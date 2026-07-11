@@ -3,17 +3,24 @@ from anthropic import Anthropic
 
 from app.core.config import settings
 
-_chroma_client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
-_collection = _chroma_client.get_or_create_collection(name="finans_haberleri")
+_collection = None
 _anthropic_client = Anthropic(api_key=settings.anthropic_api_key)
 
 
+def _get_collection():
+    global _collection
+    if _collection is None:
+        client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
+        _collection = client.get_or_create_collection(name="finans_haberleri")
+    return _collection
+
+
 def add_news_document(doc_id: str, text: str, metadata: dict | None = None) -> None:
-    _collection.add(ids=[doc_id], documents=[text], metadatas=[metadata or {}])
+    _get_collection().add(ids=[doc_id], documents=[text], metadatas=[metadata or {}])
 
 
 def _get_relevant_context(question: str, n_results: int = 5) -> list[str]:
-    results = _collection.query(query_texts=[question], n_results=n_results)
+    results = _get_collection().query(query_texts=[question], n_results=n_results)
     documents = results.get("documents") or [[]]
     return documents[0]
 

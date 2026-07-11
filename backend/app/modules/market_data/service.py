@@ -3,7 +3,7 @@ import httpx
 from app.core.config import settings
 
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
-FRANKFURTER_URL = "https://api.frankfurter.app/latest"
+FRANKFURTER_URL = "https://api.frankfurter.dev/v1/latest"
 COLLECTAPI_GOLD_URL = "https://api.collectapi.com/economy/goldPrice"
 
 
