@@ -19,3 +19,8 @@ async def forex_rates(base: str = "USD", symbols: str = Query("TRY,EUR")):
 @router.get("/gold")
 async def gold_prices():
     return await service.get_gold_prices()
+
+
+@router.get("/stocks")
+async def stock_prices():
+    return await service.get_stock_prices()

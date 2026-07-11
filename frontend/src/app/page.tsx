@@ -22,25 +22,42 @@ type GoldResponse = {
   result: GoldItem[];
 };
 
+type StockItem = {
+  name: string;
+  price: number;
+  rate: number;
+};
+
+type StockResponse = {
+  result: StockItem[];
+};
+
 export default function Home() {
   const [crypto, setCrypto] = useState<CryptoPrices | null>(null);
   const [forex, setForex] = useState<ForexRates | null>(null);
   const [gold, setGold] = useState<GoldItem[] | null>(null);
+  const [stocks, setStocks] = useState<StockItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadMarketData() {
       try {
-        const [cryptoRes, forexRes, goldRes] = await Promise.all([
+        const [cryptoRes, forexRes, goldRes, stocksRes] = await Promise.all([
           fetch(`${API_URL}/market/crypto?coins=bitcoin,ethereum`),
           fetch(`${API_URL}/market/forex?base=USD&symbols=TRY,EUR`),
           fetch(`${API_URL}/market/gold`),
+          fetch(`${API_URL}/market/stocks`),
         ]);
 
         setCrypto(await cryptoRes.json());
         setForex(await forexRes.json());
         const goldData: GoldResponse = await goldRes.json();
-        setGold(goldData.result.slice(0, 4));
+        const oncelikliKalemler = ["Gram Altın", "Çeyrek Altın", "Yarım Altın", "Gümüş"];
+        setGold(
+          goldData.result.filter((item) => oncelikliKalemler.includes(item.name))
+        );
+        const stocksData: StockResponse = await stocksRes.json();
+        setStocks(stocksData.result.slice(0, 5));
       } catch {
         setError("Piyasa verileri yuklenirken bir hata olustu.");
       }
@@ -58,7 +75,7 @@ export default function Home() {
 
         {error && <p className="text-red-500">{error}</p>}
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MarketCard title="Kripto (USD)">
             {crypto ? (
               <ul className="flex flex-col gap-1">
@@ -93,7 +110,7 @@ export default function Home() {
             )}
           </MarketCard>
 
-          <MarketCard title="Altin (TL)">
+          <MarketCard title="Altin & Gumus (TL)">
             {gold ? (
               <ul className="flex flex-col gap-1">
                 {gold.map((item) => (
@@ -101,6 +118,27 @@ export default function Home() {
                     <span className="text-zinc-500">{item.name}</span>
                     <span className="font-medium text-zinc-900 dark:text-zinc-50">
                       {item.selling.toLocaleString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Loading />
+            )}
+          </MarketCard>
+
+          <MarketCard title="Borsa (BIST)">
+            {stocks ? (
+              <ul className="flex flex-col gap-1">
+                {stocks.map((item) => (
+                  <li key={item.name} className="flex justify-between text-sm">
+                    <span className="text-zinc-500">{item.name}</span>
+                    <span
+                      className={`font-medium ${
+                        item.rate >= 0 ? "text-emerald-600" : "text-red-500"
+                      }`}
+                    >
+                      {item.price.toLocaleString()} ({item.rate}%)
                     </span>
                   </li>
                 ))}
