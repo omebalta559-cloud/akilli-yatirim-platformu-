@@ -18,17 +18,75 @@ type Holding = {
 const CUSTOM_SYMBOL = "__custom__";
 
 const SYMBOLS_BY_TYPE: Record<string, string[]> = {
-  kripto: ["BTC", "ETH", "SOL", "XRP", "DOGE"],
-  doviz: ["USD", "EUR", "GBP"],
-  altin: ["ALTIN", "GUMUS"],
-  hisse: ["AKBNK", "THYAO", "ASELS", "GARAN"],
-  gayrimenkul: ["KONUT", "ARSA", "ISYERI"],
+  kripto: ["BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "BNB", "LTC", "MATIC"],
+  doviz: ["USD", "EUR", "GBP", "CHF", "JPY", "CAD", "AUD"],
+  altin: [
+    "GRAM_ALTIN",
+    "CEYREK_ALTIN",
+    "YARIM_ALTIN",
+    "TAM_ALTIN",
+    "CUMHURIYET_ALTINI",
+    "ONS_ALTIN",
+    "GUMUS",
+  ],
+  hisse: [
+    "AKBNK",
+    "THYAO",
+    "ASELS",
+    "GARAN",
+    "BIMAS",
+    "EREGL",
+    "KCHOL",
+    "SISE",
+    "TUPRS",
+    "YKBNK",
+  ],
+  gayrimenkul: ["KONUT", "ARSA", "ISYERI", "TARLA", "DUKKAN"],
   diger: [],
 };
+
+const CRYPTO_IDS: Record<string, string> = {
+  BTC: "bitcoin",
+  ETH: "ethereum",
+  SOL: "solana",
+  XRP: "ripple",
+  DOGE: "dogecoin",
+  ADA: "cardano",
+  AVAX: "avalanche-2",
+  BNB: "binancecoin",
+  LTC: "litecoin",
+  MATIC: "matic-network",
+};
+
+const GOLD_NAMES: Record<string, string> = {
+  GRAM_ALTIN: "Gram Altın",
+  CEYREK_ALTIN: "Çeyrek Altın",
+  YARIM_ALTIN: "Yarım Altın",
+  TAM_ALTIN: "Tam Altın",
+  CUMHURIYET_ALTINI: "Cumhuriyet Altını",
+  ONS_ALTIN: "ONS Altın",
+  GUMUS: "Gümüş",
+};
+
+const REAL_ESTATE_LABELS: Record<string, string> = {
+  KONUT: "Konut",
+  ARSA: "Arsa",
+  ISYERI: "Isyeri",
+  TARLA: "Tarla",
+  DUKKAN: "Dukkan",
+};
+
+function getSymbolLabel(assetType: string, symbol: string): string {
+  if (assetType === "altin") return GOLD_NAMES[symbol] ?? symbol;
+  if (assetType === "gayrimenkul") return REAL_ESTATE_LABELS[symbol] ?? symbol;
+  return symbol;
+}
 
 export default function PortfolioPage() {
   const router = useRouter();
   const [holdings, setHoldings] = useState<Holding[] | null>(null);
+  const [currentPrices, setCurrentPrices] = useState<Record<number, number>>({});
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [assetType, setAssetType] = useState("");
@@ -56,6 +114,90 @@ export default function PortfolioPage() {
     }
     loadHoldings(token).catch(() => setError("Portfoy yuklenirken bir hata olustu."));
   }, [router]);
+
+  useEffect(() => {
+    if (!holdings || holdings.length === 0) return;
+
+    async function loadCurrentPrices() {
+      const prices: Record<number, number> = {};
+
+      const usdTryRes = await fetch(`${API_URL}/market/forex?base=USD&symbols=TRY`);
+      const usdTryData = await usdTryRes.json();
+      const usdToTry: number = usdTryData.rates.TRY;
+
+      const cryptoSymbols = [
+        ...new Set(
+          holdings!.filter((h) => h.asset_type === "kripto").map((h) => h.asset_symbol)
+        ),
+      ];
+      const cryptoIds = cryptoSymbols.map((s) => CRYPTO_IDS[s]).filter(Boolean);
+      const cryptoPrices: Record<string, { usd: number }> =
+        cryptoIds.length > 0
+          ? await (
+              await fetch(`${API_URL}/market/crypto?coins=${cryptoIds.join(",")}`)
+            ).json()
+          : {};
+
+      const dovizSymbols = [
+        ...new Set(holdings!.filter((h) => h.asset_type === "doviz").map((h) => h.asset_symbol)),
+      ];
+      const dovizRates: Record<string, number> = {};
+      await Promise.all(
+        dovizSymbols.map(async (symbol) => {
+          const res = await fetch(`${API_URL}/market/forex?base=${symbol}&symbols=TRY`);
+          const data = await res.json();
+          dovizRates[symbol] = data.rates.TRY;
+        })
+      );
+
+      const needsGold = holdings!.some((h) => h.asset_type === "altin");
+      const goldData = needsGold
+        ? await (await fetch(`${API_URL}/market/gold`)).json()
+        : null;
+
+      const needsStocks = holdings!.some((h) => h.asset_type === "hisse");
+      const stockData = needsStocks
+        ? await (await fetch(`${API_URL}/market/stocks`)).json()
+        : null;
+
+      for (const h of holdings!) {
+        if (h.asset_type === "kripto") {
+          const id = CRYPTO_IDS[h.asset_symbol];
+          if (id && cryptoPrices[id]) {
+            prices[h.id] = cryptoPrices[id].usd * usdToTry;
+          }
+        } else if (h.asset_type === "doviz") {
+          if (dovizRates[h.asset_symbol]) {
+            prices[h.id] = dovizRates[h.asset_symbol];
+          }
+        } else if (h.asset_type === "altin" && goldData) {
+          const goldName = GOLD_NAMES[h.asset_symbol];
+          const item = goldData.result.find((g: { name: string }) => g.name === goldName);
+          if (item) prices[h.id] = item.selling;
+        } else if (h.asset_type === "hisse" && stockData) {
+          const item = stockData.result.find(
+            (s: { name: string }) => s.name === h.asset_symbol
+          );
+          if (item) prices[h.id] = item.price;
+        }
+      }
+
+      setCurrentPrices(prices);
+      setLastUpdated(new Date());
+    }
+
+    loadCurrentPrices().catch(() => {
+      /* canli fiyat alinamazsa sessizce yoksay, portfoy yine de gosterilir */
+    });
+
+    const intervalId = setInterval(() => {
+      loadCurrentPrices().catch(() => {
+        /* canli fiyat alinamazsa sessizce yoksay, portfoy yine de gosterilir */
+      });
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [holdings]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -124,6 +266,13 @@ export default function PortfolioPage() {
           </Link>
         </div>
 
+        {lastUpdated && (
+          <p className="-mt-4 text-xs text-zinc-400">
+            Fiyatlar 30 saniyede bir guncelleniyor - son guncelleme:{" "}
+            {lastUpdated.toLocaleTimeString()}
+          </p>
+        )}
+
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <form
@@ -169,7 +318,7 @@ export default function PortfolioPage() {
                 </option>
                 {(SYMBOLS_BY_TYPE[assetType] ?? []).map((symbol) => (
                   <option key={symbol} value={symbol}>
-                    {symbol}
+                    {getSymbolLabel(assetType, symbol)}
                   </option>
                 ))}
                 <option value={CUSTOM_SYMBOL}>Diger (elle yaz)</option>
@@ -223,28 +372,53 @@ export default function PortfolioPage() {
           {holdings?.length === 0 && (
             <p className="text-sm text-zinc-400">Henuz portfoyune varlik eklemedin.</p>
           )}
-          {holdings?.map((h) => (
-            <div
-              key={h.id}
-              className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
-            >
-              <div>
-                <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                  {h.asset_symbol}{" "}
-                  <span className="text-xs font-normal text-zinc-500">({h.asset_type})</span>
-                </p>
-                <p className="text-sm text-zinc-500">
-                  {h.quantity} adet, alis fiyati {h.purchase_price}
-                </p>
-              </div>
-              <button
-                onClick={() => handleDelete(h.id)}
-                className="text-sm font-medium text-red-500"
+          {holdings?.map((h) => {
+            const currentPrice = currentPrices[h.id];
+            const gainAmount =
+              currentPrice !== undefined ? (currentPrice - h.purchase_price) * h.quantity : null;
+            const gainPercent =
+              currentPrice !== undefined
+                ? ((currentPrice - h.purchase_price) / h.purchase_price) * 100
+                : null;
+            const isPositive = gainAmount !== null && gainAmount >= 0;
+
+            return (
+              <div
+                key={h.id}
+                className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
               >
-                Sil
-              </button>
-            </div>
-          ))}
+                <div>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
+                    {getSymbolLabel(h.asset_type, h.asset_symbol)}{" "}
+                    <span className="text-xs font-normal text-zinc-500">({h.asset_type})</span>
+                  </p>
+                  <p className="text-sm text-zinc-500">
+                    {h.quantity} adet, alis fiyati {h.purchase_price}
+                  </p>
+                  {gainAmount !== null && gainPercent !== null ? (
+                    <p
+                      className={`text-sm font-medium ${
+                        isPositive ? "text-emerald-600" : "text-red-500"
+                      }`}
+                    >
+                      {isPositive ? "+" : ""}
+                      {gainAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL (
+                      {isPositive ? "+" : ""}
+                      {gainPercent.toFixed(2)}%)
+                    </p>
+                  ) : (
+                    <p className="text-sm text-zinc-400">Canli fiyat yok</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleDelete(h.id)}
+                  className="text-sm font-medium text-red-500"
+                >
+                  Sil
+                </button>
+              </div>
+            );
+          })}
         </div>
       </main>
     </div>
