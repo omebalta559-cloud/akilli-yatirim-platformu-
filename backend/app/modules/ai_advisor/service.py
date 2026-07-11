@@ -1,10 +1,11 @@
 import chromadb
-from anthropic import Anthropic
+import google.generativeai as genai
 
 from app.core.config import settings
 
+genai.configure(api_key=settings.gemini_api_key)
+
 _collection = None
-_anthropic_client = Anthropic(api_key=settings.anthropic_api_key)
 
 
 def _get_collection():
@@ -40,10 +41,6 @@ def ask_advisor(question: str, portfolio_summary: str = "") -> str:
         f"Soru:\n{question}"
     )
 
-    response = _anthropic_client.messages.create(
-        model="claude-sonnet-5",
-        max_tokens=1024,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_message}],
-    )
-    return response.content[0].text
+    model = genai.GenerativeModel("gemini-flash-latest", system_instruction=system_prompt)
+    response = model.generate_content(user_message)
+    return response.text

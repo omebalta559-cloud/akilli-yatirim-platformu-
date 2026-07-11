@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     chroma_port: int = 8000
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
-    anthropic_api_key: str = ""
+    gemini_api_key: str = ""
     collectapi_key: str = ""
 
     class Config:
