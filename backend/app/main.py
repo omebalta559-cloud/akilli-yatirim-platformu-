@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
 from app.modules.ai_advisor.router import router as ai_advisor_router
@@ -9,6 +10,14 @@ from app.modules.portfolio.models import Holding  # noqa: F401
 from app.modules.portfolio.router import router as portfolio_router
 
 app = FastAPI(title="Akilli Yatirim Danismani")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(market_data_router)
