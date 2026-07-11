@@ -1,0 +1,84 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { saveToken } from "@/lib/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail ?? "Giris basarisiz oldu.");
+      }
+      saveToken(data.access_token);
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Bir hata olustu.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+      >
+        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Giris Yap</h1>
+
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
+        <input
+          type="email"
+          placeholder="E-posta"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        />
+        <input
+          type="password"
+          placeholder="Sifre"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-lg bg-zinc-900 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+        >
+          {loading ? "Giris yapiliyor..." : "Giris Yap"}
+        </button>
+
+        <p className="text-center text-sm text-zinc-500">
+          Hesabin yok mu?{" "}
+          <Link href="/register" className="font-medium text-zinc-900 dark:text-zinc-50">
+            Kayit ol
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { clearToken, getToken } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -38,10 +40,21 @@ export default function Home() {
   const [gold, setGold] = useState<GoldItem[] | null>(null);
   const [stocks, setStocks] = useState<StockItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(Boolean(getToken()));
+  }, []);
+
+  function handleLogout() {
+    clearToken();
+    setIsLoggedIn(false);
+  }
 
   useEffect(() => {
     async function loadMarketData() {
       try {
+        setError(null);
         const [cryptoRes, forexRes, goldRes, stocksRes] = await Promise.all([
           fetch(`${API_URL}/market/crypto?coins=bitcoin,ethereum`),
           fetch(`${API_URL}/market/forex?base=USD&symbols=TRY,EUR`),
@@ -69,9 +82,35 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10 dark:bg-black">
       <main className="mx-auto flex max-w-4xl flex-col gap-8">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Akilli Yatirim Danismani
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            Akilli Yatirim Danismani
+          </h1>
+
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+            >
+              Cikis Yap
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <Link
+                href="/login"
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+              >
+                Giris Yap
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+              >
+                Kayit Ol
+              </Link>
+            </div>
+          )}
+        </div>
 
         {error && <p className="text-red-500">{error}</p>}
 
