@@ -8,10 +8,14 @@ from app.core.config import settings
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
 FRANKFURTER_URL = "https://api.frankfurter.dev/v1/latest"
 COLLECTAPI_GOLD_URL = "https://api.collectapi.com/economy/goldPrice"
-YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}.IS"
+YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 
 CACHE_TTL_SECONDS = 30
 GOLD_CACHE_TTL_SECONDS = 3600  # collectapi ucretsiz plan ayda 100 istekle sinirli
+
+GRAMS_PER_TROY_OUNCE = 31.1034768
+GOLD_FUTURES_SYMBOL = "GC=F"
+SILVER_FUTURES_SYMBOL = "SI=F"
 
 DEFAULT_BIST_SYMBOLS = [
     "AKBNK",
@@ -62,17 +66,7 @@ async def get_exchange_rates(base: str = "USD", symbols: list[str] | None = None
     return await get_or_set(cache_key, CACHE_TTL_SECONDS, fetch)
 
 
-async def get_gold_prices() -> dict:
-    async def fetch():
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(COLLECTAPI_GOLD_URL, headers=_collectapi_headers())
-            response.raise_for_status()
-            return response.json()
-
-    return await get_or_set("market:gold", GOLD_CACHE_TTL_SECONDS, fetch)
-
-
-async def _fetch_yahoo_stock(symbol: str) -> dict:
+async def _fetch_yahoo_quote(symbol: str) -> dict:
     url = YAHOO_CHART_URL.format(symbol=symbol)
     async with httpx.AsyncClient(timeout=10) as client:
         response = await client.get(url, headers=YAHOO_HEADERS)
@@ -83,7 +77,44 @@ async def _fetch_yahoo_stock(symbol: str) -> dict:
     price = meta["regularMarketPrice"]
     previous_close = meta.get("previousClose") or meta.get("chartPreviousClose")
     rate = round((price - previous_close) / previous_close * 100, 2) if previous_close else 0
-    return {"name": symbol, "price": price, "rate": rate}
+    return {"price": price, "rate": rate}
+
+
+async def _fetch_yahoo_stock(symbol: str) -> dict:
+    quote = await _fetch_yahoo_quote(f"{symbol}.IS")
+    return {"name": symbol, **quote}
+
+
+async def get_gold_prices() -> dict:
+    async def fetch_collectapi_coins():
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(COLLECTAPI_GOLD_URL, headers=_collectapi_headers())
+            response.raise_for_status()
+            return response.json()["result"]
+
+    async def fetch():
+        coin_names = {"Çeyrek Altın", "Yarım Altın", "Tam Altın", "Cumhuriyet Altını"}
+        collectapi_items, ons_gold, ons_silver, usd_try_data = await asyncio.gather(
+            get_or_set("market:gold:coins", GOLD_CACHE_TTL_SECONDS, fetch_collectapi_coins),
+            _fetch_yahoo_quote(GOLD_FUTURES_SYMBOL),
+            _fetch_yahoo_quote(SILVER_FUTURES_SYMBOL),
+            get_exchange_rates("USD", ["TRY"]),
+        )
+        usd_try = usd_try_data["rates"]["TRY"]
+
+        gram_altin = ons_gold["price"] / GRAMS_PER_TROY_OUNCE * usd_try
+        gumus = ons_silver["price"] / GRAMS_PER_TROY_OUNCE * usd_try
+
+        live_items = [
+            {"name": "Gram Altın", "buying": gram_altin, "selling": gram_altin, "rate": ons_gold["rate"]},
+            {"name": "ONS Altın", "buying": ons_gold["price"], "selling": ons_gold["price"], "rate": ons_gold["rate"]},
+            {"name": "Gümüş", "buying": gumus, "selling": gumus, "rate": ons_silver["rate"]},
+        ]
+        coin_items = [item for item in collectapi_items if item["name"] in coin_names]
+
+        return {"success": True, "result": live_items + coin_items}
+
+    return await get_or_set("market:gold", CACHE_TTL_SECONDS, fetch)
 
 
 async def get_stock_prices(symbols: list[str] | None = None) -> dict:
