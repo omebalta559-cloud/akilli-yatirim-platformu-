@@ -22,5 +22,6 @@ async def gold_prices():
 
 
 @router.get("/stocks")
-async def stock_prices():
-    return await service.get_stock_prices()
+async def stock_prices(symbols: str | None = None):
+    symbol_list = symbols.split(",") if symbols else None
+    return await service.get_stock_prices(symbol_list)
