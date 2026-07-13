@@ -13,6 +13,8 @@ class HoldingCreate(BaseModel):
 class HoldingOut(HoldingCreate):
     id: int
     created_at: datetime
+    is_active: bool
+    removed_at: datetime | None = None
 
     class Config:
         from_attributes = True

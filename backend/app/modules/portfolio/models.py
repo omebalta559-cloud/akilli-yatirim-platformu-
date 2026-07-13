@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -14,3 +14,5 @@ class Holding(Base):
     quantity = Column(Float, nullable=False)
     purchase_price = Column(Float, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_active = Column(Boolean, nullable=False, default=True, server_default="true")
+    removed_at = Column(DateTime(timezone=True), nullable=True)

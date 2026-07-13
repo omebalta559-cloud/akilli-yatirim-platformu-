@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -11,7 +13,22 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
 @router.get("/", response_model=list[HoldingOut])
 def list_holdings(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
-    return db.query(Holding).filter(Holding.user_id == user_id).all()
+    return (
+        db.query(Holding)
+        .filter(Holding.user_id == user_id, Holding.is_active.is_(True))
+        .order_by(Holding.created_at.desc())
+        .all()
+    )
+
+
+@router.get("/history", response_model=list[HoldingOut])
+def holdings_history(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return (
+        db.query(Holding)
+        .filter(Holding.user_id == user_id)
+        .order_by(Holding.created_at.desc())
+        .all()
+    )
 
 
 @router.post("/", response_model=HoldingOut)
@@ -33,6 +50,15 @@ def delete_holding(
     user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
-    db.query(Holding).filter(Holding.id == holding_id, Holding.user_id == user_id).delete()
+    holding = (
+        db.query(Holding)
+        .filter(Holding.id == holding_id, Holding.user_id == user_id, Holding.is_active.is_(True))
+        .first()
+    )
+    if not holding:
+        raise HTTPException(status_code=404, detail="Varlik bulunamadi.")
+
+    holding.is_active = False
+    holding.removed_at = datetime.now(timezone.utc)
     db.commit()
     return {"ok": True}

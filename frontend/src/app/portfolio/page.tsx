@@ -23,6 +23,8 @@ type Holding = {
   asset_type: string;
   quantity: number;
   purchase_price: number;
+  is_active: boolean;
+  removed_at: string | null;
 };
 
 export default function PortfolioPage() {
@@ -32,6 +34,8 @@ export default function PortfolioPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedChartId, setExpandedChartId] = useState<number | null>(null);
+  const [history, setHistory] = useState<Holding[] | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   const [assetType, setAssetType] = useState("");
   const [assetSymbol, setAssetSymbol] = useState("");
@@ -182,6 +186,25 @@ export default function PortfolioPage() {
     }
   }
 
+  async function toggleHistory() {
+    if (showHistory) {
+      setShowHistory(false);
+      return;
+    }
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/portfolio/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Gecmis yuklenemedi.");
+      setHistory(await res.json());
+      setShowHistory(true);
+    } catch {
+      setError("Islem gecmisi yuklenirken bir hata olustu.");
+    }
+  }
+
   async function handleDelete(id: number) {
     const token = getToken();
     if (!token) return;
@@ -205,9 +228,14 @@ export default function PortfolioPage() {
       <main className="mx-auto flex max-w-2xl flex-col gap-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Portfoyum</h1>
-          <Link href="/" className="text-sm font-medium text-zinc-500">
-            Dashboard&apos;a don
-          </Link>
+          <div className="flex items-center gap-4">
+            <button onClick={toggleHistory} className="text-sm font-medium text-zinc-500">
+              {showHistory ? "Gecmisi gizle" : "Islem Gecmisi"}
+            </button>
+            <Link href="/" className="text-sm font-medium text-zinc-500">
+              Dashboard&apos;a don
+            </Link>
+          </div>
         </div>
 
         {lastUpdated && (
@@ -389,6 +417,38 @@ export default function PortfolioPage() {
             );
           })}
         </div>
+
+        {showHistory && (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold text-zinc-500">Islem Gecmisi</p>
+            {history === null && <p className="text-sm text-zinc-400">Yukleniyor...</p>}
+            {history?.length === 0 && (
+              <p className="text-sm text-zinc-400">Henuz bir islem gecmisi yok.</p>
+            )}
+            {history?.map((h) => (
+              <div
+                key={h.id}
+                className="flex items-center justify-between rounded-xl border border-zinc-100 bg-white p-3 text-sm dark:border-zinc-900 dark:bg-zinc-950"
+              >
+                <div>
+                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                    {getSymbolLabel(h.asset_type, h.asset_symbol)}
+                  </span>{" "}
+                  <span className="text-zinc-500">
+                    {h.quantity} adet, alis fiyati {h.purchase_price}
+                  </span>
+                </div>
+                {h.is_active ? (
+                  <span className="text-xs font-medium text-emerald-600">Aktif</span>
+                ) : (
+                  <span className="text-xs font-medium text-zinc-400">
+                    Silindi {h.removed_at ? `(${new Date(h.removed_at).toLocaleDateString()})` : ""}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
