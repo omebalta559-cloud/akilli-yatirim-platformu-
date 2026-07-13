@@ -13,6 +13,12 @@ const PADDING_RIGHT = 12;
 const PADDING_TOP = 12;
 const PADDING_BOTTOM = 24;
 
+const RANGE_OPTIONS = [
+  { label: "1A", range: "1mo", interval: "1d" },
+  { label: "3A", range: "3mo", interval: "1d" },
+  { label: "1Y", range: "1y", interval: "1wk" },
+] as const;
+
 export default function PriceChart({
   symbol,
   currencyLabel,
@@ -23,19 +29,24 @@ export default function PriceChart({
   const [points, setPoints] = useState<HistoryPoint[] | null>(null);
   const [error, setError] = useState(false);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [rangeIndex, setRangeIndex] = useState(2);
   const svgRef = useRef<SVGSVGElement>(null);
+  const selectedRange = RANGE_OPTIONS[rangeIndex];
 
   useEffect(() => {
     setPoints(null);
     setError(false);
-    fetch(`${API_URL}/market/history?symbol=${encodeURIComponent(symbol)}&range=1y&interval=1wk`)
+    setHoverIndex(null);
+    fetch(
+      `${API_URL}/market/history?symbol=${encodeURIComponent(symbol)}&range=${selectedRange.range}&interval=${selectedRange.interval}`
+    )
       .then((res) => {
         if (!res.ok) throw new Error("history fetch failed");
         return res.json();
       })
       .then((data) => setPoints(data.points))
       .catch(() => setError(true));
-  }, [symbol]);
+  }, [symbol, selectedRange.range, selectedRange.interval]);
 
   const chartWidth = WIDTH - PADDING_LEFT - PADDING_RIGHT;
   const chartHeight = HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -82,21 +93,34 @@ export default function PriceChart({
     setHoverIndex(closest);
   }
 
-  if (error) {
-    return <p className="text-sm text-zinc-400">Bu varlik icin grafik verisi bulunamadi.</p>;
-  }
-
-  if (!points) {
-    return <p className="text-sm text-zinc-400">Grafik yukleniyor...</p>;
-  }
-
-  const hover = hoverIndex !== null ? { point: points[hoverIndex], coord: coords[hoverIndex] } : null;
+  const hover =
+    points && hoverIndex !== null ? { point: points[hoverIndex], coord: coords[hoverIndex] } : null;
 
   const formatPrice = (v: number) =>
     v.toLocaleString("tr-TR", { maximumFractionDigits: v < 10 ? 4 : 2 });
 
   return (
     <div className="[--chart-line:#2a78d6] [--chart-area:#2a78d6] [--chart-grid:#e1e0d9] [--chart-axis:#898781] [--chart-crosshair:#c3c2b7] [--chart-surface:#fcfcfb] dark:[--chart-line:#3987e5] dark:[--chart-area:#3987e5] dark:[--chart-grid:#2c2c2a] dark:[--chart-axis:#898781] dark:[--chart-crosshair:#383835] dark:[--chart-surface:#1a1a19]">
+      <div className="mb-2 flex gap-1">
+        {RANGE_OPTIONS.map((opt, i) => (
+          <button
+            key={opt.label}
+            onClick={() => setRangeIndex(i)}
+            className={`rounded px-2 py-0.5 text-xs font-medium ${
+              i === rangeIndex
+                ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {error && <p className="text-sm text-zinc-400">Bu varlik icin grafik verisi bulunamadi.</p>}
+      {!error && !points && <p className="text-sm text-zinc-400">Grafik yukleniyor...</p>}
+
+      {!error && points && (
       <svg
         ref={svgRef}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -159,6 +183,7 @@ export default function PriceChart({
           </>
         )}
       </svg>
+      )}
 
       {hover && (
         <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
