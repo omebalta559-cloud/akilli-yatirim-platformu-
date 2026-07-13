@@ -95,6 +95,12 @@ export default function Home() {
               >
                 Portfoyum
               </Link>
+              <Link
+                href="/advisor"
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+              >
+                AI Danisman
+              </Link>
               <button
                 onClick={handleLogout}
                 className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
