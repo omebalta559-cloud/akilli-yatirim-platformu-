@@ -5,7 +5,6 @@ import httpx
 from app.core.cache import get_or_set
 
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
-FRANKFURTER_URL = "https://api.frankfurter.dev/v1/latest"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 
 CACHE_TTL_SECONDS = 30
@@ -51,16 +50,14 @@ async def get_crypto_prices(coin_ids: list[str], vs_currency: str = "usd") -> di
 
 
 async def get_exchange_rates(base: str = "USD", symbols: list[str] | None = None) -> dict:
-    async def fetch():
-        params = {"from": base}
-        if symbols:
-            params["to"] = ",".join(symbols)
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(FRANKFURTER_URL, params=params)
-            response.raise_for_status()
-            return response.json()
+    symbols = symbols or ["TRY"]
 
-    cache_key = f"market:forex:{base}:{','.join(sorted(symbols or []))}"
+    async def fetch():
+        quotes = await asyncio.gather(*(_fetch_yahoo_quote(f"{base}{s}=X") for s in symbols))
+        rates = {symbol: quote["price"] for symbol, quote in zip(symbols, quotes)}
+        return {"amount": 1.0, "base": base, "rates": rates}
+
+    cache_key = f"market:forex:{base}:{','.join(sorted(symbols))}"
     return await get_or_set(cache_key, CACHE_TTL_SECONDS, fetch)
 
 
