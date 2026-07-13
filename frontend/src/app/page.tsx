@@ -87,6 +87,13 @@ export default function Home() {
             Akilli Yatirim Danismani
           </h1>
 
+          <div className="flex gap-2">
+          <Link
+            href="/charts"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+          >
+            Grafikler
+          </Link>
           {isLoggedIn ? (
             <div className="flex gap-2">
               <Link
@@ -124,6 +131,7 @@ export default function Home() {
               </Link>
             </div>
           )}
+          </div>
         </div>
 
         {error && <p className="text-red-500">{error}</p>}
