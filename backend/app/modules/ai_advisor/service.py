@@ -27,7 +27,7 @@ def get_yahoo_ticker(asset_type: str, symbol: str) -> str | None:
         return f"{symbol}-USD"
     if asset_type == "doviz":
         return f"{symbol}TRY=X"
-    if asset_type == "hisse":
+    if asset_type in ("hisse", "gayrimenkul"):
         return f"{symbol}.IS"
     if asset_type == "altin":
         return GOLD_SILVER_TICKERS.get(symbol)

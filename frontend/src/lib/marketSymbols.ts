@@ -24,7 +24,7 @@ export const SYMBOLS_BY_TYPE: Record<string, string[]> = {
     "TUPRS",
     "YKBNK",
   ],
-  gayrimenkul: ["KONUT", "ARSA", "ISYERI", "TARLA", "DUKKAN"],
+  gayrimenkul: ["EKGYO", "ISGYO", "TRGYO", "SNGYO", "YGGYO"],
   diger: [],
 };
 
@@ -52,11 +52,11 @@ export const GOLD_NAMES: Record<string, string> = {
 };
 
 export const REAL_ESTATE_LABELS: Record<string, string> = {
-  KONUT: "Konut",
-  ARSA: "Arsa",
-  ISYERI: "Isyeri",
-  TARLA: "Tarla",
-  DUKKAN: "Dukkan",
+  EKGYO: "Emlak Konut GYO",
+  ISGYO: "Is GYO",
+  TRGYO: "Torunlar GYO",
+  SNGYO: "Sinpas GYO",
+  YGGYO: "Yesil GYO",
 };
 
 export function getSymbolLabel(assetType: string, symbol: string): string {
@@ -68,7 +68,7 @@ export function getSymbolLabel(assetType: string, symbol: string): string {
 export function getYahooTicker(assetType: string, symbol: string): string | null {
   if (assetType === "kripto") return `${symbol}-USD`;
   if (assetType === "doviz") return `${symbol}TRY=X`;
-  if (assetType === "hisse") return `${symbol}.IS`;
+  if (assetType === "hisse" || assetType === "gayrimenkul") return `${symbol}.IS`;
   if (assetType === "altin") {
     if (symbol === "GRAM_ALTIN" || symbol === "ONS_ALTIN") return "GC=F";
     if (symbol === "GUMUS") return "SI=F";
@@ -87,4 +87,5 @@ export const CHART_CATEGORY_LABELS: Record<string, string> = {
   doviz: "Doviz",
   altin: "Altin / Gumus",
   hisse: "Hisse Senedi (BIST)",
+  gayrimenkul: "Gayrimenkul (GYO)",
 };

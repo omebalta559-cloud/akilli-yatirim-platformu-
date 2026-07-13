@@ -10,7 +10,7 @@ import {
   getChartCurrencyLabel,
 } from "@/lib/marketSymbols";
 
-const CATEGORIES = ["kripto", "doviz", "altin", "hisse"];
+const CATEGORIES = ["kripto", "doviz", "altin", "hisse", "gayrimenkul"];
 
 export default function ChartsPage() {
   return (
