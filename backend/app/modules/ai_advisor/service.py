@@ -57,7 +57,10 @@ def ask_advisor(question: str, portfolio_summary: str = "") -> str:
     system_prompt = (
         "Sen bir yatirim danismanisin. Sana verilen guncel finans haberlerini ve "
         "kullanicinin portfoyunu dikkate alarak Turkce, net ve riskleri belirten "
-        "tavsiyeler ver. Kesin getiri vaadinde bulunma."
+        "tavsiyeler ver. Kesin getiri vaadinde bulunma. "
+        "Cevaplarini KISA ve OZ tut: en fazla 3-4 cumle veya 3-4 madde. "
+        "Uzun basliklar, alt basliklar ve genis aciklamalar kullanma. "
+        "Kullanici daha fazla detay isterse o zaman genisletebilirsin."
     )
     user_message = (
         f"Guncel haber baglami:\n{context_text}\n\n"
