@@ -17,3 +17,12 @@ def ask(payload: AdvisorQuestion, user_id: int = Depends(get_current_user_id)):
             detail="AI danisman su an yanit veremiyor, lutfen birazdan tekrar deneyin.",
         )
     return AdvisorAnswer(answer=answer)
+
+
+@router.post("/refresh-news")
+def refresh_news(user_id: int = Depends(get_current_user_id)):
+    try:
+        count = service.refresh_news_from_rss()
+    except Exception:
+        raise HTTPException(status_code=502, detail="Haberler alinirken bir sorun olustu.")
+    return {"added": count}

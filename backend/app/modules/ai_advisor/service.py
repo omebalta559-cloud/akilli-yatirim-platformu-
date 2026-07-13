@@ -1,4 +1,7 @@
+import hashlib
+
 import chromadb
+import feedparser
 import google.generativeai as genai
 
 from app.core.config import settings
@@ -6,6 +9,10 @@ from app.core.config import settings
 genai.configure(api_key=settings.gemini_api_key)
 
 _collection = None
+
+NEWS_RSS_FEEDS = [
+    "https://www.bloomberght.com/rss",
+]
 
 
 def _get_collection():
@@ -17,7 +24,24 @@ def _get_collection():
 
 
 def add_news_document(doc_id: str, text: str, metadata: dict | None = None) -> None:
-    _get_collection().add(ids=[doc_id], documents=[text], metadatas=[metadata or {}])
+    _get_collection().upsert(ids=[doc_id], documents=[text], metadatas=[metadata or {}])
+
+
+def refresh_news_from_rss() -> int:
+    added = 0
+    for feed_url in NEWS_RSS_FEEDS:
+        parsed = feedparser.parse(feed_url)
+        for entry in parsed.entries[:20]:
+            title = entry.get("title", "")
+            summary = entry.get("summary", "")
+            link = entry.get("link", "")
+            if not title:
+                continue
+            text = f"{title}\n{summary}"
+            doc_id = hashlib.sha1(link.encode() if link else text.encode()).hexdigest()
+            add_news_document(doc_id, text, {"source": feed_url, "link": link, "title": title})
+            added += 1
+    return added
 
 
 def _get_relevant_context(question: str, n_results: int = 5) -> list[str]:

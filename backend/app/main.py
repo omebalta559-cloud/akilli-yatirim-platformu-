@@ -1,8 +1,11 @@
+import asyncio
+
 import httpx
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.modules.ai_advisor import service as ai_advisor_service
 from app.modules.ai_advisor.router import router as ai_advisor_router
 from app.modules.auth.router import router as auth_router
 from app.modules.market_data.router import router as market_data_router
@@ -22,6 +25,17 @@ app.include_router(auth_router)
 app.include_router(market_data_router)
 app.include_router(portfolio_router)
 app.include_router(ai_advisor_router)
+
+
+@app.on_event("startup")
+async def refresh_news_on_startup():
+    async def safe_refresh():
+        try:
+            await asyncio.to_thread(ai_advisor_service.refresh_news_from_rss)
+        except Exception:
+            pass  # RAG baglami olmadan da danisman genel bilgiyle calismaya devam eder
+
+    asyncio.create_task(safe_refresh())
 
 
 @app.exception_handler(httpx.HTTPStatusError)
