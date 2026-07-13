@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getToken } from "@/lib/auth";
+import PriceChart from "@/components/PriceChart";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -82,12 +83,30 @@ function getSymbolLabel(assetType: string, symbol: string): string {
   return symbol;
 }
 
+function getYahooTicker(assetType: string, symbol: string): string | null {
+  if (assetType === "kripto") return `${symbol}-USD`;
+  if (assetType === "doviz") return `${symbol}TRY=X`;
+  if (assetType === "hisse") return `${symbol}.IS`;
+  if (assetType === "altin") {
+    if (symbol === "GRAM_ALTIN" || symbol === "ONS_ALTIN") return "GC=F";
+    if (symbol === "GUMUS") return "SI=F";
+    return null;
+  }
+  return null;
+}
+
+function getChartCurrencyLabel(assetType: string): string {
+  if (assetType === "kripto" || assetType === "altin") return "USD";
+  return "TL";
+}
+
 export default function PortfolioPage() {
   const router = useRouter();
   const [holdings, setHoldings] = useState<Holding[] | null>(null);
   const [currentPrices, setCurrentPrices] = useState<Record<number, number>>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expandedChartId, setExpandedChartId] = useState<number | null>(null);
 
   const [assetType, setAssetType] = useState("");
   const [assetSymbol, setAssetSymbol] = useState("");
@@ -381,41 +400,62 @@ export default function PortfolioPage() {
                 ? ((currentPrice - h.purchase_price) / h.purchase_price) * 100
                 : null;
             const isPositive = gainAmount !== null && gainAmount >= 0;
+            const yahooTicker = getYahooTicker(h.asset_type, h.asset_symbol);
+            const isChartOpen = expandedChartId === h.id;
 
             return (
               <div
                 key={h.id}
-                className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
               >
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                    {getSymbolLabel(h.asset_type, h.asset_symbol)}{" "}
-                    <span className="text-xs font-normal text-zinc-500">({h.asset_type})</span>
-                  </p>
-                  <p className="text-sm text-zinc-500">
-                    {h.quantity} adet, alis fiyati {h.purchase_price}
-                  </p>
-                  {gainAmount !== null && gainPercent !== null ? (
-                    <p
-                      className={`text-sm font-medium ${
-                        isPositive ? "text-emerald-600" : "text-red-500"
-                      }`}
-                    >
-                      {isPositive ? "+" : ""}
-                      {gainAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL (
-                      {isPositive ? "+" : ""}
-                      {gainPercent.toFixed(2)}%)
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-50">
+                      {getSymbolLabel(h.asset_type, h.asset_symbol)}{" "}
+                      <span className="text-xs font-normal text-zinc-500">({h.asset_type})</span>
                     </p>
-                  ) : (
-                    <p className="text-sm text-zinc-400">Canli fiyat yok</p>
-                  )}
+                    <p className="text-sm text-zinc-500">
+                      {h.quantity} adet, alis fiyati {h.purchase_price}
+                    </p>
+                    {gainAmount !== null && gainPercent !== null ? (
+                      <p
+                        className={`text-sm font-medium ${
+                          isPositive ? "text-emerald-600" : "text-red-500"
+                        }`}
+                      >
+                        {isPositive ? "+" : ""}
+                        {gainAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL (
+                        {isPositive ? "+" : ""}
+                        {gainPercent.toFixed(2)}%)
+                      </p>
+                    ) : (
+                      <p className="text-sm text-zinc-400">Canli fiyat yok</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {yahooTicker && (
+                      <button
+                        onClick={() => setExpandedChartId(isChartOpen ? null : h.id)}
+                        className="text-sm font-medium text-zinc-500"
+                      >
+                        {isChartOpen ? "Grafigi gizle" : "Grafik"}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDelete(h.id)}
+                      className="text-sm font-medium text-red-500"
+                    >
+                      Sil
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(h.id)}
-                  className="text-sm font-medium text-red-500"
-                >
-                  Sil
-                </button>
+
+                {isChartOpen && yahooTicker && (
+                  <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                    <p className="mb-2 text-xs text-zinc-400">Son 1 yil fiyat trendi</p>
+                    <PriceChart symbol={yahooTicker} currencyLabel={getChartCurrencyLabel(h.asset_type)} />
+                  </div>
+                )}
               </div>
             );
           })}

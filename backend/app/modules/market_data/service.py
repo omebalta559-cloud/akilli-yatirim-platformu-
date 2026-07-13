@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 
 import httpx
 
@@ -8,6 +9,7 @@ COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 
 CACHE_TTL_SECONDS = 30
+HISTORY_CACHE_TTL_SECONDS = 3600
 
 GRAMS_PER_TROY_OUNCE = 31.1034768
 GOLD_FUTURES_SYMBOL = "GC=F"
@@ -117,3 +119,30 @@ async def get_stock_prices(symbols: list[str] | None = None) -> dict:
 
     cache_key = f"market:stocks:{','.join(sorted(symbols))}"
     return await get_or_set(cache_key, CACHE_TTL_SECONDS, fetch)
+
+
+async def get_price_history(symbol: str, range_: str = "1y", interval: str = "1wk") -> dict:
+    async def fetch():
+        url = YAHOO_CHART_URL.format(symbol=symbol)
+        params = {"range": range_, "interval": interval}
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.get(url, params=params, headers=YAHOO_HEADERS)
+            response.raise_for_status()
+            data = response.json()
+
+        result = data["chart"]["result"][0]
+        timestamps = result.get("timestamp", [])
+        closes = result["indicators"]["quote"][0]["close"]
+
+        points = [
+            {
+                "date": datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d"),
+                "price": close,
+            }
+            for ts, close in zip(timestamps, closes)
+            if close is not None
+        ]
+        return {"symbol": symbol, "points": points}
+
+    cache_key = f"market:history:{symbol}:{range_}:{interval}"
+    return await get_or_set(cache_key, HISTORY_CACHE_TTL_SECONDS, fetch)
