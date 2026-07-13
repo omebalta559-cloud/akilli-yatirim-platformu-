@@ -82,55 +82,55 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10 dark:bg-black">
       <main className="mx-auto flex max-w-4xl flex-col gap-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
             Akilli Yatirim Danismani
           </h1>
 
-          <div className="flex gap-2">
-          <Link
-            href="/charts"
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
-          >
-            Grafikler
-          </Link>
-          {isLoggedIn ? (
-            <div className="flex gap-2">
-              <Link
-                href="/portfolio"
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
-              >
-                Portfoyum
-              </Link>
-              <Link
-                href="/advisor"
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
-              >
-                AI Danisman
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
-              >
-                Cikis Yap
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Link
-                href="/login"
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
-              >
-                Giris Yap
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
-              >
-                Kayit Ol
-              </Link>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/charts"
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+            >
+              Grafikler
+            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link
+                  href="/portfolio"
+                  className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+                >
+                  Portfoyum
+                </Link>
+                <Link
+                  href="/advisor"
+                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+                >
+                  AI Danisman
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+                >
+                  Cikis Yap
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+                >
+                  Giris Yap
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+                >
+                  Kayit Ol
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
