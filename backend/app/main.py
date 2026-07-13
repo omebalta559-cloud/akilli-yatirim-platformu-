@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import httpx
 from fastapi import FastAPI, Request
@@ -29,6 +30,9 @@ app.include_router(ai_advisor_router)
 
 @app.on_event("startup")
 async def refresh_news_on_startup():
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        return
+
     async def safe_refresh():
         try:
             await asyncio.to_thread(ai_advisor_service.refresh_news_from_rss)
