@@ -219,6 +219,10 @@ export default function PortfolioPage() {
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
+        {holdings && holdings.length > 0 && (
+          <PortfolioSummary holdings={holdings} currentPrices={currentPrices} />
+        )}
+
         <form
           onSubmit={handleAdd}
           className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
@@ -386,6 +390,61 @@ export default function PortfolioPage() {
           })}
         </div>
       </main>
+    </div>
+  );
+}
+
+function PortfolioSummary({
+  holdings,
+  currentPrices,
+}: {
+  holdings: Holding[];
+  currentPrices: Record<number, number>;
+}) {
+  let totalInvested = 0;
+  let totalCurrent = 0;
+  let pricedCount = 0;
+
+  for (const h of holdings) {
+    totalInvested += h.purchase_price * h.quantity;
+    const currentPrice = currentPrices[h.id];
+    if (currentPrice !== undefined) {
+      totalCurrent += currentPrice * h.quantity;
+      pricedCount += 1;
+    } else {
+      totalCurrent += h.purchase_price * h.quantity;
+    }
+  }
+
+  const gainAmount = totalCurrent - totalInvested;
+  const gainPercent = totalInvested > 0 ? (gainAmount / totalInvested) * 100 : 0;
+  const isPositive = gainAmount >= 0;
+  const allPriced = pricedCount === holdings.length;
+
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+      <p className="mb-2 text-xs font-semibold text-zinc-500">Portfoy Ozeti</p>
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+        <div>
+          <p className="text-xs text-zinc-400">Toplam Deger</p>
+          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {totalCurrent.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-zinc-400">Toplam Kar/Zarar</p>
+          <p className={`text-xl font-semibold ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
+            {isPositive ? "+" : ""}
+            {gainAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL ({isPositive ? "+" : ""}
+            {gainPercent.toFixed(2)}%)
+          </p>
+        </div>
+      </div>
+      {!allPriced && (
+        <p className="mt-2 text-xs text-zinc-400">
+          Bazi varliklar icin canli fiyat bulunamadi, bu ozet tam kesin olmayabilir.
+        </p>
+      )}
     </div>
   );
 }
