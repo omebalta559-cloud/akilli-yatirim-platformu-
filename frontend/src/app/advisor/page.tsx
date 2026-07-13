@@ -74,13 +74,13 @@ export default function AdvisorPage() {
           portfolio_summary: portfolioSummary,
         }),
       });
-      if (!res.ok) {
-        throw new Error("Danisman yanit veremedi.");
-      }
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail ?? "Danisman yanit veremedi.");
+      }
       setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
-    } catch {
-      setError("Danisman ile iletisim kurulurken bir hata olustu.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Danisman ile iletisim kurulurken bir hata olustu.");
     } finally {
       setLoading(false);
     }

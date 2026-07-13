@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+import httpx
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.database import Base, engine
 from app.modules.ai_advisor.router import router as ai_advisor_router
@@ -28,6 +30,22 @@ app.include_router(ai_advisor_router)
 @app.on_event("startup")
 def create_tables():
     Base.metadata.create_all(bind=engine)
+
+
+@app.exception_handler(httpx.HTTPStatusError)
+async def httpx_status_error_handler(request: Request, exc: httpx.HTTPStatusError):
+    return JSONResponse(
+        status_code=502,
+        content={"detail": "Piyasa verisi saglayicisina ulasilamadi, lutfen daha sonra tekrar deneyin."},
+    )
+
+
+@app.exception_handler(httpx.RequestError)
+async def httpx_request_error_handler(request: Request, exc: httpx.RequestError):
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "Dis servise baglanirken bir sorun olustu, lutfen daha sonra tekrar deneyin."},
+    )
 
 
 @app.get("/")
