@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import httpx
 
 from app.core.cache import get_or_set
+from app.core.config import settings
 
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
@@ -69,8 +70,9 @@ async def get_crypto_prices(coin_ids: list[str], vs_currency: str = "usd") -> di
             "vs_currencies": vs_currency,
             "include_24hr_change": "true",
         }
+        headers = {"x-cg-demo-api-key": settings.coingecko_api_key} if settings.coingecko_api_key else {}
         async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(COINGECKO_URL, params=params)
+            response = await client.get(COINGECKO_URL, params=params, headers=headers)
             response.raise_for_status()
             return response.json()
 

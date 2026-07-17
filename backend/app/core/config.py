@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     gemini_api_key: str = ""
     google_client_id: str = ""
+    # CoinGecko'nun ucretsiz Demo API anahtari: paylasimli bulut sunucu IP'lerinden
+    # (Render, Railway vb.) gelen isteklerin oran sinirlamasina takilma ihtimalini
+    # azaltir. Bos birakilirsa anahtarsiz (anonim) istek atilir.
+    coingecko_api_key: str = ""
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = ""
