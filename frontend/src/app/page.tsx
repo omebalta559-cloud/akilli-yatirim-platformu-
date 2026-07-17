@@ -17,7 +17,7 @@ function formatNumber(value: number): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 }
 
-function fetchWithTimeout(url: string, timeoutMs = 10000): Promise<Response> {
+function fetchWithTimeout(url: string, timeoutMs = 40000): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
@@ -71,7 +71,11 @@ export default function Home() {
     setIsLoggedIn(false);
   }
 
+  const [retryCount, setRetryCount] = useState(0);
+
   useEffect(() => {
+    let cancelled = false;
+
     async function loadMarketData() {
       try {
         setError(null);
@@ -85,6 +89,7 @@ export default function Home() {
         if (!cryptoRes.ok || !forexRes.ok || !goldRes.ok || !stocksRes.ok) {
           throw new Error("Piyasa verileri alinamadi.");
         }
+        if (cancelled) return;
 
         setCrypto(await cryptoRes.json());
         setForex(await forexRes.json());
@@ -96,12 +101,19 @@ export default function Home() {
         const stocksData: StockResponse = await stocksRes.json();
         setStocks(stocksData.result.slice(0, 5));
       } catch {
-        setError("Piyasa verileri yuklenirken bir hata olustu.");
+        if (!cancelled) {
+          setError(
+            "Piyasa verileri yuklenirken bir hata olustu. Sunucu uyaniyor olabilir, birkac saniye sonra tekrar deneyin."
+          );
+        }
       }
     }
 
     loadMarketData();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [retryCount]);
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10 dark:bg-black">
@@ -232,7 +244,17 @@ export default function Home() {
           </p>
         </section>
 
-        {error && <p className="text-red-500">{error}</p>}
+        {error && (
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-red-500">{error}</p>
+            <button
+              onClick={() => setRetryCount((c) => c + 1)}
+              className="rounded-lg border border-red-200 px-3 py-1 text-sm font-medium text-red-500 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950"
+            >
+              Tekrar Dene
+            </button>
+          </div>
+        )}
 
         <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MarketCard title="Kripto (USD)" accent="#2a78d6" icon={<CoinIcon />}>
