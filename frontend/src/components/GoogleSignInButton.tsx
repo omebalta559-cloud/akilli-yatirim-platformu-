@@ -45,7 +45,7 @@ export default function GoogleSignInButton({ onError }: { onError?: (message: st
         throw new Error(data.detail ?? "Google ile giris basarisiz oldu.");
       }
       saveToken(data.access_token);
-      router.push("/portfolio");
+      router.push("/");
     } catch (err) {
       onError?.(err instanceof Error ? err.message : "Bir hata olustu.");
     }

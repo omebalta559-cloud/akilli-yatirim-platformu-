@@ -31,7 +31,7 @@ export default function RegisterPage() {
         throw new Error(data.detail ?? "Kayit basarisiz oldu.");
       }
       saveToken(data.access_token);
-      router.push("/portfolio");
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata olustu.");
     } finally {
