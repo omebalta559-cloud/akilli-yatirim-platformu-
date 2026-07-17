@@ -20,7 +20,8 @@ app.add_middleware(
     CORSMiddleware,
     # localhost + herhangi bir yerel ag (LAN) IP'si, 3000 portu: telefondan/DHCP ile
     # degisen IP'lerden erisimi de kapsar, boylece IP degistiginde tekrar duzenlemeye gerek kalmaz.
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}):3000",
+    # Ayrica Vercel'in verdigi *.vercel.app domain'lerini de kapsar (production + preview deploy'lar).
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}):3000|https://([a-zA-Z0-9-]+\.)*vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
