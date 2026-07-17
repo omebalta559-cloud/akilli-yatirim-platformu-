@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Akilli Yatirim Danismani",
   description:
-    "Kripto, doviz, altin ve borsa verilerini tek yerde takip eden, AI destekli yatirim danismanligi platformu",
+    "Kripto, doviz, altin ve borsa verilerini tek yerde takip eden, yapay zeka destekli yatirim danismanligi platformu",
 };
 
 export default function RootLayout({

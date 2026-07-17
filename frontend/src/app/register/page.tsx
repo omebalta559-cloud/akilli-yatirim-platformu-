@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { saveToken } from "@/lib/auth";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { getApiUrl } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = getApiUrl();
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,7 +31,7 @@ export default function RegisterPage() {
         throw new Error(data.detail ?? "Kayit basarisiz oldu.");
       }
       saveToken(data.access_token);
-      router.push("/");
+      router.push("/portfolio");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata olustu.");
     } finally {
@@ -79,6 +81,14 @@ export default function RegisterPage() {
             Giris yap
           </Link>
         </p>
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+          <span className="text-xs text-zinc-400">veya</span>
+          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+        </div>
+
+        <GoogleSignInButton onError={setError} />
       </form>
     </div>
   );

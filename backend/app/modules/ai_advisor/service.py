@@ -75,7 +75,7 @@ async def build_portfolio_chart_context(holdings: list) -> str:
 def _get_collection():
     global _collection
     if _collection is None:
-        client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
+        client = chromadb.PersistentClient(path=settings.chroma_persist_dir)
         _collection = client.get_or_create_collection(name="finans_haberleri")
     return _collection
 
@@ -108,15 +108,20 @@ def _get_relevant_context(question: str, n_results: int = 5) -> list[str]:
 
 
 def ask_advisor(
-    question: str, portfolio_summary: str = "", chart_context: str = ""
+    question: str,
+    portfolio_summary: str = "",
+    chart_context: str = "",
+    conversation_history: str = "",
 ) -> str:
     context_chunks = _get_relevant_context(question)
     context_text = "\n---\n".join(context_chunks) if context_chunks else "Ilgili guncel haber bulunamadi."
 
     system_prompt = (
         "Sen bir yatirim danismanisin. Sana verilen guncel finans haberlerini, "
-        "kullanicinin portfoyunu ve varliklarin son 3 aylik fiyat grafigi trendini "
-        "dikkate alarak Turkce, net ve riskleri belirten tavsiyeler ver. "
+        "kullanicinin portfoyunu, varliklarin son 3 aylik fiyat grafigi trendini "
+        "ve onceki konusma gecmisini dikkate alarak Turkce, net ve riskleri belirten "
+        "tavsiyeler ver. Onceki konusma varsa baglamini koru, tekrar sorulmadikca "
+        "ayni bilgiyi tekrarlama. "
         "Grafik trend verisi varsa yorumuna dahil et (orn. 'grafige gore son 3 ayda yukseldi/dustu'). "
         "Kesin getiri vaadinde bulunma. "
         "Cevaplarini KISA ve OZ tut: en fazla 3-4 cumle veya 3-4 madde. "
@@ -124,6 +129,7 @@ def ask_advisor(
         "Kullanici daha fazla detay isterse o zaman genisletebilirsin."
     )
     user_message = (
+        f"Onceki konusma gecmisi:\n{conversation_history or 'Yok, bu ilk soru.'}\n\n"
         f"Guncel haber baglami:\n{context_text}\n\n"
         f"Kullanici portfoyu:\n{portfolio_summary or 'Belirtilmedi'}\n\n"
         f"Portfoydeki varliklarin grafik/fiyat trend bilgisi:\n{chart_context or 'Mevcut degil'}\n\n"

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { getApiUrl } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = getApiUrl();
 
 type HistoryPoint = { date: string; price: number };
 
 const WIDTH = 600;
-const HEIGHT = 200;
 const PADDING_LEFT = 56;
 const PADDING_RIGHT = 12;
 const PADDING_TOP = 12;
@@ -22,9 +22,11 @@ const RANGE_OPTIONS = [
 export default function PriceChart({
   symbol,
   currencyLabel,
+  height = 200,
 }: {
   symbol: string;
   currencyLabel: string;
+  height?: number;
 }) {
   const [points, setPoints] = useState<HistoryPoint[] | null>(null);
   const [error, setError] = useState(false);
@@ -32,6 +34,7 @@ export default function PriceChart({
   const [rangeIndex, setRangeIndex] = useState(2);
   const svgRef = useRef<SVGSVGElement>(null);
   const selectedRange = RANGE_OPTIONS[rangeIndex];
+  const HEIGHT = height;
 
   useEffect(() => {
     setPoints(null);
@@ -75,11 +78,11 @@ export default function PriceChart({
     return { linePath: line, areaPath: area, minPrice: min, maxPrice: max, midPrice: (min + max) / 2, coords };
   }, [points, chartWidth, chartHeight]);
 
-  function handleMouseMove(e: React.MouseEvent<SVGSVGElement>) {
+  function updateHoverFromClientX(clientX: number) {
     if (!points || coords.length === 0 || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const scaleX = WIDTH / rect.width;
-    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseX = (clientX - rect.left) * scaleX;
 
     let closest = 0;
     let closestDist = Infinity;
@@ -93,14 +96,34 @@ export default function PriceChart({
     setHoverIndex(closest);
   }
 
+  function handleMouseMove(e: React.MouseEvent<SVGSVGElement>) {
+    updateHoverFromClientX(e.clientX);
+  }
+
+  function handleTouchMove(e: React.TouchEvent<SVGSVGElement>) {
+    const touch = e.touches[0];
+    if (!touch) return;
+    e.preventDefault();
+    updateHoverFromClientX(touch.clientX);
+  }
+
   const hover =
     points && hoverIndex !== null ? { point: points[hoverIndex], coord: coords[hoverIndex] } : null;
 
   const formatPrice = (v: number) =>
     v.toLocaleString("tr-TR", { maximumFractionDigits: v < 10 ? 4 : 2 });
 
+  const trendUp = points && points.length > 1 ? points[points.length - 1].price >= points[0].price : true;
+  const gradientId = useId();
+
   return (
-    <div className="[--chart-line:#2a78d6] [--chart-area:#2a78d6] [--chart-grid:#e1e0d9] [--chart-axis:#898781] [--chart-crosshair:#c3c2b7] [--chart-surface:#fcfcfb] dark:[--chart-line:#3987e5] dark:[--chart-area:#3987e5] dark:[--chart-grid:#2c2c2a] dark:[--chart-axis:#898781] dark:[--chart-crosshair:#383835] dark:[--chart-surface:#1a1a19]">
+    <div
+      className={
+        trendUp
+          ? "[--chart-line:#10b981] [--chart-area:#10b981] [--chart-grid:#e1e0d9] [--chart-axis:#898781] [--chart-crosshair:#c3c2b7] [--chart-surface:#fcfcfb] dark:[--chart-line:#34d399] dark:[--chart-area:#34d399] dark:[--chart-grid:#2c2c2a] dark:[--chart-axis:#898781] dark:[--chart-crosshair:#383835] dark:[--chart-surface:#1a1a19]"
+          : "[--chart-line:#ef4444] [--chart-area:#ef4444] [--chart-grid:#e1e0d9] [--chart-axis:#898781] [--chart-crosshair:#c3c2b7] [--chart-surface:#fcfcfb] dark:[--chart-line:#f87171] dark:[--chart-area:#f87171] dark:[--chart-grid:#2c2c2a] dark:[--chart-axis:#898781] dark:[--chart-crosshair:#383835] dark:[--chart-surface:#1a1a19]"
+      }
+    >
       <div className="mb-2 flex gap-1">
         {RANGE_OPTIONS.map((opt, i) => (
           <button
@@ -128,7 +151,17 @@ export default function PriceChart({
         style={{ background: "var(--chart-surface)" }}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setHoverIndex(null)}
+        onTouchMove={handleTouchMove}
+        onTouchStart={handleTouchMove}
+        onTouchEnd={() => setHoverIndex(null)}
       >
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--chart-area)" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="var(--chart-area)" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+
         {[minPrice, midPrice, maxPrice].map((v, i) => {
           const y = PADDING_TOP + chartHeight - ((v - minPrice) / (maxPrice - minPrice || 1)) * chartHeight;
           return (
@@ -148,8 +181,8 @@ export default function PriceChart({
           );
         })}
 
-        <path d={areaPath} fill="var(--chart-area)" opacity={0.1} stroke="none" />
-        <path d={linePath} fill="none" stroke="var(--chart-line)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />
+        <path d={linePath} fill="none" stroke="var(--chart-line)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
 
         {points.length > 0 && (
           <>

@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 
 from app.modules.ai_advisor import service as ai_advisor_service
 from app.modules.ai_advisor.router import router as ai_advisor_router
+from app.modules.alerts import service as alerts_service
+from app.modules.alerts.router import router as alerts_router
 from app.modules.auth.router import router as auth_router
 from app.modules.market_data.router import router as market_data_router
 from app.modules.portfolio.router import router as portfolio_router
@@ -16,7 +18,9 @@ app = FastAPI(title="Akilli Yatirim Danismani")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    # localhost + herhangi bir yerel ag (LAN) IP'si, 3000 portu: telefondan/DHCP ile
+    # degisen IP'lerden erisimi de kapsar, boylece IP degistiginde tekrar duzenlemeye gerek kalmaz.
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}):3000",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,6 +30,7 @@ app.include_router(auth_router)
 app.include_router(market_data_router)
 app.include_router(portfolio_router)
 app.include_router(ai_advisor_router)
+app.include_router(alerts_router)
 
 
 @app.on_event("startup")
@@ -40,6 +45,22 @@ async def refresh_news_on_startup():
             pass  # RAG baglami olmadan da danisman genel bilgiyle calismaya devam eder
 
     asyncio.create_task(safe_refresh())
+
+
+@app.on_event("startup")
+async def check_alerts_periodically():
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        return
+
+    async def loop():
+        while True:
+            try:
+                await alerts_service.check_alerts()
+            except Exception:
+                pass  # bir sonraki dongude tekrar denenir
+            await asyncio.sleep(60)
+
+    asyncio.create_task(loop())
 
 
 @app.exception_handler(httpx.HTTPStatusError)

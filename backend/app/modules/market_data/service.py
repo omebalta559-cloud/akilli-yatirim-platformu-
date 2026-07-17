@@ -38,10 +38,37 @@ DEFAULT_BIST_SYMBOLS = [
 
 YAHOO_HEADERS = {"User-Agent": "Mozilla/5.0"}
 
+CRYPTO_IDS = {
+    "BTC": "bitcoin",
+    "ETH": "ethereum",
+    "SOL": "solana",
+    "XRP": "ripple",
+    "DOGE": "dogecoin",
+    "ADA": "cardano",
+    "AVAX": "avalanche-2",
+    "BNB": "binancecoin",
+    "LTC": "litecoin",
+    "MATIC": "matic-network",
+}
+
+GOLD_NAMES = {
+    "GRAM_ALTIN": "Gram Altın",
+    "CEYREK_ALTIN": "Çeyrek Altın",
+    "YARIM_ALTIN": "Yarım Altın",
+    "TAM_ALTIN": "Tam Altın",
+    "CUMHURIYET_ALTINI": "Cumhuriyet Altını",
+    "ONS_ALTIN": "ONS Altın",
+    "GUMUS": "Gümüş",
+}
+
 
 async def get_crypto_prices(coin_ids: list[str], vs_currency: str = "usd") -> dict:
     async def fetch():
-        params = {"ids": ",".join(coin_ids), "vs_currencies": vs_currency}
+        params = {
+            "ids": ",".join(coin_ids),
+            "vs_currencies": vs_currency,
+            "include_24hr_change": "true",
+        }
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(COINGECKO_URL, params=params)
             response.raise_for_status()
@@ -119,6 +146,35 @@ async def get_stock_prices(symbols: list[str] | None = None) -> dict:
 
     cache_key = f"market:stocks:{','.join(sorted(symbols))}"
     return await get_or_set(cache_key, CACHE_TTL_SECONDS, fetch)
+
+
+async def get_current_price(asset_type: str, asset_symbol: str) -> float | None:
+    if asset_type == "kripto":
+        coin_id = CRYPTO_IDS.get(asset_symbol)
+        if not coin_id:
+            return None
+        data = await get_crypto_prices([coin_id])
+        item = data.get(coin_id)
+        return item["usd"] if item else None
+
+    if asset_type == "doviz":
+        data = await get_exchange_rates(asset_symbol, ["TRY"])
+        return data["rates"].get("TRY")
+
+    if asset_type == "altin":
+        data = await get_gold_prices()
+        name = GOLD_NAMES.get(asset_symbol)
+        item = next((i for i in data["result"] if i["name"] == name), None)
+        return item["selling"] if item else None
+
+    if asset_type in ("hisse", "gayrimenkul"):
+        try:
+            quote = await _fetch_yahoo_quote(f"{asset_symbol}.IS")
+        except (httpx.HTTPStatusError, httpx.RequestError, KeyError, IndexError):
+            return None
+        return quote["price"]
+
+    return None
 
 
 async def get_price_history(symbol: str, range_: str = "1y", interval: str = "1wk") -> dict:

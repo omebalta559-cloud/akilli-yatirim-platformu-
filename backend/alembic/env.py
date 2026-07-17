@@ -7,8 +7,10 @@ from alembic import context
 
 from app.core.config import settings
 from app.core.database import Base
+from app.modules.ai_advisor.models import ChatMessage  # noqa: F401
+from app.modules.alerts.models import PriceAlert  # noqa: F401
 from app.modules.auth.models import User  # noqa: F401
-from app.modules.portfolio.models import Holding  # noqa: F401
+from app.modules.portfolio.models import Holding, PortfolioSnapshot  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

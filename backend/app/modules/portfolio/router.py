@@ -1,12 +1,16 @@
 from datetime import datetime, timezone
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.modules.auth.service import get_current_user_id
-from app.modules.portfolio.models import Holding
-from app.modules.portfolio.schemas import HoldingCreate, HoldingOut
+from app.modules.portfolio import performance as performance_service
+from app.modules.portfolio import report as report_service
+from app.modules.portfolio.models import Holding, PortfolioSnapshot
+from app.modules.portfolio.schemas import HoldingCreate, HoldingOut, PortfolioSnapshotOut
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
@@ -42,6 +46,48 @@ def add_holding(
     db.commit()
     db.refresh(holding)
     return holding
+
+
+@router.get("/performance", response_model=list[PortfolioSnapshotOut])
+async def get_performance(
+    user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)
+):
+    await performance_service.ensure_today_snapshot(db, user_id)
+    return (
+        db.query(PortfolioSnapshot)
+        .filter(PortfolioSnapshot.user_id == user_id)
+        .order_by(PortfolioSnapshot.snapshot_date.asc())
+        .all()
+    )
+
+
+@router.get("/report")
+async def download_report(
+    format: Literal["csv", "pdf"] = Query("pdf"),
+    user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    holdings = (
+        db.query(Holding)
+        .filter(Holding.user_id == user_id, Holding.is_active.is_(True))
+        .all()
+    )
+    rows = await report_service.build_report_rows(holdings)
+
+    if format == "csv":
+        content = report_service.build_csv(rows)
+        media_type = "text/csv"
+        filename = "portfoy_raporu.csv"
+    else:
+        content = report_service.build_pdf(rows)
+        media_type = "application/pdf"
+        filename = "portfoy_raporu.pdf"
+
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.delete("/{holding_id}")

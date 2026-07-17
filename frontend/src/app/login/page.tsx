@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { TrendingUp, Mail, Lock } from "lucide-react";
 import { saveToken } from "@/lib/auth";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { getApiUrl } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = getApiUrl();
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function LoginPage() {
         throw new Error(data.detail ?? "Giris basarisiz oldu.");
       }
       saveToken(data.access_token);
-      router.push("/");
+      router.push("/portfolio");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata olustu.");
     } finally {
@@ -38,47 +41,121 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 dark:bg-black">
-      <form
-        onSubmit={handleSubmit}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
-      >
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Giris Yap</h1>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <input
-          type="email"
-          placeholder="E-posta"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        />
-        <input
-          type="password"
-          placeholder="Sifre"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-zinc-900 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+      {/* SOL PANEL */}
+      <div className="relative hidden overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-950 lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <svg
+          className="pointer-events-none absolute inset-0 h-full w-full opacity-20"
+          viewBox="0 0 600 800"
+          preserveAspectRatio="none"
+          fill="none"
         >
-          {loading ? "Giris yapiliyor..." : "Giris Yap"}
-        </button>
+          <path
+            d="M0 620 L80 560 L160 600 L240 460 L320 500 L400 320 L480 380 L560 180 L600 220"
+            stroke="#818cf8"
+            strokeWidth="3"
+            fill="none"
+          />
+          <path
+            d="M0 700 L90 660 L180 690 L260 580 L340 610 L420 470 L500 520 L600 380"
+            stroke="#6366f1"
+            strokeWidth="2"
+            opacity="0.6"
+            fill="none"
+          />
+          <circle cx="600" cy="220" r="5" fill="#818cf8" />
+          <circle cx="480" cy="380" r="3" fill="#818cf8" />
+          <circle cx="320" cy="500" r="3" fill="#818cf8" />
+        </svg>
 
-        <p className="text-center text-sm text-zinc-500">
-          Hesabin yok mu?{" "}
-          <Link href="/register" className="font-medium text-zinc-900 dark:text-zinc-50">
-            Kayit ol
-          </Link>
+        <div className="relative flex items-center gap-2 text-white">
+          <TrendingUp className="h-7 w-7 text-indigo-400" strokeWidth={2.5} />
+          <span className="text-lg font-semibold">Akilli Yatirim Danismani</span>
+        </div>
+
+        <div className="relative flex flex-col gap-4">
+          <h1 className="text-4xl font-bold leading-tight text-white xl:text-5xl">
+            Yatirimlarinizi Yapay Zeka ile Akillica Yonetin.
+          </h1>
+          <p className="max-w-md text-base text-indigo-200/70">
+            Risk profilinizi belirleyin, portfoyunuzu canli verilerle takip edin.
+          </p>
+        </div>
+
+        <p className="relative text-xs text-indigo-300/50">
+          &copy; {new Date().getFullYear()} Akilli Yatirim Danismani. Tum haklari saklidir.
         </p>
-      </form>
+      </div>
+
+      {/* SAG PANEL */}
+      <div className="flex min-h-screen items-center justify-center bg-white px-6 py-12 dark:bg-white">
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-indigo-600" strokeWidth={2.5} />
+              <span className="text-lg font-semibold text-slate-900">
+                Akilli Yatirim Danismani
+              </span>
+            </div>
+            <p className="text-sm text-slate-500">Hesabiniza giris yapin</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            )}
+
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="email"
+                placeholder="E-posta"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm text-slate-900 transition-all placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="password"
+                placeholder="Sifre"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm text-slate-900 transition-all placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-xl bg-indigo-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? "Giris yapiliyor..." : "Giris Yap"}
+            </button>
+
+            <p className="text-center text-sm text-slate-500">
+              Hesabin yok mu?{" "}
+              <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-700">
+                Kayit ol
+              </Link>
+            </p>
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-xs text-gray-400">veya</span>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 p-1 transition-all hover:bg-gray-100">
+              <GoogleSignInButton onError={setError} />
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
