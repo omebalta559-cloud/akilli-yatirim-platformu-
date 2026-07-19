@@ -36,7 +36,7 @@ export default function AlertsPage() {
     const res = await fetch(`${API_URL}/alerts/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error("Alarmlar yuklenemedi.");
+    if (!res.ok) throw new Error("Alarmlar yüklenemedi.");
     setAlerts(await res.json());
   }
 
@@ -46,7 +46,7 @@ export default function AlertsPage() {
       router.push("/login");
       return;
     }
-    loadAlerts(token).catch(() => setError("Alarmlar yuklenirken bir hata olustu."));
+    loadAlerts(token).catch(() => setError("Alarmlar yüklenirken bir hata oluştu."));
 
     const intervalId = setInterval(() => {
       loadAlerts(token).catch(() => {});
@@ -85,7 +85,7 @@ export default function AlertsPage() {
       setDirection("ustunde");
       await loadAlerts(token);
     } catch {
-      setError("Alarm eklenirken bir hata olustu.");
+      setError("Alarm eklenirken bir hata oluştu.");
     } finally {
       setSubmitting(false);
     }
@@ -102,7 +102,7 @@ export default function AlertsPage() {
       if (!res.ok) throw new Error("Silinemedi.");
       await loadAlerts(token);
     } catch {
-      setError("Alarm silinirken bir hata olustu.");
+      setError("Alarm silinirken bir hata oluştu.");
     }
   }
 
@@ -114,15 +114,15 @@ export default function AlertsPage() {
       <main className="mx-auto flex max-w-2xl flex-col gap-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Fiyat Alarmlarim
+            Fiyat Alarmlarım
           </h1>
           <Link href="/portfolio" className="text-sm font-medium text-zinc-500">
-            Portfoyume don
+            Portföyüme dön
           </Link>
         </div>
 
         <p className="-mt-4 text-xs text-zinc-400">
-          Alarmlar 60 saniyede bir sunucu tarafinda kontrol edilir, bu sayfa da 30 saniyede bir
+          Alarmlar 60 saniyede bir sunucu tarafında kontrol edilir, bu sayfa da 30 saniyede bir
           yenilenir.
         </p>
 
@@ -141,14 +141,14 @@ export default function AlertsPage() {
                     {getSymbolLabel(a.asset_type, a.asset_symbol)}
                   </span>{" "}
                   <span className="text-zinc-600 dark:text-zinc-300">
-                    hedef fiyat {a.target_price} ({a.direction === "ustunde" ? "ustune cikti" : "altina dustu"})
+                    hedef fiyat {a.target_price} ({a.direction === "ustunde" ? "üstüne çıktı" : "altına düştü"})
                   </span>
                 </div>
                 <button
                   onClick={() => handleDelete(a.id)}
                   className="text-sm font-medium text-red-500"
                 >
-                  Kaldir
+                  Kaldır
                 </button>
               </div>
             ))}
@@ -162,7 +162,7 @@ export default function AlertsPage() {
           <h2 className="text-sm font-semibold text-zinc-500">Yeni Alarm Ekle</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Tur (varlik kategorisi)
+              Tür (varlık kategorisi)
               <select
                 value={assetType}
                 onChange={(e) => {
@@ -174,17 +174,17 @@ export default function AlertsPage() {
                 className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
               >
                 <option value="" disabled>
-                  Kategori sec
+                  Kategori seç
                 </option>
                 <option value="kripto">Kripto</option>
-                <option value="doviz">Doviz</option>
-                <option value="altin">Altin / Gumus</option>
+                <option value="doviz">Döviz</option>
+                <option value="altin">Altın / Gümüş</option>
                 <option value="hisse">Hisse Senedi</option>
                 <option value="gayrimenkul">Gayrimenkul</option>
               </select>
             </label>
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Sembol (varligin kodu)
+              Sembol (varlığın kodu)
               <select
                 value={assetSymbol}
                 onChange={(e) => setAssetSymbol(e.target.value)}
@@ -193,18 +193,18 @@ export default function AlertsPage() {
                 className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
               >
                 <option value="" disabled>
-                  {assetType ? "Sembol sec" : "Once tur sec"}
+                  {assetType ? "Sembol seç" : "Önce tür seç"}
                 </option>
                 {(SYMBOLS_BY_TYPE[assetType] ?? []).map((symbol) => (
                   <option key={symbol} value={symbol}>
                     {getSymbolLabel(assetType, symbol)}
                   </option>
                 ))}
-                <option value={CUSTOM_SYMBOL}>Diger (elle yaz)</option>
+                <option value={CUSTOM_SYMBOL}>Diğer (elle yaz)</option>
               </select>
               {assetSymbol === CUSTOM_SYMBOL && (
                 <input
-                  placeholder="Ozel sembol yaz"
+                  placeholder="Özel sembol yaz"
                   value={customSymbol}
                   onChange={(e) => setCustomSymbol(e.target.value)}
                   required
@@ -225,14 +225,14 @@ export default function AlertsPage() {
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Yon
+              Yön
               <select
                 value={direction}
                 onChange={(e) => setDirection(e.target.value as "ustunde" | "altinda")}
                 className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
               >
-                <option value="ustunde">Bu fiyatin ustune cikinca</option>
-                <option value="altinda">Bu fiyatin altina dusunce</option>
+                <option value="ustunde">Bu fiyatın üstüne çıkınca</option>
+                <option value="altinda">Bu fiyatın altına düşünce</option>
               </select>
             </label>
           </div>
@@ -247,9 +247,9 @@ export default function AlertsPage() {
 
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold text-zinc-500">Aktif Alarmlar</p>
-          {alerts === null && <p className="text-sm text-zinc-400">Yukleniyor...</p>}
+          {alerts === null && <p className="text-sm text-zinc-400">Yükleniyor...</p>}
           {alerts !== null && activeAlerts.length === 0 && (
-            <p className="text-sm text-zinc-400">Henuz aktif bir alarmin yok.</p>
+            <p className="text-sm text-zinc-400">Henüz aktif bir alarmın yok.</p>
           )}
           {activeAlerts.map((a) => (
             <div
@@ -261,7 +261,7 @@ export default function AlertsPage() {
                   {getSymbolLabel(a.asset_type, a.asset_symbol)}
                 </span>{" "}
                 <span className="text-zinc-500">
-                  {a.direction === "ustunde" ? "ustune cikinca" : "altina dusunce"} haber ver:{" "}
+                  {a.direction === "ustunde" ? "üstüne çıkınca" : "altına düşünce"} haber ver:{" "}
                   {a.target_price}
                 </span>
               </div>

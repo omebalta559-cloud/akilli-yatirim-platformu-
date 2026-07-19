@@ -44,7 +44,7 @@ def delete_alert(
         .first()
     )
     if not alert:
-        raise HTTPException(status_code=404, detail="Alarm bulunamadi")
+        raise HTTPException(status_code=404, detail="Alarm bulunamadı")
     db.delete(alert)
     db.commit()
     return {"detail": "Alarm silindi"}

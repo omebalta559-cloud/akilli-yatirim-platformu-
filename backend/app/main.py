@@ -14,7 +14,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.market_data.router import router as market_data_router
 from app.modules.portfolio.router import router as portfolio_router
 
-app = FastAPI(title="Akilli Yatirim Danismani")
+app = FastAPI(title="Akıllı Yatırım Danışmanı")
 
 app.add_middleware(
     CORSMiddleware,
@@ -68,7 +68,7 @@ async def check_alerts_periodically():
 async def httpx_status_error_handler(request: Request, exc: httpx.HTTPStatusError):
     return JSONResponse(
         status_code=502,
-        content={"detail": "Piyasa verisi saglayicisina ulasilamadi, lutfen daha sonra tekrar deneyin."},
+        content={"detail": "Piyasa verisi sağlayıcısına ulaşılamadı, lütfen daha sonra tekrar deneyin."},
     )
 
 
@@ -76,10 +76,10 @@ async def httpx_status_error_handler(request: Request, exc: httpx.HTTPStatusErro
 async def httpx_request_error_handler(request: Request, exc: httpx.RequestError):
     return JSONResponse(
         status_code=503,
-        content={"detail": "Dis servise baglanirken bir sorun olustu, lutfen daha sonra tekrar deneyin."},
+        content={"detail": "Dış servise bağlanırken bir sorun oluştu, lütfen daha sonra tekrar deneyin."},
     )
 
 
 @app.get("/")
 def ana_sayfa():
-    return {"mesaj": "Akilli Yatirim Danismani backend motoru basariyla calisti! 🚀"}
+    return {"mesaj": "Akıllı Yatırım Danışmanı backend motoru başarıyla çalıştı! 🚀"}

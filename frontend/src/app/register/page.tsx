@@ -28,12 +28,12 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail ?? "Kayit basarisiz oldu.");
+        throw new Error(data.detail ?? "Kayıt başarısız oldu.");
       }
       saveToken(data.access_token);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bir hata olustu.");
+      setError(err instanceof Error ? err.message : "Bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
       >
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Kayit Ol</h1>
+        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Kayıt Ol</h1>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
@@ -59,7 +59,7 @@ export default function RegisterPage() {
         />
         <input
           type="password"
-          placeholder="Sifre"
+          placeholder="Şifre"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -72,13 +72,13 @@ export default function RegisterPage() {
           disabled={loading}
           className="rounded-lg bg-zinc-900 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
         >
-          {loading ? "Kayit olunuyor..." : "Kayit Ol"}
+          {loading ? "Kayıt olunuyor..." : "Kayıt Ol"}
         </button>
 
         <p className="text-center text-sm text-zinc-500">
-          Zaten hesabin var mi?{" "}
+          Zaten hesabın var mı?{" "}
           <Link href="/login" className="font-medium text-zinc-900 dark:text-zinc-50">
-            Giris yap
+            Giriş yap
           </Link>
         </p>
 

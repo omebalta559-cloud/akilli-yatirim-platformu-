@@ -29,7 +29,7 @@ def get_history(user_id: int = Depends(get_current_user_id), db: Session = Depen
 def clear_history(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     db.query(ChatMessage).filter(ChatMessage.user_id == user_id).delete()
     db.commit()
-    return {"detail": "Sohbet gecmisi temizlendi"}
+    return {"detail": "Sohbet geçmişi temizlendi"}
 
 
 @router.post("/ask", response_model=AdvisorAnswer)
@@ -68,7 +68,7 @@ async def ask(
     except Exception:
         raise HTTPException(
             status_code=502,
-            detail="AI danisman su an yanit veremiyor, lutfen birazdan tekrar deneyin.",
+            detail="AI danışman şu an yanıt veremiyor, lütfen birazdan tekrar deneyin.",
         )
 
     db.add(ChatMessage(user_id=user_id, role="user", content=payload.question))
@@ -83,5 +83,5 @@ def refresh_news(user_id: int = Depends(get_current_user_id)):
     try:
         count = service.refresh_news_from_rss()
     except Exception:
-        raise HTTPException(status_code=502, detail="Haberler alinirken bir sorun olustu.")
+        raise HTTPException(status_code=502, detail="Haberler alınırken bir sorun oluştu.")
     return {"added": count}

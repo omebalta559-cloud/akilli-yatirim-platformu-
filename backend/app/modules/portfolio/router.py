@@ -102,7 +102,7 @@ def delete_holding(
         .first()
     )
     if not holding:
-        raise HTTPException(status_code=404, detail="Varlik bulunamadi.")
+        raise HTTPException(status_code=404, detail="Varlık bulunamadı.")
 
     holding.is_active = False
     holding.removed_at = datetime.now(timezone.utc)

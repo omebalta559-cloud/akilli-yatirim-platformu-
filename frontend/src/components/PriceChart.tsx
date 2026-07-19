@@ -140,8 +140,8 @@ export default function PriceChart({
         ))}
       </div>
 
-      {error && <p className="text-sm text-zinc-400">Bu varlik icin grafik verisi bulunamadi.</p>}
-      {!error && !points && <p className="text-sm text-zinc-400">Grafik yukleniyor...</p>}
+      {error && <p className="text-sm text-zinc-400">Bu varlık için grafik verisi bulunamadı.</p>}
+      {!error && !points && <p className="text-sm text-zinc-400">Grafik yükleniyor...</p>}
 
       {!error && points && (
       <svg

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Akilli Yatirim Danismani",
+  title: "Akıllı Yatırım Danışmanı",
   description:
-    "Kripto, doviz, altin ve borsa verilerini tek yerde takip eden, yapay zeka destekli yatirim danismanligi platformu",
+    "Kripto, döviz, altın ve borsa verilerini tek yerde takip eden, yapay zekâ destekli yatırım danışmanlığı platformu",
 };
 
 export default function RootLayout({
@@ -31,8 +31,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <div className="flex-1">{children}</div>
         <footer className="border-t border-zinc-200 bg-zinc-50 px-6 py-3 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-black">
-          Bu platform ve icerdigi yapay zeka danismani yatirim tavsiyesi degildir, yalnizca
-          genel bilgilendirme amaclidir. Yatirim kararlarinizdan once bir uzmana danisin.
+          Bu platform ve içerdiği yapay zekâ danışmanı yatırım tavsiyesi değildir, yalnızca
+          genel bilgilendirme amaçlıdır. Yatırım kararlarınızdan önce bir uzmana danışın.
         </footer>
       </body>
     </html>

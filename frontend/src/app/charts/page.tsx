@@ -29,8 +29,8 @@ type TabKey = "kripto" | "doviz" | "altin" | "borsa";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "kripto", label: "Kripto" },
-  { key: "doviz", label: "Doviz" },
-  { key: "altin", label: "Altin & Gumus" },
+  { key: "doviz", label: "Döviz" },
+  { key: "altin", label: "Altın & Gümüş" },
   { key: "borsa", label: "BIST 100" },
 ];
 
@@ -181,7 +181,7 @@ export default function ChartsPage() {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Grafikler</h1>
           <Link href="/" className="text-sm font-medium text-zinc-500">
-            Dashboard&apos;a don
+            Dashboard&apos;a dön
           </Link>
         </div>
 
@@ -191,7 +191,7 @@ export default function ChartsPage() {
             <>
               <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-zinc-400">Detayli Analiz</p>
+                  <p className="text-sm font-medium text-zinc-400">Detaylı Analiz</p>
                   <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-3xl">
                     {selected.label}
                   </h2>
@@ -232,7 +232,7 @@ export default function ChartsPage() {
               <HeroChart points={heroPoints} loading={heroLoading} color={heroColor} currency={selected.currency} />
             </>
           ) : (
-            <p className="text-sm text-zinc-400">Yukleniyor...</p>
+            <p className="text-sm text-zinc-400">Yükleniyor...</p>
           )}
         </div>
 
@@ -285,7 +285,7 @@ export default function ChartsPage() {
                   )}
                 </div>
                 <span className="text-sm text-zinc-500">
-                  {lastPrice !== null ? formatHeroPrice(lastPrice, asset.currency) : "Yukleniyor..."}
+                  {lastPrice !== null ? formatHeroPrice(lastPrice, asset.currency) : "Yükleniyor..."}
                 </span>
                 <MiniSparkline points={points} />
               </button>
@@ -311,13 +311,13 @@ function HeroChart({
   const gradientId = useId().replace(/:/g, "");
 
   if (loading || !points) {
-    return <div className="flex h-[340px] items-center justify-center text-sm text-zinc-400">Grafik yukleniyor...</div>;
+    return <div className="flex h-[340px] items-center justify-center text-sm text-zinc-400">Grafik yükleniyor...</div>;
   }
 
   if (points.length === 0) {
     return (
       <div className="flex h-[340px] items-center justify-center text-sm text-zinc-400">
-        Bu varlik icin grafik verisi bulunamadi.
+        Bu varlık için grafik verisi bulunamadı.
       </div>
     );
   }

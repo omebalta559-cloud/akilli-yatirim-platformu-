@@ -13,7 +13,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def register(payload: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Bu e-posta zaten kayitli")
+        raise HTTPException(status_code=400, detail="Bu e-posta zaten kayıtlı")
 
     user = User(email=payload.email, hashed_password=service.hash_password(payload.password))
     db.add(user)
@@ -43,7 +43,7 @@ def google_auth(payload: GoogleAuthRequest, db: Session = Depends(get_db)):
 def login(payload: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not service.verify_password(payload.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Gecersiz e-posta veya sifre")
+        raise HTTPException(status_code=401, detail="Geçersiz e-posta veya şifre")
 
     token = service.create_access_token(subject=str(user.id))
     return Token(access_token=token)

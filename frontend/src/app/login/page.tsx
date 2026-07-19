@@ -29,12 +29,12 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail ?? "Giris basarisiz oldu.");
+        throw new Error(data.detail ?? "Giriş başarısız oldu.");
       }
       saveToken(data.access_token);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bir hata olustu.");
+      setError(err instanceof Error ? err.message : "Bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -70,20 +70,20 @@ export default function LoginPage() {
 
         <div className="relative flex items-center gap-2 text-white">
           <TrendingUp className="h-7 w-7 text-indigo-400" strokeWidth={2.5} />
-          <span className="text-lg font-semibold">Akilli Yatirim Danismani</span>
+          <span className="text-lg font-semibold">Akıllı Yatırım Danışmanı</span>
         </div>
 
         <div className="relative flex flex-col gap-4">
           <h1 className="text-4xl font-bold leading-tight text-white xl:text-5xl">
-            Yatirimlarinizi Yapay Zeka ile Akillica Yonetin.
+            Yatırımlarınızı Yapay Zekâ ile Akıllıca Yönetin.
           </h1>
           <p className="max-w-md text-base text-indigo-200/70">
-            Risk profilinizi belirleyin, portfoyunuzu canli verilerle takip edin.
+            Risk profilinizi belirleyin, portföyünüzü canlı verilerle takip edin.
           </p>
         </div>
 
         <p className="relative text-xs text-indigo-300/50">
-          &copy; {new Date().getFullYear()} Akilli Yatirim Danismani. Tum haklari saklidir.
+          &copy; {new Date().getFullYear()} Akıllı Yatırım Danışmanı. Tüm hakları saklıdır.
         </p>
       </div>
 
@@ -94,10 +94,10 @@ export default function LoginPage() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-6 w-6 text-indigo-600" strokeWidth={2.5} />
               <span className="text-lg font-semibold text-slate-900">
-                Akilli Yatirim Danismani
+                Akıllı Yatırım Danışmanı
               </span>
             </div>
-            <p className="text-sm text-slate-500">Hesabiniza giris yapin</p>
+            <p className="text-sm text-slate-500">Hesabınıza giriş yapın</p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -121,7 +121,7 @@ export default function LoginPage() {
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
-                placeholder="Sifre"
+                placeholder="Şifre"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -134,13 +134,13 @@ export default function LoginPage() {
               disabled={loading}
               className="rounded-xl bg-indigo-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Giris yapiliyor..." : "Giris Yap"}
+              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
             </button>
 
             <p className="text-center text-sm text-slate-500">
-              Hesabin yok mu?{" "}
+              Hesabın yok mu?{" "}
               <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-700">
-                Kayit ol
+                Kayıt ol
               </Link>
             </p>
 

@@ -9,8 +9,8 @@ from app.modules.market_data import service as market_data_service
 
 ASSET_TYPE_LABELS = {
     "kripto": "Kripto",
-    "doviz": "Doviz",
-    "altin": "Altin/Gumus",
+    "doviz": "Döviz",
+    "altin": "Altın/Gümüş",
     "hisse": "Hisse Senedi",
     "gayrimenkul": "Gayrimenkul",
 }
@@ -54,14 +54,14 @@ async def check_alerts() -> int:
             if not user:
                 continue
             label = ASSET_TYPE_LABELS.get(alert.asset_type, alert.asset_type)
-            direction_text = "ustune cikti" if alert.direction == "ustunde" else "altina dustu"
-            subject = f"Fiyat alarmi: {alert.asset_symbol} {direction_text}"
+            direction_text = "üstüne çıktı" if alert.direction == "ustunde" else "altına düştü"
+            subject = f"Fiyat alarmı: {alert.asset_symbol} {direction_text}"
             body = (
-                f"{label} - {alert.asset_symbol} hedef fiyatiniz olan {alert.target_price} "
-                f"degerinin {direction_text}.\n"
-                f"Guncel fiyat: {current_price}\n\n"
-                "Bu e-posta Akilli Yatirim Danismani platformundaki fiyat alarminiz icin "
-                "otomatik gonderilmistir. Yatirim tavsiyesi degildir."
+                f"{label} - {alert.asset_symbol} hedef fiyatınız olan {alert.target_price} "
+                f"değerinin {direction_text}.\n"
+                f"Güncel fiyat: {current_price}\n\n"
+                "Bu e-posta Akıllı Yatırım Danışmanı platformundaki fiyat alarmınız için "
+                "otomatik gönderilmiştir. Yatırım tavsiyesi değildir."
             )
             emails_to_send.append((user.email, subject, body))
 

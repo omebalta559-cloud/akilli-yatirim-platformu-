@@ -27,21 +27,21 @@ type CategoryTotals = { kripto: number; bist: number; safe: number; total: numbe
 
 function buildWelcomeMessage(totals: CategoryTotals, riskProfile: string): string {
   if (totals.total <= 0) {
-    return "Merhaba! Henuz portfoyune hic varlik eklememissin. Profiline gore harika bir baslangic portfoyu hazirlayabiliriz. Nasil bir yatirim planliyorsun?";
+    return "Merhaba! Henüz portföyüne hiç varlık eklemedin. Risk profiline göre sana uygun bir başlangıç portföyü oluşturabiliriz. Nasıl bir yatırım yapmayı planlıyorsun?";
   }
 
   const cryptoPercent = (totals.kripto / totals.total) * 100;
   const safePercent = (totals.safe / totals.total) * 100;
 
   if (cryptoPercent > 50 && (riskProfile === "Dusuk" || riskProfile === "Orta")) {
-    return `Merhaba! Portfoyunu inceledim. Su an varliklarinin %${cryptoPercent.toFixed(0)}'si Kripto parada gorunuyor. Bu senin sectigin '${riskProfile}' risk profiline gore biraz fazla riskli. Dengelemek icin belki BIST hisselerini veya Altini biraz artirmak isteyebilirsin. Bana portfoyunle ilgili ne sormak istersin?`;
+    return `Merhaba! Portföyünü inceledim. Şu an varlıklarının %${cryptoPercent.toFixed(0)}'si kripto para biriminde görünüyor. Bu, seçtiğin '${riskProfile}' risk profiline göre biraz fazla riskli. Dengelemek için belki BIST hisselerini veya altını biraz artırmak isteyebilirsin. Portföyünle ilgili bana ne sormak istersin?`;
   }
 
   if (safePercent > 60 && riskProfile === "Yuksek") {
-    return `Merhaba! Portfoyunun %${safePercent.toFixed(0)}'si guvenli limanlarda (Altin/Doviz) duruyor. Yuksek risk/yuksek getiri hedefleyen profilin icin belki bir miktar Kripto veya BIST hissesi eklemeyi dusunebilirsin. Portfoyunu nasil optimize edebilecegimizi konusalim mi?`;
+    return `Merhaba! Portföyünün %${safePercent.toFixed(0)}'si güvenli limanlarda (altın/döviz) duruyor. Yüksek risk/yüksek getiri hedefleyen profilin için belki bir miktar kripto veya BIST hissesi eklemeyi düşünebilirsin. Portföyünü nasıl optimize edebileceğimizi konuşalım mı?`;
   }
 
-  return `Merhaba! Portfoyunu inceledim, mevcut dagilimin '${riskProfile}' risk profiline uygun gorunuyor. Portfoyunle ilgili ne sormak istersin?`;
+  return `Merhaba! Portföyünü inceledim, mevcut dağılımın '${riskProfile}' risk profiline uygun görünüyor. Portföyünle ilgili ne sormak istersin?`;
 }
 
 export default function AdvisorPage() {
@@ -188,7 +188,7 @@ export default function AdvisorPage() {
       });
       setMessages([]);
     } catch {
-      setError("Sohbet gecmisi temizlenirken bir hata olustu.");
+      setError("Sohbet geçmişi temizlenirken bir hata oluştu.");
     }
   }
 
@@ -225,11 +225,11 @@ export default function AdvisorPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail ?? "Danisman yanit veremedi.");
+        throw new Error(data.detail ?? "Danışman yanıt veremedi.");
       }
       setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Danisman ile iletisim kurulurken bir hata olustu.");
+      setError(err instanceof Error ? err.message : "Danışman ile iletişim kurulurken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -239,7 +239,7 @@ export default function AdvisorPage() {
     <div className="flex min-h-dvh flex-col bg-zinc-50 px-6 py-10 dark:bg-black">
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Akilli Danisman</h1>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Akıllı Danışman</h1>
           <div className="flex items-center gap-4">
             {activeTab === "sohbet" && messages.length > 0 && (
               <button
@@ -250,13 +250,13 @@ export default function AdvisorPage() {
               </button>
             )}
             <Link href="/" className="text-sm font-medium text-zinc-500">
-              Dashboard&apos;a don
+              Dashboard&apos;a dön
             </Link>
           </div>
         </div>
 
         <p className="text-xs text-zinc-400">
-          Bu bir yatirim tavsiyesi degildir, genel bilgi amaclidir.
+          Bu bir yatırım tavsiyesi değildir, genel bilgi amaçlıdır.
         </p>
 
         <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
@@ -278,7 +278,7 @@ export default function AdvisorPage() {
                 : "text-zinc-500"
             }`}
           >
-            Danismanlik Oturumu
+            Danışmanlık Oturumu
           </button>
         </div>
 
@@ -308,7 +308,7 @@ export default function AdvisorPage() {
               ))}
               {loading && (
                 <div className="self-start rounded-xl bg-zinc-100 px-4 py-2 text-sm text-zinc-400 dark:bg-zinc-800">
-                  Yaziyor...
+                  Yazıyor...
                 </div>
               )}
               <div ref={bottomRef} />
@@ -327,7 +327,7 @@ export default function AdvisorPage() {
                 disabled={loading}
                 className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
               >
-                Gonder
+                Gönder
               </button>
             </form>
           </>

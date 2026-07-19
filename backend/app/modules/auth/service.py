@@ -33,10 +33,10 @@ def verify_google_token(credential: str) -> str:
             credential, google_requests.Request(), settings.google_client_id
         )
     except ValueError:
-        raise HTTPException(status_code=401, detail="Gecersiz Google kimlik dogrulamasi")
+        raise HTTPException(status_code=401, detail="Geçersiz Google kimlik doğrulaması")
     email = payload.get("email")
     if not email:
-        raise HTTPException(status_code=401, detail="Google hesabinda e-posta bulunamadi")
+        raise HTTPException(status_code=401, detail="Google hesabında e-posta bulunamadı")
     return email
 
 
@@ -45,4 +45,4 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(bear
         payload = jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         return int(payload["sub"])
     except (JWTError, KeyError, ValueError):
-        raise HTTPException(status_code=401, detail="Gecersiz veya suresi dolmus token")
+        raise HTTPException(status_code=401, detail="Geçersiz veya süresi dolmuş token")

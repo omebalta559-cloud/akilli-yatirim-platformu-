@@ -6,6 +6,19 @@ import { Wallet, FileText } from "lucide-react";
 import { getToken } from "@/lib/auth";
 import { getApiUrl } from "@/lib/api";
 
+// jsPDF'in varsayilan Helvetica fontu WinAnsiEncoding kullanir ve
+// Turkce'ye ozgu g, i, S harflerini duzgun gosteremez; bu yuzden PDF'e
+// yazilan metinlerde bu harfleri ASCII karsiliklarina ceviriyoruz.
+function toPdfSafe(text: string): string {
+  return text
+    .replace(/ğ/g, "g")
+    .replace(/Ğ/g, "G")
+    .replace(/ı/g, "i")
+    .replace(/İ/g, "I")
+    .replace(/ş/g, "s")
+    .replace(/Ş/g, "S");
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   const clean = hex.replace("#", "");
   return [
@@ -29,21 +42,21 @@ type Allocation = {
 };
 
 const RISK_OPTIONS: { value: RiskLevel; label: string; description: string }[] = [
-  { value: "dusuk", label: "Dusuk", description: "Garanti yatirim, sermayemi korumak istiyorum" },
-  { value: "orta", label: "Orta", description: "Dengeli, hem buyume hem guvenlik istiyorum" },
-  { value: "yuksek", label: "Yuksek", description: "Agresif, kripto agirlikli, riski goze alirim" },
+  { value: "dusuk", label: "Düşük", description: "Garanti yatırım, sermayemi korumak istiyorum" },
+  { value: "orta", label: "Orta", description: "Dengeli, hem büyüme hem güvenlik istiyorum" },
+  { value: "yuksek", label: "Yüksek", description: "Agresif, kripto ağırlıklı, riski göze alırım" },
 ];
 
 const VADE_OPTIONS: { value: Vade; label: string; description: string }[] = [
-  { value: "kisa", label: "Kisa Vadeli", description: "0 - 6 Ay" },
-  { value: "orta", label: "Orta Vadeli", description: "6 Ay - 2 Yil" },
-  { value: "uzun", label: "Uzun Vadeli", description: "2+ Yil" },
+  { value: "kisa", label: "Kısa Vadeli", description: "0 - 6 Ay" },
+  { value: "orta", label: "Orta Vadeli", description: "6 Ay - 2 Yıl" },
+  { value: "uzun", label: "Uzun Vadeli", description: "2+ Yıl" },
 ];
 
 const AMAC_OPTIONS: { value: Amac; label: string; description: string }[] = [
-  { value: "koruma", label: "Ana Parayi Korumak", description: "Deger kaybini en aza indirmek" },
-  { value: "gelir", label: "Duzenli Gelir", description: "Temettu / faiz gibi periyodik gelir" },
-  { value: "buyume", label: "Maksimum Buyume", description: "Uzun vadede en yuksek getiri" },
+  { value: "koruma", label: "Ana Parayı Korumak", description: "Değer kaybını en aza indirmek" },
+  { value: "gelir", label: "Düzenli Gelir", description: "Temettü / faiz gibi periyodik gelir" },
+  { value: "buyume", label: "Maksimum Büyüme", description: "Uzun vadede en yüksek getiri" },
 ];
 
 const ALLOCATION_MATRIX: Record<RiskLevel, Record<Vade, Allocation>> = {
@@ -73,8 +86,8 @@ const ASSET_COLORS: Record<keyof Allocation, string> = {
 
 const ASSET_LABELS: Record<keyof Allocation, string> = {
   kripto: "Kripto",
-  doviz: "Doviz",
-  altin: "Altin",
+  doviz: "Döviz",
+  altin: "Altın",
   borsa: "Borsa (BIST)",
 };
 
@@ -96,9 +109,9 @@ const VADE_CARPANI: Record<Vade, number> = {
 };
 
 const VADE_BEKLENTI_ETIKETI: Record<Vade, string> = {
-  kisa: "6 Aylik",
-  orta: "1 Yillik",
-  uzun: "2 Yillik",
+  kisa: "6 Aylık",
+  orta: "1 Yıllık",
+  uzun: "2 Yıllık",
 };
 
 function calcScenarioReturn(
@@ -119,11 +132,11 @@ type FearGreedData = {
 };
 
 const FNG_TR_LABELS: Record<string, string> = {
-  "Extreme Fear": "Asiri Korku",
+  "Extreme Fear": "Aşırı Korku",
   Fear: "Korku",
-  Neutral: "Notr",
-  Greed: "Acgozluluk",
-  "Extreme Greed": "Asiri Acgozluluk",
+  Neutral: "Nötr",
+  Greed: "Açgözlülük",
+  "Extreme Greed": "Aşırı Açgözlülük",
 };
 
 function getFngColor(value: number): string {
@@ -136,25 +149,25 @@ function getFngColor(value: number): string {
 
 function getFngNote(value: number): string {
   if (value < 45) {
-    return "Piyasalarda su an korku hakim. Bu durum, uzun vadeli yatiriminiz icin kademeli bir alim firsati yaratabilir.";
+    return "Piyasalarda şu an korku hâkim. Bu durum, uzun vadeli yatırımınız için kademeli bir alım fırsatı yaratabilir.";
   }
   if (value <= 55) {
-    return "Piyasa dengeli bir seyir izliyor. Mevcut portfoy koruma stratejiniz oldukca saglikli.";
+    return "Piyasa dengeli bir seyir izliyor. Mevcut portföy koruma stratejiniz oldukça sağlıklı.";
   }
-  return "Piyasalarda yuksek acgozluluk goruluyor. Yeni alimlar yaparken temkinli olmanizi oneririz.";
+  return "Piyasalarda yüksek açgözlülük görülüyor. Yeni alımlar yaparken temkinli olmanızı öneririz.";
 }
 
-const RISK_LABELS: Record<RiskLevel, string> = { dusuk: "dusuk riskli", orta: "orta riskli", yuksek: "yuksek riskli" };
+const RISK_LABELS: Record<RiskLevel, string> = { dusuk: "düşük riskli", orta: "orta riskli", yuksek: "yüksek riskli" };
 const RISK_PROFILE_STORAGE_LABELS: Record<RiskLevel, string> = {
   dusuk: "Dusuk",
   orta: "Orta",
   yuksek: "Yuksek",
 };
-const VADE_LABELS: Record<Vade, string> = { kisa: "kisa vadeli", orta: "orta vadeli", uzun: "uzun vadeli" };
+const VADE_LABELS: Record<Vade, string> = { kisa: "kısa vadeli", orta: "orta vadeli", uzun: "uzun vadeli" };
 const AMAC_LABELS: Record<Amac, string> = {
-  koruma: "ana parayi korumaya",
-  gelir: "duzenli gelir elde etmeye",
-  buyume: "sermayeyi maksimum duzeyde buyutmeye",
+  koruma: "ana parayı korumaya",
+  gelir: "düzenli gelir elde etmeye",
+  buyume: "sermayeyi maksimum düzeyde büyütmeye",
 };
 
 type LivePrices = {
@@ -167,18 +180,18 @@ type LivePrices = {
 function getQuantityText(key: keyof Allocation, tlAmount: number, prices: LivePrices): string {
   if (key === "altin") {
     const gram = tlAmount / prices.gramAltin;
-    return `Yaklasik ${gram.toFixed(2)} Gram Altin alabilirsiniz.`;
+    return `Yaklaşık ${gram.toFixed(2)} gram altın alabilirsiniz.`;
   }
   if (key === "doviz") {
     const usd = tlAmount / prices.usdTry;
-    return `Yaklasik ${Math.round(usd).toLocaleString()} Dolar (USD) alabilirsiniz.`;
+    return `Yaklaşık ${Math.round(usd).toLocaleString()} dolar (USD) alabilirsiniz.`;
   }
   if (key === "kripto") {
     const btc = tlAmount / prices.btcTl;
-    return `Yaklasik ${btc.toFixed(6)} BTC alabilirsiniz.`;
+    return `Yaklaşık ${btc.toFixed(6)} BTC alabilirsiniz.`;
   }
   const shares = Math.floor(tlAmount / prices.akbnk);
-  return `Yaklasik ${shares.toLocaleString()} adet AKBNK hissesi alabilirsiniz (BIST temsili fiyat).`;
+  return `Yaklaşık ${shares.toLocaleString()} adet AKBNK hissesi alabilirsiniz (BIST temsili fiyat).`;
 }
 
 function buildAdvisorNote(risk: RiskLevel, vade: Vade, amac: Amac): string {
@@ -188,14 +201,14 @@ function buildAdvisorNote(risk: RiskLevel, vade: Vade, amac: Amac): string {
 
   const riskCumle =
     risk === "yuksek"
-      ? "Kripto ve hisse senedi agirlikli bu dagilim yuksek getiri potansiyeli tasir ancak fiyat dalgalanmalarina karsi dayanikli olmaniz gerekir."
+      ? "Kripto ve hisse senedi ağırlıklı bu dağılım yüksek getiri potansiyeli taşır ancak fiyat dalgalanmalarına karşı dayanıklı olmanız gerekir."
       : risk === "orta"
-        ? "Borsa agirlikli ama altin ve dovizle dengelenmis bu dagilim, buyume ile guvenlik arasinda makul bir denge kurar."
-        : "Altin ve doviz agirlikli bu dagilim, sermayenizi korumayi one cikarir; getiri potansiyeli sinirli ama dalgalanma riski dusuktur.";
+        ? "Borsa ağırlıklı ama altın ve dövizle dengelenmiş bu dağılım, büyüme ile güvenlik arasında makul bir denge kurar."
+        : "Altın ve döviz ağırlıklı bu dağılım, sermayenizi korumayı ön plana çıkarır; getiri potansiyeli sınırlı ama dalgalanma riski düşüktür.";
 
   return (
-    `Profiliniz ${riskText} ve ${vadeText} bir yatirimci olarak degerlendirildi; temel hedefiniz ${amacText} yonelik. ` +
-    `${riskCumle} Bu dagilim genel bir baslangic noktasidir, piyasa kosullarina ve kisisel durumunuza gore yeniden degerlendirilmelidir.`
+    `Profiliniz ${riskText} ve ${vadeText} bir yatırımcı olarak değerlendirildi; temel hedefiniz ${amacText} yönelik. ` +
+    `${riskCumle} Bu dağılım genel bir başlangıç noktasıdır, piyasa koşullarına ve kişisel durumunuza göre yeniden değerlendirilmelidir.`
   );
 }
 
@@ -291,7 +304,7 @@ export default function RiskProfileAdvisor() {
     const token = getToken();
     if (!token) {
       setTransferStatus("error");
-      setTransferMessage("Portfoyunuze aktarmak icin once giris yapmalisiniz.");
+      setTransferMessage("Portföyünüze aktarmak için önce giriş yapmalısınız.");
       return;
     }
 
@@ -359,17 +372,17 @@ export default function RiskProfileAdvisor() {
         })
       );
       if (results.some((res) => !res.ok)) {
-        throw new Error("Bazi varliklar aktarilamadi.");
+        throw new Error("Bazı varlıklar aktarılamadı.");
       }
       setTransferStatus("success");
       setTransferMessage(
-        "Onerilen sepet basariyla olusturuldu ve cuzdaniniza aktarildi! Portfoyum sayfasina yonlendiriliyorsunuz..."
+        "Önerilen sepet başarıyla oluşturuldu ve cüzdanınıza aktarıldı! Portföyüm sayfasına yönlendiriliyorsunuz..."
       );
       setTimeout(() => router.push("/portfolio"), 1600);
     } catch (err) {
       console.error("Portfoye aktarim istisnasi:", err);
       setTransferStatus("error");
-      setTransferMessage("Aktarim sirasinda bir hata olustu, lutfen tekrar deneyin.");
+      setTransferMessage("Aktarım sırasında bir hata oluştu, lütfen tekrar deneyin.");
     } finally {
       setTransferring(false);
     }
@@ -399,13 +412,13 @@ export default function RiskProfileAdvisor() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(20);
       doc.setTextColor(42, 120, 214);
-      doc.text("Akilli Yatirim Danismani", marginX, y);
+      doc.text(toPdfSafe("Akıllı Yatırım Danışmanı"), marginX, y);
 
       y += 7;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.setTextColor(113, 113, 122);
-      doc.text(`Kisisel Portfoy Raporu - ${new Date().toLocaleDateString("tr-TR")}`, marginX, y);
+      doc.text(toPdfSafe(`Kişisel Portföy Raporu - ${new Date().toLocaleDateString("tr-TR")}`), marginX, y);
 
       y += 5;
       doc.setDrawColor(228, 228, 231);
@@ -415,7 +428,7 @@ export default function RiskProfileAdvisor() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
       doc.setTextColor(113, 113, 122);
-      doc.text("Sana Ozel Portfoy Onerisi", marginX, y);
+      doc.text(toPdfSafe("Sana Özel Portföy Önerisi"), marginX, y);
       y += 7;
 
       for (const key of rows) {
@@ -425,7 +438,7 @@ export default function RiskProfileAdvisor() {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
         doc.setTextColor(63, 63, 70);
-        doc.text(ASSET_LABELS[key], marginX, y);
+        doc.text(toPdfSafe(ASSET_LABELS[key]), marginX, y);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
@@ -450,7 +463,7 @@ export default function RiskProfileAdvisor() {
           doc.setFont("helvetica", "normal");
           doc.setFontSize(8.5);
           doc.setTextColor(161, 161, 170);
-          doc.text(getQuantityText(key, tl, prices), marginX, y);
+          doc.text(toPdfSafe(getQuantityText(key, tl, prices)), marginX, y);
           y += 6;
         } else {
           y += 2;
@@ -468,7 +481,7 @@ export default function RiskProfileAdvisor() {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(113, 113, 122);
-        doc.text(title, x + 4, y + 7);
+        doc.text(toPdfSafe(title), x + 4, y + 7);
 
         const [vr, vg, vb] = value >= 0 ? [5, 150, 105] : [239, 68, 68];
         doc.setFont("helvetica", "bold");
@@ -479,26 +492,26 @@ export default function RiskProfileAdvisor() {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
         doc.setTextColor(161, 161, 170);
-        doc.text(subtitle, x + 4, y + 22);
+        doc.text(toPdfSafe(subtitle), x + 4, y + 22);
       };
 
       drawScenarioBox(
         marginX,
-        `En Yuksek Beklenti (${beklentiEtiketi})`,
+        `En Yüksek Beklenti (${beklentiEtiketi})`,
         iyimserGetiri,
-        "Iyimser senaryo, portfoy agirlikli ortalama"
+        "İyimser senaryo, portföy ağırlıklı ortalama"
       );
       drawScenarioBox(
         marginX + boxWidth + 6,
-        `En Dusuk Beklenti (${beklentiEtiketi})`,
+        `En Düşük Beklenti (${beklentiEtiketi})`,
         kotumserGetiri,
-        "Kotumser senaryo, portfoy agirlikli ortalama"
+        "Kötümser senaryo, portföy ağırlıklı ortalama"
       );
       y += boxHeight + 8;
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
-      const noteLines: string[] = doc.splitTextToSize(note, contentWidth - 8);
+      const noteLines: string[] = doc.splitTextToSize(toPdfSafe(note), contentWidth - 8);
       const noteHeight = 14 + noteLines.length * 4.5;
       doc.setFillColor(247, 250, 253);
       doc.roundedRect(marginX, y, contentWidth, noteHeight, 2, 2, "F");
@@ -510,7 +523,7 @@ export default function RiskProfileAdvisor() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(42, 120, 214);
-      doc.text("AKILLI DANISMAN NOTU", marginX + 4, y + 7);
+      doc.text(toPdfSafe("AKILLI DANIŞMAN NOTU"), marginX + 4, y + 7);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
@@ -519,11 +532,11 @@ export default function RiskProfileAdvisor() {
       y += noteHeight + 8;
 
       const disclaimer =
-        "Bu oneri kural tabanli bir simulasyondur, yatirim tavsiyesi degildir. Beklenti araliklari " +
-        "varsayimsal yillik oranlarin secilen vadeye olceklenmesiyle hesaplanir, gercek getiriyi garanti etmez.";
+        "Bu öneri kural tabanlı bir simülasyondur, yatırım tavsiyesi değildir. Beklenti aralıkları " +
+        "varsayımsal yıllık oranların seçilen vadeye ölçeklenmesiyle hesaplanır, gerçek getiriyi garanti etmez.";
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
-      const disclaimerLines: string[] = doc.splitTextToSize(disclaimer, contentWidth);
+      const disclaimerLines: string[] = doc.splitTextToSize(toPdfSafe(disclaimer), contentWidth);
       doc.setTextColor(161, 161, 170);
       doc.text(disclaimerLines, marginX, y);
 
@@ -531,7 +544,7 @@ export default function RiskProfileAdvisor() {
     } catch (err) {
       console.error("PDF olusturma hatasi:", err);
       setTransferStatus("error");
-      setTransferMessage("PDF olusturulurken bir hata olustu, lutfen tekrar deneyin.");
+      setTransferMessage("PDF oluşturulurken bir hata oluştu, lütfen tekrar deneyin.");
     } finally {
       setDownloadingPdf(false);
     }
@@ -551,7 +564,7 @@ export default function RiskProfileAdvisor() {
       <div className="flex flex-col gap-4">
         <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-zinc-500">Sana Ozel Portfoy Onerisi</h2>
+            <h2 className="text-sm font-semibold text-zinc-500">Sana Özel Portföy Önerisi</h2>
             <button onClick={handleReset} className="text-sm font-medium text-zinc-500 hover:underline">
               Testi Tekrar Yap
             </button>
@@ -594,7 +607,7 @@ export default function RiskProfileAdvisor() {
           </div>
           {budgetNumber > 0 && !prices && (
             <p className="mt-3 text-xs text-zinc-400">
-              Miktar hesabi icin canli fiyatlar yukleniyor...
+              Miktar hesabı için canlı fiyatlar yükleniyor...
             </p>
           )}
         </div>
@@ -602,26 +615,26 @@ export default function RiskProfileAdvisor() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
             <p className="text-xs font-semibold text-zinc-500">
-              En Yuksek Beklenti ({beklentiEtiketi})
+              En Yüksek Beklenti ({beklentiEtiketi})
             </p>
             <p className="mt-1 text-2xl font-semibold text-emerald-600">
               {iyimserGetiri >= 0 ? "+" : ""}
               {iyimserGetiri.toFixed(1)}%
             </p>
-            <p className="mt-1 text-xs text-zinc-400">Iyimser senaryo, portfoy agirlikli ortalama</p>
+            <p className="mt-1 text-xs text-zinc-400">İyimser senaryo, portföy ağırlıklı ortalama</p>
           </div>
           <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
             <p className="text-xs font-semibold text-zinc-500">
-              En Dusuk Beklenti ({beklentiEtiketi})
+              En Düşük Beklenti ({beklentiEtiketi})
             </p>
             <p className={`mt-1 text-2xl font-semibold ${kotumserGetiri >= 0 ? "text-emerald-600" : "text-red-500"}`}>
               {kotumserGetiri >= 0 ? "+" : ""}
               {kotumserGetiri.toFixed(1)}%
             </p>
-            <p className="mt-1 text-xs text-zinc-400">Kotumser senaryo, portfoy agirlikli ortalama</p>
+            <p className="mt-1 text-xs text-zinc-400">Kötümser senaryo, portföy ağırlıklı ortalama</p>
           </div>
           <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-xs font-semibold text-zinc-500">Piyasa Korku &amp; Acgozluluk (Canli)</p>
+            <p className="text-xs font-semibold text-zinc-500">Piyasa Korku &amp; Açgözlülük (Canlı)</p>
             <div className="mt-1 flex items-baseline gap-2">
               <span
                 className="text-2xl font-semibold"
@@ -636,14 +649,14 @@ export default function RiskProfileAdvisor() {
               </span>
             </div>
             <p className="mt-1 text-xs text-zinc-400">
-              Kuresel piyasa duyarliligi ve oynaklik endeksi
+              Küresel piyasa duyarlılığı ve oynaklık endeksi
             </p>
           </div>
         </div>
 
         <div className="rounded-xl border-l-4 border-[#2a78d6] bg-[#f7fafd] p-5 dark:bg-zinc-900">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#2a78d6]">
-            Akilli Danisman Notu
+            Akıllı Danışman Notu
           </p>
           <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{note}</p>
         </div>
@@ -654,8 +667,8 @@ export default function RiskProfileAdvisor() {
         </div>
 
         <p className="text-xs text-zinc-400">
-          Bu oneri kural tabanli bir simulasyondur, yatirim tavsiyesi degildir. Beklenti araliklari
-          varsayimsal yillik oranlarin secilen vadeye olceklenmesiyle hesaplanir, gercek getiriyi
+          Bu öneri kural tabanlı bir simülasyondur, yatırım tavsiyesi değildir. Beklenti aralıkları
+          varsayımsal yıllık oranların seçilen vadeye ölçeklenmesiyle hesaplanır, gerçek getiriyi
           garanti etmez.
         </p>
 
@@ -667,10 +680,10 @@ export default function RiskProfileAdvisor() {
           >
             <Wallet className="h-4 w-4" strokeWidth={2.5} />
             {transferring
-              ? "Aktariliyor..."
+              ? "Aktarılıyor..."
               : !prices
-                ? "Fiyatlar yukleniyor..."
-                : "Onerilen Sepeti Portfoyume Aktar"}
+                ? "Fiyatlar yükleniyor..."
+                : "Önerilen Sepeti Portföyüme Aktar"}
           </button>
           <button
             onClick={handleDownloadPDF}
@@ -678,7 +691,7 @@ export default function RiskProfileAdvisor() {
             className="flex items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-zinc-50 py-3 px-6 text-sm font-medium text-zinc-700 transition-all hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             <FileText className="h-4 w-4" strokeWidth={2.5} />
-            {downloadingPdf ? "Hazirlaniyor..." : "Raporu PDF Olarak Indir"}
+            {downloadingPdf ? "Hazırlanıyor..." : "Raporu PDF Olarak İndir"}
           </button>
         </div>
 
@@ -700,19 +713,19 @@ export default function RiskProfileAdvisor() {
   return (
     <div className="flex flex-col gap-4">
       <QuizCard
-        title="Risk Toleransiniz"
+        title="Risk Toleransınız"
         options={RISK_OPTIONS}
         selected={risk}
         onSelect={setRisk}
       />
       <QuizCard
-        title="Yatirim Vadeniz"
+        title="Yatırım Vadeniz"
         options={VADE_OPTIONS}
         selected={vade}
         onSelect={setVade}
       />
       <QuizCard
-        title="Yatirim Amaciniz"
+        title="Yatırım Amacınız"
         options={AMAC_OPTIONS}
         selected={amac}
         onSelect={setAmac}
@@ -720,14 +733,14 @@ export default function RiskProfileAdvisor() {
 
       <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-md dark:border-zinc-800 dark:bg-zinc-950">
         <h3 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-          Yatirim Butceniz
+          Yatırım Bütçeniz
         </h3>
         <input
           type="number"
           min={0}
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
-          placeholder="Ornek: 100000"
+          placeholder="Örnek: 100000"
           className="w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#2a78d6] dark:border-zinc-800 dark:text-zinc-50"
         />
       </div>
@@ -737,7 +750,7 @@ export default function RiskProfileAdvisor() {
         disabled={!canSubmit}
         className="rounded-lg bg-zinc-900 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-50 dark:text-zinc-900"
       >
-        Portfoyumu Olustur
+        Portföyümü Oluştur
       </button>
     </div>
   );

@@ -42,12 +42,12 @@ export default function GoogleSignInButton({ onError }: { onError?: (message: st
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail ?? "Google ile giris basarisiz oldu.");
+        throw new Error(data.detail ?? "Google ile giriş başarısız oldu.");
       }
       saveToken(data.access_token);
       router.push("/");
     } catch (err) {
-      onError?.(err instanceof Error ? err.message : "Bir hata olustu.");
+      onError?.(err instanceof Error ? err.message : "Bir hata oluştu.");
     }
   }
 

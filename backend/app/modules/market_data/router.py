@@ -38,5 +38,5 @@ async def inflation_rate():
     return {
         "annual_rate": settings.annual_tufe_rate,
         "period": settings.annual_tufe_period,
-        "source": "TUIK",
+        "source": "TÜİK",
     }

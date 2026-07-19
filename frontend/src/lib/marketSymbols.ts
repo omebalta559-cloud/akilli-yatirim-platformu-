@@ -53,10 +53,10 @@ export const GOLD_NAMES: Record<string, string> = {
 
 export const REAL_ESTATE_LABELS: Record<string, string> = {
   EKGYO: "Emlak Konut GYO",
-  ISGYO: "Is GYO",
+  ISGYO: "İş GYO",
   TRGYO: "Torunlar GYO",
-  SNGYO: "Sinpas GYO",
-  YGGYO: "Yesil GYO",
+  SNGYO: "Sinpaş GYO",
+  YGGYO: "Yeşil GYO",
 };
 
 export function getSymbolLabel(assetType: string, symbol: string): string {
@@ -84,8 +84,8 @@ export function getChartCurrencyLabel(assetType: string): string {
 
 export const CHART_CATEGORY_LABELS: Record<string, string> = {
   kripto: "Kripto Para",
-  doviz: "Doviz",
-  altin: "Altin / Gumus",
+  doviz: "Döviz",
+  altin: "Altın / Gümüş",
   hisse: "Hisse Senedi (BIST)",
   gayrimenkul: "Gayrimenkul (GYO)",
 };

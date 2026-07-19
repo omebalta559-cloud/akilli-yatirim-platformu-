@@ -63,7 +63,7 @@ export default function PortfolioPage() {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      throw new Error("Portfoy yuklenemedi.");
+      throw new Error("Portföy yüklenemedi.");
     }
     setHoldings(await res.json());
   }
@@ -74,7 +74,7 @@ export default function PortfolioPage() {
       router.push("/login");
       return;
     }
-    loadHoldings(token).catch(() => setError("Portfoy yuklenirken bir hata olustu."));
+    loadHoldings(token).catch(() => setError("Portföy yüklenirken bir hata oluştu."));
   }, [router]);
 
   useEffect(() => {
@@ -185,7 +185,7 @@ export default function PortfolioPage() {
         }),
       });
       if (!res.ok) {
-        throw new Error("Varlik eklenemedi.");
+        throw new Error("Varlık eklenemedi.");
       }
       setAssetType("");
       setAssetSymbol("");
@@ -194,7 +194,7 @@ export default function PortfolioPage() {
       setPurchasePrice("");
       await loadHoldings(token);
     } catch {
-      setError("Varlik eklenirken bir hata olustu.");
+      setError("Varlık eklenirken bir hata oluştu.");
     } finally {
       setSubmitting(false);
     }
@@ -211,11 +211,11 @@ export default function PortfolioPage() {
       const res = await fetch(`${API_URL}/portfolio/history`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Gecmis yuklenemedi.");
+      if (!res.ok) throw new Error("Geçmiş yüklenemedi.");
       setHistory(await res.json());
       setShowHistory(true);
     } catch {
-      setError("Islem gecmisi yuklenirken bir hata olustu.");
+      setError("İşlem geçmişi yüklenirken bir hata oluştu.");
     }
   }
 
@@ -227,7 +227,7 @@ export default function PortfolioPage() {
       const res = await fetch(`${API_URL}/portfolio/report?format=${format}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Rapor olusturulamadi.");
+      if (!res.ok) throw new Error("Rapor oluşturulamadı.");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -238,7 +238,7 @@ export default function PortfolioPage() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      setError("Rapor indirilirken bir hata olustu.");
+      setError("Rapor indirilirken bir hata oluştu.");
     }
   }
 
@@ -256,7 +256,7 @@ export default function PortfolioPage() {
       }
       await loadHoldings(token);
     } catch {
-      setError("Silme islemi basarisiz oldu.");
+      setError("Silme işlemi başarısız oldu.");
     }
   }
 
@@ -264,23 +264,23 @@ export default function PortfolioPage() {
     <div className="min-h-screen bg-zinc-50 px-6 py-10 dark:bg-black">
       <main className="mx-auto flex max-w-4xl flex-col gap-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Portfoyum</h1>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Portföyüm</h1>
           <div className="flex flex-wrap items-center gap-4">
             <button onClick={toggleHistory} className="text-sm font-medium text-zinc-500">
-              {showHistory ? "Gecmisi gizle" : "Islem Gecmisi"}
+              {showHistory ? "Geçmişi gizle" : "İşlem Geçmişi"}
             </button>
             <Link href="/alerts" className="text-sm font-medium text-zinc-500">
-              Alarmlarim
+              Alarmlarım
             </Link>
             <Link href="/" className="text-sm font-medium text-zinc-500">
-              Dashboard&apos;a don
+              Dashboard&apos;a dön
             </Link>
           </div>
         </div>
 
         {lastUpdated && (
           <p className="-mt-4 text-xs text-zinc-400">
-            Fiyatlar 30 saniyede bir guncelleniyor - son guncelleme:{" "}
+            Fiyatlar 30 saniyede bir güncelleniyor - son güncelleme:{" "}
             {lastUpdated.toLocaleTimeString()}
           </p>
         )}
@@ -307,13 +307,13 @@ export default function PortfolioPage() {
               onClick={() => handleDownload("pdf")}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
             >
-              PDF Indir
+              PDF İndir
             </button>
             <button
               onClick={() => handleDownload("csv")}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
             >
-              CSV Indir (Excel)
+              CSV İndir (Excel)
             </button>
           </div>
         )}
@@ -330,10 +330,10 @@ export default function PortfolioPage() {
           onSubmit={handleAdd}
           className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
         >
-          <h2 className="text-sm font-semibold text-zinc-500">Yeni Varlik Ekle</h2>
+          <h2 className="text-sm font-semibold text-zinc-500">Yeni Varlık Ekle</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Tur (varlik kategorisi)
+              Tür (varlık kategorisi)
               <select
                 value={assetType}
                 onChange={(e) => {
@@ -345,18 +345,18 @@ export default function PortfolioPage() {
                 className="rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
               >
                 <option value="" disabled>
-                  Kategori sec
+                  Kategori seç
                 </option>
                 <option value="kripto">Kripto</option>
-                <option value="doviz">Doviz</option>
-                <option value="altin">Altin / Gumus</option>
+                <option value="doviz">Döviz</option>
+                <option value="altin">Altın / Gümüş</option>
                 <option value="hisse">Hisse Senedi</option>
                 <option value="gayrimenkul">Gayrimenkul</option>
-                <option value="diger">Diger</option>
+                <option value="diger">Diğer</option>
               </select>
             </label>
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Sembol (varligin kodu)
+              Sembol (varlığın kodu)
               <select
                 value={assetSymbol}
                 onChange={(e) => setAssetSymbol(e.target.value)}
@@ -365,18 +365,18 @@ export default function PortfolioPage() {
                 className="rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
               >
                 <option value="" disabled>
-                  {assetType ? "Sembol sec" : "Once tur sec"}
+                  {assetType ? "Sembol seç" : "Önce tür seç"}
                 </option>
                 {(SYMBOLS_BY_TYPE[assetType] ?? []).map((symbol) => (
                   <option key={symbol} value={symbol}>
                     {getSymbolLabel(assetType, symbol)}
                   </option>
                 ))}
-                <option value={CUSTOM_SYMBOL}>Diger (elle yaz)</option>
+                <option value={CUSTOM_SYMBOL}>Diğer (elle yaz)</option>
               </select>
               {assetSymbol === CUSTOM_SYMBOL && (
                 <input
-                  placeholder="Ozel sembol yaz"
+                  placeholder="Özel sembol yaz"
                   value={customSymbol}
                   onChange={(e) => setCustomSymbol(e.target.value)}
                   required
@@ -385,7 +385,7 @@ export default function PortfolioPage() {
               )}
             </label>
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Miktar (kac adet/birim aldin)
+              Miktar (kaç adet/birim aldın)
               <input
                 type="number"
                 step="any"
@@ -397,7 +397,7 @@ export default function PortfolioPage() {
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-zinc-500">
-              Alis Fiyati (birim basina, TL)
+              Alış Fiyatı (birim başına, TL)
               <input
                 type="number"
                 step="any"
@@ -420,10 +420,10 @@ export default function PortfolioPage() {
 
         {showHistory && (
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold text-zinc-500">Islem Gecmisi</p>
-            {history === null && <p className="text-sm text-zinc-400">Yukleniyor...</p>}
+            <p className="text-xs font-semibold text-zinc-500">İşlem Geçmişi</p>
+            {history === null && <p className="text-sm text-zinc-400">Yükleniyor...</p>}
             {history?.length === 0 && (
-              <p className="text-sm text-zinc-400">Henuz bir islem gecmisi yok.</p>
+              <p className="text-sm text-zinc-400">Henüz bir işlem geçmişi yok.</p>
             )}
             {history?.map((h) => (
               <div
@@ -435,7 +435,7 @@ export default function PortfolioPage() {
                     {getSymbolLabel(h.asset_type, h.asset_symbol)}
                   </span>{" "}
                   <span className="text-zinc-500">
-                    {h.quantity} adet, alis fiyati {h.purchase_price}
+                    {h.quantity} adet, alış fiyatı {h.purchase_price}
                   </span>
                 </div>
                 {h.is_active ? (
@@ -491,16 +491,16 @@ function PortfolioSummary({
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <p className="mb-2 text-xs font-semibold text-zinc-500">Portfoy Ozeti</p>
+      <p className="mb-2 text-xs font-semibold text-zinc-500">Portföy Özeti</p>
       <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
         <div>
-          <p className="text-xs text-zinc-400">Toplam Deger</p>
+          <p className="text-xs text-zinc-400">Toplam Değer</p>
           <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
             {totalCurrent.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL
           </p>
         </div>
         <div>
-          <p className="text-xs text-zinc-400">Toplam Kar/Zarar (Nominal)</p>
+          <p className="text-xs text-zinc-400">Toplam Kâr/Zarar (Nominal)</p>
           <p className={`text-xl font-semibold ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
             {isPositive ? "+" : ""}
             {gainAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL ({isPositive ? "+" : ""}
@@ -509,7 +509,7 @@ function PortfolioSummary({
         </div>
         {realGainPercent !== null && (
           <div>
-            <p className="text-xs text-zinc-400">Enflasyona Gore Reel Getiri</p>
+            <p className="text-xs text-zinc-400">Enflasyona Göre Reel Getiri</p>
             <p
               className={`text-xl font-semibold ${realGainPercent >= 0 ? "text-emerald-600" : "text-red-500"}`}
             >
@@ -521,13 +521,13 @@ function PortfolioSummary({
       </div>
       {!allPriced && (
         <p className="mt-2 text-xs text-zinc-400">
-          Bazi varliklar icin canli fiyat bulunamadi, bu ozet tam kesin olmayabilir.
+          Bazı varlıklar için canlı fiyat bulunamadı, bu özet tam kesin olmayabilir.
         </p>
       )}
       {realGainPercent !== null && (
         <p className="mt-2 text-xs text-zinc-400">
-          Reel getiri, TUIK&apos;in son acikladigi yillik %{inflationRate?.toFixed(2)} TUFE oranina gore
-          hesaplanir.
+          Reel getiri, TÜİK&apos;in son açıkladığı yıllık %{inflationRate?.toFixed(2)} TÜFE oranına göre
+          hesaplanır.
         </p>
       )}
     </div>
@@ -559,10 +559,10 @@ function PortfolioPerformanceChart() {
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <p className="mb-3 text-xs font-semibold text-zinc-500">Portfoy Performans Gecmisi</p>
+      <p className="mb-3 text-xs font-semibold text-zinc-500">Portföy Performans Geçmişi</p>
       {snapshots.length < 2 ? (
         <p className="text-sm text-zinc-400">
-          Trend grafigi icin veri birikiyor, birkac gun sonra burada gorunecek.
+          Trend grafiği için veri birikiyor, birkaç gün sonra burada görünecek.
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={220}>
@@ -582,7 +582,7 @@ function PortfolioPerformanceChart() {
             <Tooltip
               formatter={(value: number) => [
                 `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })} TL`,
-                "Toplam Deger",
+                "Toplam Değer",
               ]}
               labelFormatter={(d: string) => new Date(d).toLocaleDateString("tr-TR")}
             />
@@ -605,11 +605,11 @@ const ASSET_TYPE_COLORS: Record<string, string> = {
 
 const ASSET_TYPE_LABELS: Record<string, string> = {
   kripto: "Kripto",
-  doviz: "Doviz",
-  altin: "Altin / Gumus",
+  doviz: "Döviz",
+  altin: "Altın / Gümüş",
   hisse: "Hisse Senedi (BIST)",
   gayrimenkul: "Gayrimenkul (GYO)",
-  diger: "Diger",
+  diger: "Diğer",
 };
 
 function AssetDistribution({
@@ -637,7 +637,7 @@ function AssetDistribution({
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <p className="mb-3 text-xs font-semibold text-zinc-500">Varlik Dagilimi</p>
+      <p className="mb-3 text-xs font-semibold text-zinc-500">Varlık Dağılımı</p>
       <div className="flex flex-col gap-3">
         {rows.map((row) => (
           <div key={row.type} className="flex flex-col gap-1">
@@ -677,11 +677,11 @@ function HoldingsTable({
   onDelete: (id: number) => void;
 }) {
   if (holdings === null) {
-    return <p className="text-sm text-zinc-400">Yukleniyor...</p>;
+    return <p className="text-sm text-zinc-400">Yükleniyor...</p>;
   }
 
   if (holdings.length === 0) {
-    return <p className="text-sm text-zinc-400">Henuz portfoyune varlik eklemedin.</p>;
+    return <p className="text-sm text-zinc-400">Henüz portföyüne varlık eklemedin.</p>;
   }
 
   return (
@@ -689,12 +689,12 @@ function HoldingsTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-zinc-100 text-left text-xs font-semibold text-zinc-400 dark:border-zinc-900">
-            <th className="px-4 py-3 font-semibold">Varlik</th>
+            <th className="px-4 py-3 font-semibold">Varlık</th>
             <th className="px-4 py-3 font-semibold">Miktar</th>
-            <th className="px-4 py-3 font-semibold">Ort. Alis Fiyati</th>
-            <th className="px-4 py-3 font-semibold">Guncel Fiyat</th>
-            <th className="px-4 py-3 font-semibold">Toplam Deger</th>
-            <th className="px-4 py-3 font-semibold">Kar/Zarar (%)</th>
+            <th className="px-4 py-3 font-semibold">Ort. Alış Fiyatı</th>
+            <th className="px-4 py-3 font-semibold">Güncel Fiyat</th>
+            <th className="px-4 py-3 font-semibold">Toplam Değer</th>
+            <th className="px-4 py-3 font-semibold">Kâr/Zarar (%)</th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
@@ -753,7 +753,7 @@ function HoldingsTable({
                         e.stopPropagation();
                         onDelete(h.id);
                       }}
-                      aria-label="Varligi sil"
+                      aria-label="Varlığı sil"
                       className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
                     >
                       <TrashIcon />
@@ -763,7 +763,7 @@ function HoldingsTable({
                 {isChartOpen && yahooTicker && (
                   <tr className="border-b border-zinc-50 last:border-0 dark:border-zinc-900">
                     <td colSpan={7} className="bg-zinc-50/60 px-4 pb-4 pt-2 dark:bg-zinc-900/30">
-                      <p className="mb-2 text-xs text-zinc-400">Son 1 yil fiyat trendi</p>
+                      <p className="mb-2 text-xs text-zinc-400">Son 1 yıl fiyat trendi</p>
                       <PriceChart symbol={yahooTicker} currencyLabel={getChartCurrencyLabel(h.asset_type)} />
                     </td>
                   </tr>

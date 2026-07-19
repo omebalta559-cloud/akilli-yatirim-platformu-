@@ -87,7 +87,7 @@ export default function Home() {
         ]);
 
         if (!cryptoRes.ok || !forexRes.ok || !goldRes.ok || !stocksRes.ok) {
-          throw new Error("Piyasa verileri alinamadi.");
+          throw new Error("Piyasa verileri alınamadı.");
         }
         if (cancelled) return;
 
@@ -103,7 +103,7 @@ export default function Home() {
       } catch {
         if (!cancelled) {
           setError(
-            "Piyasa verileri yuklenirken bir hata olustu. Sunucu uyaniyor olabilir, birkac saniye sonra tekrar deneyin."
+            "Piyasa verileri yüklenirken bir hata oluştu. Sunucu uyanıyor olabilir, birkaç saniye sonra tekrar deneyin."
           );
         }
       }
@@ -121,24 +121,24 @@ export default function Home() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
             <h1 className="shrink-0 whitespace-nowrap text-xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
-              Akilli Yatirim Danismani
+              Akıllı Yatırım Danışmanı
             </h1>
 
             <div className="hidden flex-wrap items-center justify-end gap-1 sm:flex">
-              <span className={NAV_LINK_ACTIVE_CLASS}>Guncel Fiyatlar</span>
+              <span className={NAV_LINK_ACTIVE_CLASS}>Güncel Fiyatlar</span>
               <Link href="/charts" className={NAV_LINK_CLASS}>
                 Grafikler
               </Link>
               {isLoggedIn ? (
                 <>
                   <Link href="/portfolio" className={NAV_LINK_CLASS}>
-                    Portfoyum
+                    Portföyüm
                   </Link>
                   <Link href="/alerts" className={NAV_LINK_CLASS}>
                     Alarmlar
                   </Link>
                   <Link href="/advisor" className={NAV_LINK_CLASS}>
-                    Akilli Danisman
+                    Akıllı Danışman
                   </Link>
                   <span className="mx-1 h-5 w-px bg-zinc-200 dark:bg-zinc-800" />
                   <button
@@ -146,19 +146,19 @@ export default function Home() {
                     className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                   >
                     <LogoutIcon />
-                    Cikis Yap
+                    Çıkış Yap
                   </button>
                 </>
               ) : (
                 <>
                   <Link href="/login" className={NAV_LINK_CLASS}>
-                    Giris Yap
+                    Giriş Yap
                   </Link>
                   <Link
                     href="/register"
                     className="ml-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
                   >
-                    Kayit Ol
+                    Kayıt Ol
                   </Link>
                 </>
               )}
@@ -166,7 +166,7 @@ export default function Home() {
 
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              aria-label={menuOpen ? "Menuyu kapat" : "Menuyu ac"}
+              aria-label={menuOpen ? "Menüyü kapat" : "Menüyü aç"}
               className="rounded-lg p-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900 sm:hidden"
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -175,7 +175,7 @@ export default function Home() {
 
           {menuOpen && (
             <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950 sm:hidden">
-              <span className={`${NAV_LINK_ACTIVE_CLASS} text-center`}>Guncel Fiyatlar</span>
+              <span className={`${NAV_LINK_ACTIVE_CLASS} text-center`}>Güncel Fiyatlar</span>
               <Link href="/charts" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
                 Grafikler
               </Link>
@@ -186,7 +186,7 @@ export default function Home() {
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Portfoyum
+                    Portföyüm
                   </Link>
                   <Link
                     href="/alerts"
@@ -200,7 +200,7 @@ export default function Home() {
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Akilli Danisman
+                    Akıllı Danışman
                   </Link>
                   <div className="my-1 h-px bg-zinc-200 dark:bg-zinc-800" />
                   <button
@@ -208,7 +208,7 @@ export default function Home() {
                     className="flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                   >
                     <LogoutIcon />
-                    Cikis Yap
+                    Çıkış Yap
                   </button>
                 </>
               ) : (
@@ -218,14 +218,14 @@ export default function Home() {
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Giris Yap
+                    Giriş Yap
                   </Link>
                   <Link
                     href="/register"
                     className="rounded-lg bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Kayit Ol
+                    Kayıt Ol
                   </Link>
                 </>
               )}
@@ -235,12 +235,12 @@ export default function Home() {
 
         <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#2a78d6] to-[#1c5cab] px-6 py-10 text-white shadow-lg dark:from-[#184f95] dark:to-[#0d366b] sm:px-10">
           <h2 className="text-xl font-semibold sm:text-2xl">
-            Guncel piyasa fiyatlari
+            Güncel piyasa fiyatları
           </h2>
           <p className="mt-2 max-w-xl text-sm text-blue-100">
-            Kripto, doviz, altin ve BIST hisselerinin canli fiyatlari. Kendi
-            yatirimlarinizi ve kar/zararinizi gormek icin{" "}
-            <span className="font-semibold">Portfoyum</span> sayfasina gecin.
+            Kripto, döviz, altın ve BIST hisselerinin canlı fiyatları. Kendi
+            yatırımlarınızı ve kâr/zararınızı görmek için{" "}
+            <span className="font-semibold">Portföyüm</span> sayfasına geçin.
           </p>
         </section>
 
@@ -288,7 +288,7 @@ export default function Home() {
             )}
           </MarketCard>
 
-          <MarketCard title="Doviz Kurlari" accent="#1baf7a" icon={<ExchangeIcon />}>
+          <MarketCard title="Döviz Kurları" accent="#1baf7a" icon={<ExchangeIcon />}>
             {forex ? (
               <ul className="flex flex-col gap-2">
                 {Object.entries(forex.rates).map(([symbol, rate]) => (
@@ -305,7 +305,7 @@ export default function Home() {
             )}
           </MarketCard>
 
-          <MarketCard title="Altin & Gumus (TL)" accent="#eda100" icon={<GemIcon />}>
+          <MarketCard title="Altın & Gümüş (TL)" accent="#eda100" icon={<GemIcon />}>
             {gold ? (
               <ul className="flex flex-col gap-2">
                 {gold.map((item) => (
@@ -436,5 +436,5 @@ function ChartIcon() {
 }
 
 function Loading() {
-  return <p className="text-sm text-zinc-400">Yukleniyor...</p>;
+  return <p className="text-sm text-zinc-400">Yükleniyor...</p>;
 }
