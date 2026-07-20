@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from app.modules.auth.service import get_current_user_id
 from app.modules.portfolio.models import Holding
 
 router = APIRouter(prefix="/advisor", tags=["ai-advisor"])
+logger = logging.getLogger(__name__)
 
 HISTORY_MESSAGE_LIMIT = 10
 
@@ -66,6 +68,7 @@ async def ask(
             conversation_history,
         )
     except Exception:
+        logger.exception("Advisor /ask basarisiz oldu (user_id=%s, soru=%r)", user_id, payload.question)
         raise HTTPException(
             status_code=502,
             detail="AI danışman şu an yanıt veremiyor, lütfen birazdan tekrar deneyin.",
