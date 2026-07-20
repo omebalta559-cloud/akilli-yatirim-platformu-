@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 
 import httpx
@@ -6,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.core.logging_config import setup_logging
 from app.modules.ai_advisor import service as ai_advisor_service
 from app.modules.ai_advisor.router import router as ai_advisor_router
 from app.modules.alerts import service as alerts_service
@@ -13,6 +15,9 @@ from app.modules.alerts.router import router as alerts_router
 from app.modules.auth.router import router as auth_router
 from app.modules.market_data.router import router as market_data_router
 from app.modules.portfolio.router import router as portfolio_router
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Akıllı Yatırım Danışmanı")
 
@@ -42,8 +47,9 @@ async def refresh_news_on_startup():
     async def safe_refresh():
         try:
             await asyncio.to_thread(ai_advisor_service.refresh_news_from_rss)
+            logger.info("Haber akışı (RSS) başarıyla ChromaDB'ye yenilendi.")
         except Exception:
-            pass  # RAG baglami olmadan da danisman genel bilgiyle calismaya devam eder
+            logger.exception("Haber akışı yenilenemedi, danışman genel bilgiyle devam edecek.")
 
     asyncio.create_task(safe_refresh())
 
@@ -56,9 +62,11 @@ async def check_alerts_periodically():
     async def loop():
         while True:
             try:
-                await alerts_service.check_alerts()
+                triggered = await alerts_service.check_alerts()
+                if triggered:
+                    logger.info("%d fiyat alarmı tetiklendi.", triggered)
             except Exception:
-                pass  # bir sonraki dongude tekrar denenir
+                logger.exception("Alarm kontrol döngüsünde hata oluştu, bir sonraki döngüde tekrar denenecek.")
             await asyncio.sleep(60)
 
     asyncio.create_task(loop())
@@ -66,6 +74,7 @@ async def check_alerts_periodically():
 
 @app.exception_handler(httpx.HTTPStatusError)
 async def httpx_status_error_handler(request: Request, exc: httpx.HTTPStatusError):
+    logger.warning("Dış API hata kodu döndü: %s %s -> %s", request.method, request.url.path, exc)
     return JSONResponse(
         status_code=502,
         content={"detail": "Piyasa verisi sağlayıcısına ulaşılamadı, lütfen daha sonra tekrar deneyin."},
@@ -74,6 +83,7 @@ async def httpx_status_error_handler(request: Request, exc: httpx.HTTPStatusErro
 
 @app.exception_handler(httpx.RequestError)
 async def httpx_request_error_handler(request: Request, exc: httpx.RequestError):
+    logger.warning("Dış servise bağlanırken hata oluştu: %s %s -> %s", request.method, request.url.path, exc)
     return JSONResponse(
         status_code=503,
         content={"detail": "Dış servise bağlanırken bir sorun oluştu, lütfen daha sonra tekrar deneyin."},

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -7,18 +9,21 @@ from app.modules.auth.models import User
 from app.modules.auth.schemas import GoogleAuthRequest, Token, UserCreate, UserLogin
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register", response_model=Token)
 def register(payload: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing:
+        logger.warning("Kayıt denemesi başarısız: %s zaten kayıtlı.", payload.email)
         raise HTTPException(status_code=400, detail="Bu e-posta zaten kayıtlı")
 
     user = User(email=payload.email, hashed_password=service.hash_password(payload.password))
     db.add(user)
     db.commit()
     db.refresh(user)
+    logger.info("Yeni kullanıcı kaydoldu: id=%s email=%s", user.id, user.email)
 
     token = service.create_access_token(subject=str(user.id))
     return Token(access_token=token)
@@ -34,6 +39,9 @@ def google_auth(payload: GoogleAuthRequest, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
+        logger.info("Google ile yeni kullanıcı oluşturuldu: id=%s email=%s", user.id, user.email)
+    else:
+        logger.info("Google ile giriş yapıldı: id=%s email=%s", user.id, user.email)
 
     token = service.create_access_token(subject=str(user.id))
     return Token(access_token=token)
@@ -43,7 +51,9 @@ def google_auth(payload: GoogleAuthRequest, db: Session = Depends(get_db)):
 def login(payload: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not service.verify_password(payload.password, user.hashed_password):
+        logger.warning("Başarısız giriş denemesi: %s", payload.email)
         raise HTTPException(status_code=401, detail="Geçersiz e-posta veya şifre")
 
+    logger.info("Giriş yapıldı: id=%s email=%s", user.id, user.email)
     token = service.create_access_token(subject=str(user.id))
     return Token(access_token=token)

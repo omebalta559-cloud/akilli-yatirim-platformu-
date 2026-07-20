@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime, timezone
 
 from app.core.database import SessionLocal
@@ -6,6 +7,8 @@ from app.core.email import send_email
 from app.modules.alerts.models import PriceAlert
 from app.modules.auth.models import User
 from app.modules.market_data import service as market_data_service
+
+logger = logging.getLogger(__name__)
 
 ASSET_TYPE_LABELS = {
     "kripto": "Kripto",
@@ -44,6 +47,10 @@ async def check_alerts() -> int:
                 alert.is_triggered = True
                 alert.triggered_at = datetime.now(timezone.utc)
                 newly_triggered.append((alert, current_price))
+                logger.info(
+                    "Alarm tetiklendi: id=%s %s %s hedef=%s güncel=%s",
+                    alert.id, alert.asset_symbol, alert.direction, alert.target_price, current_price,
+                )
 
         if not newly_triggered:
             return 0
@@ -73,7 +80,9 @@ async def check_alerts() -> int:
     for to, subject, body in emails_to_send:
         try:
             await asyncio.to_thread(send_email, to, subject, body)
+            logger.info("Alarm e-postası gönderildi: %s", to)
         except Exception:
-            pass  # e-posta gonderilemese bile alarm tetiklenmis olarak isaretli kalir
+            logger.exception("Alarm e-postası gönderilemedi: %s", to)
+            # e-posta gonderilemese bile alarm tetiklenmis olarak isaretli kalir
 
     return triggered_count
