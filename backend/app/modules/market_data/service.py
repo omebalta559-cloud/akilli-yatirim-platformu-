@@ -5,6 +5,7 @@ import httpx
 
 from app.core.cache import get_or_set
 from app.core.config import settings
+from app.core.decorators import log_calls
 
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
@@ -63,6 +64,7 @@ GOLD_NAMES = {
 }
 
 
+@log_calls
 async def get_crypto_prices(coin_ids: list[str], vs_currency: str = "usd") -> dict:
     async def fetch():
         params = {
@@ -80,6 +82,7 @@ async def get_crypto_prices(coin_ids: list[str], vs_currency: str = "usd") -> di
     return await get_or_set(cache_key, CACHE_TTL_SECONDS, fetch)
 
 
+@log_calls
 async def get_exchange_rates(base: str = "USD", symbols: list[str] | None = None) -> dict:
     symbols = symbols or ["TRY"]
 
@@ -111,6 +114,7 @@ async def _fetch_yahoo_stock(symbol: str) -> dict:
     return {"name": symbol, **quote}
 
 
+@log_calls
 async def get_gold_prices() -> dict:
     async def fetch():
         ons_gold, ons_silver, usd_try_data = await asyncio.gather(
@@ -139,6 +143,7 @@ async def get_gold_prices() -> dict:
     return await get_or_set("market:gold", CACHE_TTL_SECONDS, fetch)
 
 
+@log_calls
 async def get_stock_prices(symbols: list[str] | None = None) -> dict:
     symbols = symbols or DEFAULT_BIST_SYMBOLS
 

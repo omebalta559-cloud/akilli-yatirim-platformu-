@@ -5,6 +5,7 @@ import feedparser
 import google.generativeai as genai
 
 from app.core.config import settings
+from app.core.decorators import log_calls
 from app.modules.market_data import service as market_data_service
 
 genai.configure(api_key=settings.gemini_api_key)
@@ -107,6 +108,7 @@ def _get_relevant_context(question: str, n_results: int = 5) -> list[str]:
     return documents[0]
 
 
+@log_calls
 def ask_advisor(
     question: str,
     portfolio_summary: str = "",
