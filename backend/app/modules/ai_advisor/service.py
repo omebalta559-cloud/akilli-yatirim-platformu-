@@ -1,4 +1,7 @@
+import asyncio
 import hashlib
+import logging
+import time
 
 import chromadb
 import feedparser
@@ -9,6 +12,8 @@ from app.core.decorators import log_calls
 from app.modules.market_data import service as market_data_service
 
 genai.configure(api_key=settings.gemini_api_key)
+
+logger = logging.getLogger(__name__)
 
 _collection = None
 
@@ -35,41 +40,43 @@ def get_yahoo_ticker(asset_type: str, symbol: str) -> str | None:
     return None
 
 
+async def _build_holding_line(h) -> str:
+    ticker = get_yahoo_ticker(h.asset_type, h.asset_symbol)
+    if not ticker:
+        return (
+            f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
+            "grafik verisi mevcut degil"
+        )
+    try:
+        history = await market_data_service.get_price_history(ticker, "3mo", "1d")
+        points = history.get("points", [])
+        if len(points) >= 2:
+            first_price = points[0]["price"]
+            last_price = points[-1]["price"]
+            change_pct = (last_price - first_price) / first_price * 100
+            return (
+                f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
+                f"son 3 ayin grafigine gore guncel referans fiyat {last_price:.2f}, "
+                f"3 aylik degisim %{change_pct:.1f}"
+            )
+        return (
+            f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
+            "yeterli grafik verisi yok"
+        )
+    except Exception:
+        return (
+            f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
+            "grafik verisi su an alinamadi"
+        )
+
+
 async def build_portfolio_chart_context(holdings: list) -> str:
     if not holdings:
         return "Kullanicinin portfoyunde varlik yok."
 
-    lines = []
-    for h in holdings:
-        ticker = get_yahoo_ticker(h.asset_type, h.asset_symbol)
-        if not ticker:
-            lines.append(
-                f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
-                "grafik verisi mevcut degil"
-            )
-            continue
-        try:
-            history = await market_data_service.get_price_history(ticker, "3mo", "1d")
-            points = history.get("points", [])
-            if len(points) >= 2:
-                first_price = points[0]["price"]
-                last_price = points[-1]["price"]
-                change_pct = (last_price - first_price) / first_price * 100
-                lines.append(
-                    f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
-                    f"son 3 ayin grafigine gore guncel referans fiyat {last_price:.2f}, "
-                    f"3 aylik degisim %{change_pct:.1f}"
-                )
-            else:
-                lines.append(
-                    f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
-                    "yeterli grafik verisi yok"
-                )
-        except Exception:
-            lines.append(
-                f"- {h.asset_symbol} ({h.asset_type}): {h.quantity} adet, alis fiyati {h.purchase_price}, "
-                "grafik verisi su an alinamadi"
-            )
+    # Her varligin fiyat gecmisini sirayla degil, ayni anda (paralel) cekiyoruz -
+    # 5 varlik icin 5 istegin toplami yerine en yavas istek kadar sure alir.
+    lines = await asyncio.gather(*(_build_holding_line(h) for h in holdings))
     return "\n".join(lines)
 
 
@@ -115,7 +122,9 @@ def ask_advisor(
     chart_context: str = "",
     conversation_history: str = "",
 ) -> str:
+    t0 = time.perf_counter()
     context_chunks = _get_relevant_context(question)
+    logger.info("ChromaDB baglam aramasi: %.2f sn", time.perf_counter() - t0)
     context_text = "\n---\n".join(context_chunks) if context_chunks else "Ilgili guncel haber bulunamadi."
 
     system_prompt = (
@@ -139,5 +148,7 @@ def ask_advisor(
     )
 
     model = genai.GenerativeModel("gemini-flash-latest", system_instruction=system_prompt)
+    t0 = time.perf_counter()
     response = model.generate_content(user_message)
+    logger.info("Gemini cevap uretme: %.2f sn", time.perf_counter() - t0)
     return response.text
