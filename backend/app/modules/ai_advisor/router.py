@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
+from google.api_core.exceptions import ResourceExhausted
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -66,6 +67,12 @@ async def ask(
             payload.portfolio_summary,
             chart_context,
             conversation_history,
+        )
+    except ResourceExhausted:
+        logger.warning("Gemini gunluk kota asildi (user_id=%s)", user_id)
+        raise HTTPException(
+            status_code=429,
+            detail="AI danışman için günlük sorgu limitine ulaşıldı, lütfen yarın tekrar deneyin.",
         )
     except Exception:
         logger.exception("Advisor /ask basarisiz oldu (user_id=%s, soru=%r)", user_id, payload.question)
