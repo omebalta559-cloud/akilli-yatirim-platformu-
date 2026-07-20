@@ -2,6 +2,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # Loglarda hangi ortamdan geldigini ayirt etmek icin: yerelde "development",
+    # Render'da ortam degiskeni olarak "production" verilir.
+    environment: str = "development"
     app_name: str = "Akilli Yatirim Danismani"
     database_url: str = "postgresql://postgres:postgres@postgres:5432/yatirim"
     redis_url: str = "redis://redis:6379/0"

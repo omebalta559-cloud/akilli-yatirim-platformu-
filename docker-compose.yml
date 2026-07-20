@@ -23,6 +23,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
+      ENVIRONMENT: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/yatirim
       REDIS_URL: redis://redis:6379/0
       CHROMA_PERSIST_DIR: /chroma_data

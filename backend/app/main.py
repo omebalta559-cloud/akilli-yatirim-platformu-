@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.modules.ai_advisor import service as ai_advisor_service
 from app.modules.ai_advisor.router import router as ai_advisor_router
@@ -16,8 +17,9 @@ from app.modules.auth.router import router as auth_router
 from app.modules.market_data.router import router as market_data_router
 from app.modules.portfolio.router import router as portfolio_router
 
-setup_logging()
+setup_logging(settings.environment)
 logger = logging.getLogger(__name__)
+logger.info("Uygulama başlatılıyor (ortam: %s)", settings.environment)
 
 app = FastAPI(title="Akıllı Yatırım Danışmanı")
 
