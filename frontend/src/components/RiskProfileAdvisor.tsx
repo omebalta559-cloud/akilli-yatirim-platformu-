@@ -247,7 +247,11 @@ export default function RiskProfileAdvisor() {
   }, []);
 
   useEffect(() => {
-    async function loadPrices() {
+    let cancelled = false;
+    const MAX_ATTEMPTS = 5;
+    const RETRY_DELAY_MS = 4000;
+
+    async function tryLoadPrices(): Promise<boolean> {
       try {
         const [goldRes, forexRes, cryptoRes, stocksRes] = await Promise.all([
           fetch(`${API_URL}/market/gold`),
@@ -269,12 +273,29 @@ export default function RiskProfileAdvisor() {
 
         if (gramAltin && usdTry && btcTl && akbnk) {
           setPrices({ gramAltin, usdTry, btcTl, akbnk });
+          return true;
         }
+        return false;
       } catch {
-        /* canli fiyat alinamazsa miktar hesaplamasi gosterilmez, dagilim yine de gorunur */
+        return false;
+      }
+    }
+
+    async function loadPrices() {
+      // Piyasa verisi saglayicilarindan biri gecici olarak (orn. rate limit)
+      // basarisiz olursa kullanici sonsuza kadar "yukleniyor" yazisinda
+      // takili kalmasin diye birkac kez tekrar deniyoruz.
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        if (cancelled) return;
+        const success = await tryLoadPrices();
+        if (success || cancelled) return;
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       }
     }
     loadPrices();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const budgetNumber = Number(budget);

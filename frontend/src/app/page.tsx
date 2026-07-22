@@ -77,35 +77,50 @@ export default function Home() {
     let cancelled = false;
 
     async function loadMarketData() {
-      try {
-        setError(null);
-        const [cryptoRes, forexRes, goldRes, stocksRes] = await Promise.all([
-          fetchWithTimeout(`${API_URL}/market/crypto?coins=bitcoin,ethereum`),
-          fetchWithTimeout(`${API_URL}/market/forex?base=USD&symbols=TRY,EUR`),
-          fetchWithTimeout(`${API_URL}/market/gold`),
-          fetchWithTimeout(`${API_URL}/market/stocks`),
-        ]);
+      setError(null);
 
-        if (!cryptoRes.ok || !forexRes.ok || !goldRes.ok || !stocksRes.ok) {
-          throw new Error("Piyasa verileri alınamadı.");
-        }
-        if (cancelled) return;
+      const [cryptoResult, forexResult, goldResult, stocksResult] = await Promise.allSettled([
+        fetchWithTimeout(`${API_URL}/market/crypto?coins=bitcoin,ethereum`).then((r) => {
+          if (!r.ok) throw new Error("crypto");
+          return r.json();
+        }),
+        fetchWithTimeout(`${API_URL}/market/forex?base=USD&symbols=TRY,EUR`).then((r) => {
+          if (!r.ok) throw new Error("forex");
+          return r.json();
+        }),
+        fetchWithTimeout(`${API_URL}/market/gold`).then((r) => {
+          if (!r.ok) throw new Error("gold");
+          return r.json();
+        }),
+        fetchWithTimeout(`${API_URL}/market/stocks`).then((r) => {
+          if (!r.ok) throw new Error("stocks");
+          return r.json();
+        }),
+      ]);
 
-        setCrypto(await cryptoRes.json());
-        setForex(await forexRes.json());
-        const goldData: GoldResponse = await goldRes.json();
+      if (cancelled) return;
+
+      if (cryptoResult.status === "fulfilled") setCrypto(cryptoResult.value);
+      if (forexResult.status === "fulfilled") setForex(forexResult.value);
+      if (goldResult.status === "fulfilled") {
+        const goldData: GoldResponse = goldResult.value;
         const oncelikliKalemler = ["Gram Altın", "Çeyrek Altın", "Yarım Altın", "Gümüş"];
-        setGold(
-          goldData.result.filter((item) => oncelikliKalemler.includes(item.name))
-        );
-        const stocksData: StockResponse = await stocksRes.json();
+        setGold(goldData.result.filter((item) => oncelikliKalemler.includes(item.name)));
+      }
+      if (stocksResult.status === "fulfilled") {
+        const stocksData: StockResponse = stocksResult.value;
         setStocks(stocksData.result.slice(0, 5));
-      } catch {
-        if (!cancelled) {
-          setError(
-            "Piyasa verileri yüklenirken bir hata oluştu. Sunucu uyanıyor olabilir, birkaç saniye sonra tekrar deneyin."
-          );
-        }
+      }
+
+      const failedCount = [cryptoResult, forexResult, goldResult, stocksResult].filter(
+        (r) => r.status === "rejected"
+      ).length;
+      if (failedCount > 0) {
+        setError(
+          failedCount === 4
+            ? "Piyasa verileri yüklenirken bir hata oluştu. Sunucu uyanıyor olabilir, birkaç saniye sonra tekrar deneyin."
+            : "Bazı piyasa verileri şu an alınamadı, diğerleri gösteriliyor. Eksik olanlar için tekrar deneyin."
+        );
       }
     }
 
