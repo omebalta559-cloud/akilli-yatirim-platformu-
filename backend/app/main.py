@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import random
 
 import httpx
 from fastapi import FastAPI, Request
@@ -70,6 +71,31 @@ async def check_alerts_periodically():
             except Exception:
                 logger.exception("Alarm kontrol döngüsünde hata oluştu, bir sonraki döngüde tekrar denenecek.")
             await asyncio.sleep(60)
+
+    asyncio.create_task(loop())
+
+
+@app.on_event("startup")
+async def ping_keepalive_partner_periodically():
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        return
+    if not settings.keepalive_partner_url:
+        return
+
+    partner_url = settings.keepalive_partner_url.rstrip("/")
+    ping_interval_seconds = 10 * 60
+    jitter_seconds = 4 * 60
+
+    async def loop():
+        async with httpx.AsyncClient(timeout=30) as client:
+            while True:
+                await asyncio.sleep(random.uniform(0, jitter_seconds))
+                try:
+                    response = await client.get(f"{partner_url}/")
+                    logger.info("Keepalive partner ping başarılı: %s -> %s", partner_url, response.status_code)
+                except Exception:
+                    logger.warning("Keepalive partner ping başarısız: %s", partner_url, exc_info=True)
+                await asyncio.sleep(ping_interval_seconds - jitter_seconds)
 
     asyncio.create_task(loop())
 
