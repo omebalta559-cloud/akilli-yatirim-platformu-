@@ -4,60 +4,38 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X, Sparkles, Target, TrendingUp, Bell } from "lucide-react";
 import { clearToken, getToken } from "@/lib/auth";
-import { getApiUrl } from "@/lib/api";
 
 const NAV_LINK_CLASS =
   "rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900";
-const NAV_LINK_ACTIVE_CLASS =
-  "rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900";
 
-const API_URL = getApiUrl();
-
-function formatNumber(value: number): string {
-  return value.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
-}
-
-function fetchWithTimeout(url: string, timeoutMs = 40000): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
-}
-
-type CryptoPrices = Record<string, { usd: number; usd_24h_change?: number }>;
-
-type ForexRates = {
-  base: string;
-  date: string;
-  rates: Record<string, number>;
-};
-
-type GoldItem = {
-  name: string;
-  buying: number;
-  selling: number;
-  rate?: number;
-};
-
-type GoldResponse = {
-  result: GoldItem[];
-};
-
-type StockItem = {
-  name: string;
-  price: number;
-  rate: number;
-};
-
-type StockResponse = {
-  result: StockItem[];
-};
+const FEATURES = [
+  {
+    icon: <Sparkles className="h-5 w-5" />,
+    title: "AI Yatırım Asistanı",
+    desc: "Güncel finans haberlerini ve senin portföyünü bilen yapay zekâya sor; piyasayı, riskleri ve seçenekleri sade bir dille açıklasın.",
+    highlight: true,
+  },
+  {
+    icon: <Target className="h-5 w-5" />,
+    title: "Risk Profili Analizi",
+    desc: "Risk toleransın, vaden ve hedefine göre sana uygun örnek varlık dağılımını (borsa / kripto / altın / döviz) gör.",
+    highlight: true,
+  },
+  {
+    icon: <TrendingUp className="h-5 w-5" />,
+    title: "Reel Getiri Takibi",
+    desc: "Enflasyona göre gerçekte kazandın mı kaybettin mi — nominal değil, alım gücü bazında.",
+    highlight: false,
+  },
+  {
+    icon: <Bell className="h-5 w-5" />,
+    title: "Fiyat Alarmları",
+    desc: "Bir varlık hedef fiyatına ulaştığında anında e-posta ile haberdar ol, fırsatı kaçırma.",
+    highlight: false,
+  },
+];
 
 export default function Home() {
-  const [crypto, setCrypto] = useState<CryptoPrices | null>(null);
-  const [forex, setForex] = useState<ForexRates | null>(null);
-  const [gold, setGold] = useState<GoldItem[] | null>(null);
-  const [stocks, setStocks] = useState<StockItem[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -71,76 +49,19 @@ export default function Home() {
     setIsLoggedIn(false);
   }
 
-  const [retryCount, setRetryCount] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadMarketData() {
-      setError(null);
-
-      const [cryptoResult, forexResult, goldResult, stocksResult] = await Promise.allSettled([
-        fetchWithTimeout(`${API_URL}/market/crypto?coins=bitcoin,ethereum`).then((r) => {
-          if (!r.ok) throw new Error("crypto");
-          return r.json();
-        }),
-        fetchWithTimeout(`${API_URL}/market/forex?base=USD&symbols=TRY,EUR`).then((r) => {
-          if (!r.ok) throw new Error("forex");
-          return r.json();
-        }),
-        fetchWithTimeout(`${API_URL}/market/gold`).then((r) => {
-          if (!r.ok) throw new Error("gold");
-          return r.json();
-        }),
-        fetchWithTimeout(`${API_URL}/market/stocks`).then((r) => {
-          if (!r.ok) throw new Error("stocks");
-          return r.json();
-        }),
-      ]);
-
-      if (cancelled) return;
-
-      if (cryptoResult.status === "fulfilled") setCrypto(cryptoResult.value);
-      if (forexResult.status === "fulfilled") setForex(forexResult.value);
-      if (goldResult.status === "fulfilled") {
-        const goldData: GoldResponse = goldResult.value;
-        const oncelikliKalemler = ["Gram Altın", "Çeyrek Altın", "Yarım Altın", "Gümüş"];
-        setGold(goldData.result.filter((item) => oncelikliKalemler.includes(item.name)));
-      }
-      if (stocksResult.status === "fulfilled") {
-        const stocksData: StockResponse = stocksResult.value;
-        setStocks(stocksData.result.slice(0, 5));
-      }
-
-      const failedCount = [cryptoResult, forexResult, goldResult, stocksResult].filter(
-        (r) => r.status === "rejected"
-      ).length;
-      if (failedCount > 0) {
-        setError(
-          failedCount === 4
-            ? "Piyasa verileri yüklenirken bir hata oluştu. Sunucu uyanıyor olabilir, birkaç saniye sonra tekrar deneyin."
-            : "Bazı piyasa verileri şu an alınamadı, diğerleri gösteriliyor. Eksik olanlar için tekrar deneyin."
-        );
-      }
-    }
-
-    loadMarketData();
-    return () => {
-      cancelled = true;
-    };
-  }, [retryCount]);
-
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10 dark:bg-black">
       <main className="mx-auto flex max-w-4xl flex-col gap-8">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
-            <h1 className="shrink-0 whitespace-nowrap text-xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
+            <Link
+              href="/"
+              className="shrink-0 whitespace-nowrap text-xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-2xl"
+            >
               Akıllı Portföy
-            </h1>
+            </Link>
 
             <div className="hidden flex-wrap items-center justify-end gap-1 sm:flex">
-              <span className={NAV_LINK_ACTIVE_CLASS}>Güncel Fiyatlar</span>
               <Link href="/charts" className={NAV_LINK_CLASS}>
                 Grafikler
               </Link>
@@ -190,7 +111,6 @@ export default function Home() {
 
           {menuOpen && (
             <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950 sm:hidden">
-              <span className={`${NAV_LINK_ACTIVE_CLASS} text-center`}>Güncel Fiyatlar</span>
               <Link href="/charts" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
                 Grafikler
               </Link>
@@ -330,32 +250,7 @@ export default function Home() {
           </p>
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {[
-              {
-                icon: <Sparkles className="h-5 w-5" />,
-                title: "AI Yatırım Asistanı",
-                desc: "Güncel finans haberlerini ve senin portföyünü bilen yapay zekâya sor; piyasayı, riskleri ve seçenekleri sade bir dille açıklasın.",
-                highlight: true,
-              },
-              {
-                icon: <Target className="h-5 w-5" />,
-                title: "Risk Profili Analizi",
-                desc: "Risk toleransın, vaden ve hedefine göre sana uygun örnek varlık dağılımını (borsa / kripto / altın / döviz) gör.",
-                highlight: true,
-              },
-              {
-                icon: <TrendingUp className="h-5 w-5" />,
-                title: "Reel Getiri Takibi",
-                desc: "Enflasyona göre gerçekte kazandın mı kaybettin mi — nominal değil, alım gücü bazında.",
-                highlight: false,
-              },
-              {
-                icon: <Bell className="h-5 w-5" />,
-                title: "Fiyat Alarmları",
-                desc: "Bir varlık hedef fiyatına ulaştığında anında e-posta ile haberdar ol, fırsatı kaçırma.",
-                highlight: false,
-              },
-            ].map((f) => (
+            {FEATURES.map((f) => (
               <div
                 key={f.title}
                 className={`flex gap-4 rounded-xl border p-5 ${
@@ -376,184 +271,22 @@ export default function Home() {
           </div>
         </section>
 
-        {error && (
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="text-red-500">{error}</p>
-            <button
-              onClick={() => setRetryCount((c) => c + 1)}
-              className="rounded-lg border border-red-200 px-3 py-1 text-sm font-medium text-red-500 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950"
+        {/* Alt CTA */}
+        {!isLoggedIn && (
+          <section className="flex flex-col items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-6 py-10 text-center dark:border-zinc-800 dark:bg-zinc-950">
+            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
+              Yatırımlarının gerçek durumunu bugün gör.
+            </h3>
+            <Link
+              href="/register"
+              className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
             >
-              Tekrar Dene
-            </button>
-          </div>
+              Ücretsiz Başla
+            </Link>
+          </section>
         )}
-
-        <div className="-mb-2 flex items-baseline justify-between">
-          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-            Canlı piyasa fiyatları
-          </h3>
-          <span className="text-xs text-zinc-400">Kripto · Döviz · Altın · BIST</span>
-        </div>
-
-        <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MarketCard title="Kripto (USD)" accent="#2a78d6" icon={<CoinIcon />}>
-            {crypto ? (
-              <ul className="flex flex-col gap-2">
-                {Object.entries(crypto)
-                  .filter(([, price]) => typeof price?.usd === "number")
-                  .map(([coin, price]) => (
-                    <li key={coin} className="flex w-full items-center justify-between text-sm">
-                      <span className="capitalize text-zinc-500">{coin}</span>
-                      <span className="flex items-baseline gap-2">
-                        <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                          ${formatNumber(price.usd)}
-                        </span>
-                        {price.usd_24h_change !== undefined && (
-                          <span
-                            className={`text-xs font-medium ${
-                              price.usd_24h_change >= 0 ? "text-emerald-600" : "text-red-500"
-                            }`}
-                          >
-                            {price.usd_24h_change >= 0 ? "+" : ""}
-                            {price.usd_24h_change.toFixed(2)}%
-                          </span>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            ) : (
-              <Loading />
-            )}
-          </MarketCard>
-
-          <MarketCard title="Döviz Kurları" accent="#1baf7a" icon={<ExchangeIcon />}>
-            {forex ? (
-              <ul className="flex flex-col gap-2">
-                {Object.entries(forex.rates).map(([symbol, rate]) => (
-                  <li key={symbol} className="flex w-full items-center justify-between text-sm">
-                    <span className="text-zinc-500">USD/{symbol}</span>
-                    <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                      {formatNumber(rate)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Loading />
-            )}
-          </MarketCard>
-
-          <MarketCard title="Altın & Gümüş (TL)" accent="#eda100" icon={<GemIcon />}>
-            {gold ? (
-              <ul className="flex flex-col gap-2">
-                {gold.map((item) => (
-                  <li key={item.name} className="flex w-full items-center justify-between text-sm">
-                    <span className="text-zinc-500">{item.name}</span>
-                    <span className="flex items-baseline gap-2">
-                      <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                        {formatNumber(item.selling)}
-                      </span>
-                      {item.rate !== undefined && (
-                        <span
-                          className={`text-xs font-medium ${
-                            item.rate >= 0 ? "text-emerald-600" : "text-red-500"
-                          }`}
-                        >
-                          {item.rate >= 0 ? "+" : ""}
-                          {item.rate}%
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Loading />
-            )}
-          </MarketCard>
-
-          <MarketCard title="Borsa (BIST)" accent="#008300" icon={<ChartIcon />}>
-            {stocks ? (
-              <ul className="flex flex-col gap-2">
-                {stocks.map((item) => (
-                  <li key={item.name} className="flex w-full items-center justify-between text-sm">
-                    <span className="text-zinc-500">{item.name}</span>
-                    <span className="flex items-baseline gap-2">
-                      <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                        {formatNumber(item.price)}
-                      </span>
-                      <span
-                        className={`text-xs font-medium ${
-                          item.rate >= 0 ? "text-emerald-600" : "text-red-500"
-                        }`}
-                      >
-                        {item.rate >= 0 ? "+" : ""}
-                        {item.rate}%
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Loading />
-            )}
-          </MarketCard>
-        </section>
       </main>
     </div>
-  );
-}
-
-function MarketCard({
-  title,
-  accent,
-  icon,
-  children,
-}: {
-  title: string;
-  accent: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="min-h-[280px] rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
-      style={{ borderTopWidth: "3px", borderTopColor: accent }}
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <span style={{ color: accent }}>{icon}</span>
-        <h2 className="text-sm font-semibold text-zinc-500">{title}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function CoinIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v10M9.5 9.5c0-1.4 1.2-2.5 2.5-2.5s2.5 1 2.5 2c0 1.5-2 2-2.5 2.5c-1 1-2.5 1.5-2.5 3s1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5" />
-    </svg>
-  );
-}
-
-function ExchangeIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M4 7h13M17 7l-3-3M17 7l-3 3" />
-      <path d="M20 17H7M7 17l3-3M7 17l3 3" />
-    </svg>
-  );
-}
-
-function GemIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M6 3h12l3 6-9 12L3 9z" />
-      <path d="M3 9h18M9 3l3 6 3-6M9.5 9L12 21l2.5-12" />
-    </svg>
   );
 }
 
@@ -564,16 +297,4 @@ function LogoutIcon() {
       <path d="M16 17l5-5-5-5M21 12H9" />
     </svg>
   );
-}
-
-function ChartIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M4 20V10M11 20V4M18 20v-7" />
-    </svg>
-  );
-}
-
-function Loading() {
-  return <p className="text-sm text-zinc-400">Yükleniyor...</p>;
 }
