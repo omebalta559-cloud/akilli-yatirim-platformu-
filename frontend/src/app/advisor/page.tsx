@@ -112,6 +112,11 @@ export default function AdvisorPage() {
   const [riskProfile, setRiskProfile] = useState("Orta");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  // historyCount: acilista backend'den yuklenen "eski" mesaj sayisi. Bu
+  // mesajlar varsayilan olarak gizlenir; showHistory ile acilir. Yeni oturumda
+  // gonderilen mesajlar (index >= historyCount) her zaman gorunur.
+  const [historyCount, setHistoryCount] = useState(0);
+  const [showHistory, setShowHistory] = useState(false);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,7 +150,9 @@ export default function AdvisorPage() {
     fetch(`${API_URL}/advisor/history`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : []))
       .then((history: { role: "user" | "assistant"; content: string }[]) => {
-        setMessages(history.map((m) => ({ role: m.role, content: m.content })));
+        const loaded = history.map((m) => ({ role: m.role, content: m.content }));
+        setMessages(loaded);
+        setHistoryCount(loaded.length);
       })
       .catch(() => {
         /* gecmis alinamazsa bos sohbetle devam edilir */
@@ -246,6 +253,8 @@ export default function AdvisorPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessages([]);
+      setHistoryCount(0);
+      setShowHistory(false);
     } catch {
       setError("Sohbet geçmişi temizlenirken bir hata oluştu.");
     }
@@ -359,13 +368,24 @@ export default function AdvisorPage() {
         {activeTab === "sohbet" && (
           <>
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto rounded-2xl border border-zinc-200 bg-gradient-to-b from-indigo-50/40 to-white p-4 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
-              {historyLoaded && messages.length === 0 && (
+              {historyCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowHistory((v) => !v)}
+                  className="mx-auto rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500 shadow-sm transition-colors hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:text-indigo-400"
+                >
+                  {showHistory ? "Geçmişi gizle" : `Geçmiş sohbeti göster (${historyCount} mesaj)`}
+                </button>
+              )}
+              {historyLoaded && messages.length === historyCount && !showHistory && (
                 <AssistantBubble>
                   <p className="whitespace-pre-wrap">{welcomeMessage}</p>
                 </AssistantBubble>
               )}
-              {messages.map((m, i) =>
-                m.role === "user" ? (
+              {messages.map((m, i) => {
+                // Eski (gecmis) mesajlar yalnizca "Geçmişi göster" acikken gorunur.
+                if (i < historyCount && !showHistory) return null;
+                return m.role === "user" ? (
                   <div
                     key={i}
                     className="max-w-[85%] self-end whitespace-pre-wrap rounded-2xl rounded-br-md bg-indigo-600 px-4 py-2.5 text-sm text-white shadow-sm"
@@ -376,8 +396,8 @@ export default function AdvisorPage() {
                   <AssistantBubble key={i}>
                     <div className="flex flex-col gap-2 leading-relaxed">{renderMessage(m.content)}</div>
                   </AssistantBubble>
-                )
-              )}
+                );
+              })}
               {loading && (
                 <AssistantBubble>
                   <span className="flex items-center gap-1 text-zinc-400">
