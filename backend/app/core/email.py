@@ -14,7 +14,9 @@ def send_email(to: str, subject: str, body: str) -> None:
     message["Subject"] = subject
     message.set_content(body)
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+    # timeout: SMTP sunucusu yanit vermezse istegin sonsuza kadar asili
+    # kalmasini engeller (baglanti, login ve gonderim icin ust sinir).
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20) as server:
         server.starttls()
         server.login(settings.smtp_user, settings.smtp_password)
         server.send_message(message)

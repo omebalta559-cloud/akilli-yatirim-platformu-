@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -68,25 +68,36 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     return Token(access_token=token)
 
 
+def _send_reset_email(to_email: str, reset_link: str) -> None:
+    """Arka planda calisir: SMTP yavas/takili olsa bile kullanicinin istegini
+    bloklamaz. Hata olursa loglanir, kullaniciya yansimaz."""
+    body = (
+        "Merhaba,\n\n"
+        "Akıllı Portföy hesabının şifresini sıfırlamak için aşağıdaki bağlantıya tıkla "
+        "(bağlantı 15 dakika geçerlidir):\n\n"
+        f"{reset_link}\n\n"
+        "Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin, şifren değişmez.\n\n"
+        "Akıllı Portföy"
+    )
+    try:
+        send_email(to_email, "Akıllı Portföy - Şifre Sıfırlama", body)
+        logger.info("Şifre sıfırlama e-postası gönderildi: %s", to_email)
+    except Exception:
+        logger.exception("Şifre sıfırlama e-postası gönderilemedi: %s", to_email)
+
+
 @router.post("/forgot-password")
-def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     user = db.query(User).filter(User.email == payload.email).first()
     if user:
         token = service.create_reset_token(subject=str(user.id))
         reset_link = f"{settings.frontend_url.rstrip('/')}/reset-password?token={token}"
-        body = (
-            "Merhaba,\n\n"
-            "Akıllı Portföy hesabının şifresini sıfırlamak için aşağıdaki bağlantıya tıkla "
-            "(bağlantı 15 dakika geçerlidir):\n\n"
-            f"{reset_link}\n\n"
-            "Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin, şifren değişmez.\n\n"
-            "Akıllı Portföy"
-        )
-        try:
-            send_email(user.email, "Akıllı Portföy - Şifre Sıfırlama", body)
-            logger.info("Şifre sıfırlama e-postası gönderildi: id=%s", user.id)
-        except Exception:
-            logger.exception("Şifre sıfırlama e-postası gönderilemedi: %s", payload.email)
+        # E-posta gonderimi arka planda: endpoint aninda doner, sayfa donmaz.
+        background_tasks.add_task(_send_reset_email, user.email, reset_link)
 
     # Guvenlik: e-posta kayitli olsun olmasin ayni cevap donulur; boylece
     # hangi e-postalarin kayitli oldugu disariya sizdirilmaz.
