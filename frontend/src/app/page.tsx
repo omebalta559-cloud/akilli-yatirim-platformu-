@@ -196,16 +196,16 @@ export default function Home() {
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-100 ring-1 ring-white/15">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Enflasyona göre reel getiri hesaplayan tek uygulama
+              Yapay zekâ destekli akıllı portföy platformu
             </span>
             <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-tight sm:text-5xl">
-              Enflasyona karşı{" "}
-              <span className="text-emerald-400">gerçek</span> getirini gör.
+              Yatırımlarını tek yerde topla,{" "}
+              <span className="text-emerald-400">akıllıca</span> yönet.
             </h2>
             <p className="mt-4 max-w-xl text-sm text-indigo-200/80 sm:text-base">
-              Borsa, kripto, altın, döviz, mevduat… Hepsini tek ekranda topla.
-              &quot;%40 kâr ettim&quot; sandığın yatırım, enflasyon sonrası
-              gerçekten kazandırdı mı? Anında gör.
+              Borsa, kripto, altın, döviz, mevduat… hepsi tek panelde. Yapay zekâ
+              asistanına sor, risk profilini çıkar ve enflasyona göre{" "}
+              <span className="font-medium text-white">gerçek getirini</span> gör.
             </p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
