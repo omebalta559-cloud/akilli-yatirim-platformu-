@@ -248,14 +248,49 @@ export default function Home() {
           )}
         </div>
 
-        <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#2a78d6] to-[#1c5cab] px-6 py-10 text-white shadow-lg dark:from-[#184f95] dark:to-[#0d366b] sm:px-10">
-          <h2 className="text-xl font-semibold sm:text-2xl">
-            Güncel piyasa fiyatları
+        <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#2a78d6] to-[#1c5cab] px-6 py-12 text-white shadow-lg dark:from-[#184f95] dark:to-[#0d366b] sm:px-10 sm:py-14">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-blue-50">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            Enflasyona göre reel getiri hesaplayan tek uygulama
+          </span>
+          <h2 className="mt-4 max-w-2xl text-2xl font-bold leading-tight sm:text-4xl">
+            Enflasyona karşı{" "}
+            <span className="text-emerald-300">gerçek</span> getirini gör.
           </h2>
-          <p className="mt-2 max-w-xl text-sm text-blue-100">
-            Kripto, döviz, altın ve BIST hisselerinin canlı fiyatları. Kendi
-            yatırımlarınızı ve kâr/zararınızı görmek için{" "}
-            <span className="font-semibold">Portföyüm</span> sayfasına geçin.
+          <p className="mt-3 max-w-xl text-sm text-blue-100 sm:text-base">
+            Borsa, kripto, altın, döviz, mevduat… Hepsini tek ekranda topla.
+            &quot;%40 kâr ettim&quot; sandığın yatırım, enflasyon sonrası
+            gerçekten kazandırdı mı? Anında gör.
+          </p>
+
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            {isLoggedIn ? (
+              <Link
+                href="/portfolio"
+                className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#1c5cab] shadow-sm transition hover:bg-blue-50"
+              >
+                Portföyüme Git
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#1c5cab] shadow-sm transition hover:bg-blue-50"
+                >
+                  Ücretsiz Başla
+                </Link>
+                <Link
+                  href="/login"
+                  className="rounded-xl border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Giriş Yap
+                </Link>
+              </>
+            )}
+          </div>
+
+          <p className="mt-4 text-xs text-blue-200">
+            Kredi kartı gerekmez · Ücretsiz kayıt · Türkiye piyasalarına özel
           </p>
         </section>
 
@@ -270,6 +305,13 @@ export default function Home() {
             </button>
           </div>
         )}
+
+        <div className="-mb-2 flex items-baseline justify-between">
+          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            Canlı piyasa fiyatları
+          </h3>
+          <span className="text-xs text-zinc-400">Kripto · Döviz · Altın · BIST</span>
+        </div>
 
         <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MarketCard title="Kripto (USD)" accent="#2a78d6" icon={<CoinIcon />}>
