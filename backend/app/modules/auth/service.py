@@ -27,6 +27,24 @@ def create_access_token(subject: str, expires_minutes: int = 60 * 24) -> str:
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
+def create_reset_token(subject: str, expires_minutes: int = 15) -> str:
+    """Sifre sifirlama icin kisa omurlu, 'reset' tipli JWT. Erisim token'i
+    yerine kullanilamaz (get_current_user_id 'reset' tipli token'i reddeder)."""
+    expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
+    payload = {"sub": subject, "exp": expire, "type": "reset"}
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def verify_reset_token(token: str) -> int:
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        if payload.get("type") != "reset":
+            raise HTTPException(status_code=400, detail="Geçersiz sıfırlama bağlantısı")
+        return int(payload["sub"])
+    except (JWTError, KeyError, ValueError):
+        raise HTTPException(status_code=400, detail="Sıfırlama bağlantısı geçersiz veya süresi dolmuş")
+
+
 def verify_google_token(credential: str) -> str:
     try:
         payload = google_id_token.verify_oauth2_token(
@@ -43,6 +61,9 @@ def verify_google_token(credential: str) -> str:
 def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> int:
     try:
         payload = jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        # Sifre sifirlama token'i erisim token'i olarak kullanilamaz.
+        if payload.get("type") == "reset":
+            raise HTTPException(status_code=401, detail="Bu token oturum için geçerli değil")
         return int(payload["sub"])
     except (JWTError, KeyError, ValueError):
         raise HTTPException(status_code=401, detail="Geçersiz veya süresi dolmuş token")

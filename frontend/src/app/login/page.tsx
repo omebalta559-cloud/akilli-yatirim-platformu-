@@ -148,6 +148,12 @@ export default function LoginPage() {
               />
             </div>
 
+            <div className="-mt-1 text-right">
+              <Link href="/forgot-password" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+                Şifremi unuttum?
+              </Link>
+            </div>
+
             <button
               type="submit"
               disabled={loading}

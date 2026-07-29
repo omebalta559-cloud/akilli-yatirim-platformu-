@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     # atarak ikisinin de ucretsiz planda uykuya gecmesini engellemek icin.
     # Bos birakilirsa bu dongu hic baslamaz.
     keepalive_partner_url: str = ""
+    # Sifre sifirlama e-postasindaki linkin isaret edecegi frontend adresi.
+    frontend_url: str = "https://akilli-yatirim-platformu.vercel.app"
     # --- Outreach (otomatik mail kampanyasi) ayarlari ---
     # Tum /outreach uclarini koruyan gizli anahtar. Bos ise uclar kapali kalir.
     outreach_admin_token: str = ""

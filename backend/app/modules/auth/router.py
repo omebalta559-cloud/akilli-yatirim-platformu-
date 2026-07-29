@@ -4,9 +4,18 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.email import send_email
+from app.core.config import settings
 from app.modules.auth import service
 from app.modules.auth.models import User
-from app.modules.auth.schemas import GoogleAuthRequest, Token, UserCreate, UserLogin
+from app.modules.auth.schemas import (
+    ForgotPasswordRequest,
+    GoogleAuthRequest,
+    ResetPasswordRequest,
+    Token,
+    UserCreate,
+    UserLogin,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 logger = logging.getLogger(__name__)
@@ -57,3 +66,47 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     logger.info("Giriş yapıldı: id=%s email=%s", user.id, user.email)
     token = service.create_access_token(subject=str(user.id))
     return Token(access_token=token)
+
+
+@router.post("/forgot-password")
+def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email).first()
+    if user:
+        token = service.create_reset_token(subject=str(user.id))
+        reset_link = f"{settings.frontend_url.rstrip('/')}/reset-password?token={token}"
+        body = (
+            "Merhaba,\n\n"
+            "Akıllı Portföy hesabının şifresini sıfırlamak için aşağıdaki bağlantıya tıkla "
+            "(bağlantı 15 dakika geçerlidir):\n\n"
+            f"{reset_link}\n\n"
+            "Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin, şifren değişmez.\n\n"
+            "Akıllı Portföy"
+        )
+        try:
+            send_email(user.email, "Akıllı Portföy - Şifre Sıfırlama", body)
+            logger.info("Şifre sıfırlama e-postası gönderildi: id=%s", user.id)
+        except Exception:
+            logger.exception("Şifre sıfırlama e-postası gönderilemedi: %s", payload.email)
+
+    # Guvenlik: e-posta kayitli olsun olmasin ayni cevap donulur; boylece
+    # hangi e-postalarin kayitli oldugu disariya sizdirilmaz.
+    return {"detail": "Eğer bu e-posta kayıtlıysa, şifre sıfırlama bağlantısı gönderildi."}
+
+
+@router.post("/reset-password", response_model=Token)
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    if len(payload.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Şifre en az 8 karakter olmalı")
+
+    user_id = service.verify_reset_token(payload.token)
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Kullanıcı bulunamadı")
+
+    user.hashed_password = service.hash_password(payload.new_password)
+    db.commit()
+    logger.info("Şifre sıfırlandı: id=%s", user.id)
+
+    # Sifirlama sonrasi kullaniciyi otomatik giris yaptir.
+    access_token = service.create_access_token(subject=str(user.id))
+    return Token(access_token=access_token)
