@@ -297,6 +297,7 @@ export default function Home() {
 
         {/* ZIYARETCI (giris yapmamis) -> LANDING */}
         {!isLoggedIn && (
+          <>
         <section className="relative overflow-hidden rounded-2xl bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-950 px-6 py-14 text-white shadow-lg sm:px-10 sm:py-16">
           <svg
             className="pointer-events-none absolute inset-0 h-full w-full opacity-20"
@@ -412,6 +413,7 @@ export default function Home() {
             Ücretsiz Başla
           </Link>
         </section>
+          </>
         )}
 
         {/* CANLI FIYATLAR - yalnizca giris yapmis kullaniciya */}
