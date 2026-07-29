@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     keepalive_partner_url: str = ""
     # Sifre sifirlama e-postasindaki linkin isaret edecegi frontend adresi.
     frontend_url: str = "https://akilli-yatirim-platformu.vercel.app"
+    # --- E-posta gonderimi (Brevo HTTP API) ---
+    # Render giden SMTP portlarini (25/465/587) engelledigi icin e-postalar
+    # smtplib yerine Brevo'nun HTTPS API'si uzerinden gonderilir.
+    brevo_api_key: str = ""
+    # Brevo'da DOGRULANMIS gonderen e-posta adresi (Senders bolumunden).
+    email_sender: str = ""
+    email_sender_name: str = "Akıllı Portföy"
     # --- Outreach (otomatik mail kampanyasi) ayarlari ---
     # Tum /outreach uclarini koruyan gizli anahtar. Bos ise uclar kapali kalir.
     outreach_admin_token: str = ""
