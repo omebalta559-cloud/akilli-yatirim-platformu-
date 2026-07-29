@@ -248,50 +248,76 @@ export default function Home() {
           )}
         </div>
 
-        <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#2a78d6] to-[#1c5cab] px-6 py-12 text-white shadow-lg dark:from-[#184f95] dark:to-[#0d366b] sm:px-10 sm:py-14">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-blue-50">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            Enflasyona göre reel getiri hesaplayan tek uygulama
-          </span>
-          <h2 className="mt-4 max-w-2xl text-2xl font-bold leading-tight sm:text-4xl">
-            Enflasyona karşı{" "}
-            <span className="text-emerald-300">gerçek</span> getirini gör.
-          </h2>
-          <p className="mt-3 max-w-xl text-sm text-blue-100 sm:text-base">
-            Borsa, kripto, altın, döviz, mevduat… Hepsini tek ekranda topla.
-            &quot;%40 kâr ettim&quot; sandığın yatırım, enflasyon sonrası
-            gerçekten kazandırdı mı? Anında gör.
-          </p>
+        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-950 px-6 py-14 text-white shadow-lg sm:px-10 sm:py-16">
+          <svg
+            className="pointer-events-none absolute inset-0 h-full w-full opacity-20"
+            viewBox="0 0 600 400"
+            preserveAspectRatio="none"
+            fill="none"
+          >
+            <path
+              d="M0 320 L80 280 L160 300 L240 220 L320 250 L400 150 L480 190 L560 80 L600 110"
+              stroke="#818cf8"
+              strokeWidth="3"
+              fill="none"
+            />
+            <path
+              d="M0 360 L90 330 L180 350 L260 280 L340 300 L420 210 L500 240 L600 150"
+              stroke="#6366f1"
+              strokeWidth="2"
+              opacity="0.6"
+              fill="none"
+            />
+            <circle cx="560" cy="80" r="5" fill="#818cf8" />
+            <circle cx="400" cy="150" r="3" fill="#818cf8" />
+            <circle cx="240" cy="220" r="3" fill="#818cf8" />
+          </svg>
 
-          <div className="mt-7 flex flex-wrap items-center gap-3">
-            {isLoggedIn ? (
-              <Link
-                href="/portfolio"
-                className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#1c5cab] shadow-sm transition hover:bg-blue-50"
-              >
-                Portföyüme Git
-              </Link>
-            ) : (
-              <>
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-100 ring-1 ring-white/15">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Enflasyona göre reel getiri hesaplayan tek uygulama
+            </span>
+            <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-tight sm:text-5xl">
+              Enflasyona karşı{" "}
+              <span className="text-emerald-400">gerçek</span> getirini gör.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm text-indigo-200/80 sm:text-base">
+              Borsa, kripto, altın, döviz, mevduat… Hepsini tek ekranda topla.
+              &quot;%40 kâr ettim&quot; sandığın yatırım, enflasyon sonrası
+              gerçekten kazandırdı mı? Anında gör.
+            </p>
+
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              {isLoggedIn ? (
                 <Link
-                  href="/register"
-                  className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#1c5cab] shadow-sm transition hover:bg-blue-50"
+                  href="/portfolio"
+                  className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-950 shadow-sm transition hover:bg-indigo-50"
                 >
-                  Ücretsiz Başla
+                  Portföyüme Git
                 </Link>
-                <Link
-                  href="/login"
-                  className="rounded-xl border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                >
-                  Giriş Yap
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    className="rounded-xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-400"
+                  >
+                    Ücretsiz Başla
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                  >
+                    Giriş Yap
+                  </Link>
+                </>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs text-indigo-300/60">
+              Kredi kartı gerekmez · Ücretsiz kayıt · Türkiye piyasalarına özel
+            </p>
           </div>
-
-          <p className="mt-4 text-xs text-blue-200">
-            Kredi kartı gerekmez · Ücretsiz kayıt · Türkiye piyasalarına özel
-          </p>
         </section>
 
         {error && (
