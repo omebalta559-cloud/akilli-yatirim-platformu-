@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Wallet, FileText } from "lucide-react";
+import { Wallet, FileText, Check } from "lucide-react";
 import { getToken } from "@/lib/auth";
 import { getApiUrl } from "@/lib/api";
 
@@ -762,14 +762,14 @@ export default function RiskProfileAdvisor() {
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
           placeholder="Örnek: 100000"
-          className="w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#2a78d6] dark:border-zinc-800 dark:text-zinc-50"
+          className="w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-800 dark:text-zinc-50"
         />
       </div>
 
       <button
         onClick={handleSubmit}
         disabled={!canSubmit}
-        className="rounded-lg bg-zinc-900 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-50 dark:text-zinc-900"
+        className="rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Portföyümü Oluştur
       </button>
@@ -789,25 +789,35 @@ function QuizCard<T extends string>({
   onSelect: (value: T) => void;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-md dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
       <h3 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">{title}</h3>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {options.map((option) => {
           const isSelected = selected === option.value;
           return (
             <button
               key={option.value}
               onClick={() => onSelect(option.value)}
-              className={`flex flex-col gap-1 rounded-lg border p-3 text-left transition-colors ${
+              aria-pressed={isSelected}
+              className={`relative flex flex-col gap-1 rounded-xl border-2 p-4 text-left transition-all ${
                 isSelected
-                  ? "border-[#2a78d6] bg-[#eef4fa] dark:bg-zinc-900"
-                  : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+                  ? "border-indigo-500 bg-indigo-50 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/40"
+                  : "border-zinc-200 hover:border-indigo-300 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
               }`}
             >
-              <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              {isSelected && (
+                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
+                  <Check className="h-3 w-3" strokeWidth={3} />
+                </span>
+              )}
+              <span
+                className={`text-sm font-semibold ${
+                  isSelected ? "text-indigo-700 dark:text-indigo-300" : "text-zinc-900 dark:text-zinc-50"
+                }`}
+              >
                 {option.label}
               </span>
-              <span className="text-xs text-zinc-500">{option.description}</span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">{option.description}</span>
             </button>
           );
         })}
