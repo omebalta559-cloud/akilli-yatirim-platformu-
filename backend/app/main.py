@@ -16,6 +16,7 @@ from app.modules.alerts import service as alerts_service
 from app.modules.alerts.router import router as alerts_router
 from app.modules.auth.router import router as auth_router
 from app.modules.market_data.router import router as market_data_router
+from app.modules.outreach.router import router as outreach_router
 from app.modules.portfolio.router import router as portfolio_router
 
 setup_logging(settings.environment)
@@ -40,6 +41,7 @@ app.include_router(market_data_router)
 app.include_router(portfolio_router)
 app.include_router(ai_advisor_router)
 app.include_router(alerts_router)
+app.include_router(outreach_router)
 
 
 @app.on_event("startup")

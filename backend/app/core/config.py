@@ -33,6 +33,17 @@ class Settings(BaseSettings):
     # atarak ikisinin de ucretsiz planda uykuya gecmesini engellemek icin.
     # Bos birakilirsa bu dongu hic baslamaz.
     keepalive_partner_url: str = ""
+    # --- Outreach (otomatik mail kampanyasi) ayarlari ---
+    # Tum /outreach uclarini koruyan gizli anahtar. Bos ise uclar kapali kalir.
+    outreach_admin_token: str = ""
+    # Gonderen mailde gorunecek isim: "Akilli Yatirim" <hesap@gmail.com>
+    outreach_from_name: str = "Akilli Yatirim"
+    # Iki gonderim arasindaki bekleme (saniye) - spam filtrelerine takilmamak icin.
+    outreach_send_delay_seconds: float = 3.0
+    # Tek kampanya calistirmasinda gonderilecek azami mail sayisi. Gmail ucretsiz
+    # hesap gunluk ~500 sinirinin altinda guvenli bir varsayilan. limit verilmezse
+    # bu deger kullanilir; boylece "gunde bir calistir" ile 10k liste bolunerek gider.
+    outreach_daily_limit: int = 400
 
     class Config:
         env_file = ".env"

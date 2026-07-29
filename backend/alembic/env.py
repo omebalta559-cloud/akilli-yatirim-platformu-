@@ -10,6 +10,7 @@ from app.core.database import Base
 from app.modules.ai_advisor.models import ChatMessage  # noqa: F401
 from app.modules.alerts.models import PriceAlert  # noqa: F401
 from app.modules.auth.models import User  # noqa: F401
+from app.modules.outreach.models import Lead, OutreachEmail  # noqa: F401
 from app.modules.portfolio.models import Holding, PortfolioSnapshot  # noqa: F401
 
 # this is the Alembic Config object, which provides
