@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     # Loglarda hangi ortamdan geldigini ayirt etmek icin: yerelde "development",
     # Render'da ortam degiskeni olarak "production" verilir.
     environment: str = "development"
-    app_name: str = "Akilli Yatirim Danismani"
+    app_name: str = "Akilli Portfoy"
     database_url: str = "postgresql://postgres:postgres@postgres:5432/yatirim"
     redis_url: str = "redis://redis:6379/0"
     # ChromaDB artik ayri bir sunucu olarak degil, gomulu (embedded) modda
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # Tum /outreach uclarini koruyan gizli anahtar. Bos ise uclar kapali kalir.
     outreach_admin_token: str = ""
     # Gonderen mailde gorunecek isim: "Akilli Yatirim" <hesap@gmail.com>
-    outreach_from_name: str = "Akilli Yatirim"
+    outreach_from_name: str = "Akilli Portfoy"
     # Iki gonderim arasindaki bekleme (saniye) - spam filtrelerine takilmamak icin.
     outreach_send_delay_seconds: float = 3.0
     # Tek kampanya calistirmasinda gonderilecek azami mail sayisi. Gmail ucretsiz

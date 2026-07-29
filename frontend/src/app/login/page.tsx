@@ -70,7 +70,7 @@ export default function LoginPage() {
 
         <div className="relative flex items-center gap-2 text-white">
           <TrendingUp className="h-7 w-7 text-indigo-400" strokeWidth={2.5} />
-          <span className="text-lg font-semibold">Akıllı Yatırım Danışmanı</span>
+          <span className="text-lg font-semibold">Akıllı Portföy</span>
         </div>
 
         <div className="relative flex flex-col gap-4">
@@ -83,7 +83,7 @@ export default function LoginPage() {
         </div>
 
         <p className="relative text-xs text-indigo-300/50">
-          &copy; {new Date().getFullYear()} Akıllı Yatırım Danışmanı. Tüm hakları saklıdır.
+          &copy; {new Date().getFullYear()} Akıllı Portföy. Tüm hakları saklıdır.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-6 w-6 text-indigo-600" strokeWidth={2.5} />
               <span className="text-lg font-semibold text-slate-900">
-                Akıllı Yatırım Danışmanı
+                Akıllı Portföy
               </span>
             </div>
             <p className="text-sm text-slate-500">Hesabınıza giriş yapın</p>

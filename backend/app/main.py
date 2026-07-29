@@ -23,7 +23,7 @@ setup_logging(settings.environment)
 logger = logging.getLogger(__name__)
 logger.info("Uygulama başlatılıyor (ortam: %s)", settings.environment)
 
-app = FastAPI(title="Akıllı Yatırım Danışmanı")
+app = FastAPI(title="Akıllı Portföy")
 
 app.add_middleware(
     CORSMiddleware,
@@ -122,4 +122,4 @@ async def httpx_request_error_handler(request: Request, exc: httpx.RequestError)
 
 @app.get("/")
 def ana_sayfa():
-    return {"mesaj": "Akıllı Yatırım Danışmanı backend motoru başarıyla çalıştı! 🚀"}
+    return {"mesaj": "Akıllı Portföy backend motoru başarıyla çalıştı! 🚀"}

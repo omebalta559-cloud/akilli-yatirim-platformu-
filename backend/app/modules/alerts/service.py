@@ -67,7 +67,7 @@ async def check_alerts() -> int:
                 f"{label} - {alert.asset_symbol} hedef fiyatınız olan {alert.target_price} "
                 f"değerinin {direction_text}.\n"
                 f"Güncel fiyat: {current_price}\n\n"
-                "Bu e-posta Akıllı Yatırım Danışmanı platformundaki fiyat alarmınız için "
+                "Bu e-posta Akıllı Portföy platformundaki fiyat alarmınız için "
                 "otomatik gönderilmiştir. Yatırım tavsiyesi değildir."
             )
             emails_to_send.append((user.email, subject, body))

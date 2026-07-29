@@ -82,7 +82,7 @@ def build_pdf(rows: list[dict]) -> bytes:
     styles = getSampleStyleSheet()
     elements = []
 
-    elements.append(Paragraph("Akilli Yatirim Danismani - Portfoy Raporu", styles["Title"]))
+    elements.append(Paragraph("Akilli Portfoy - Portfoy Raporu", styles["Title"]))
     elements.append(
         Paragraph(
             f"Olusturulma tarihi: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M')} (UTC)",

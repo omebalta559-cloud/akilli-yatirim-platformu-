@@ -72,13 +72,13 @@ async def ask(
         logger.warning("Gemini gunluk kota asildi (user_id=%s)", user_id)
         raise HTTPException(
             status_code=429,
-            detail="AI danışman için günlük sorgu limitine ulaşıldı, lütfen yarın tekrar deneyin.",
+            detail="AI asistan için günlük sorgu limitine ulaşıldı, lütfen yarın tekrar deneyin.",
         )
     except Exception:
         logger.exception("Advisor /ask basarisiz oldu (user_id=%s, soru=%r)", user_id, payload.question)
         raise HTTPException(
             status_code=502,
-            detail="AI danışman şu an yanıt veremiyor, lütfen birazdan tekrar deneyin.",
+            detail="AI asistan şu an yanıt veremiyor, lütfen birazdan tekrar deneyin.",
         )
 
     db.add(ChatMessage(user_id=user_id, role="user", content=payload.question))

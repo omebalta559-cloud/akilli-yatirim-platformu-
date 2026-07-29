@@ -225,11 +225,11 @@ export default function AdvisorPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail ?? "Danışman yanıt veremedi.");
+        throw new Error(data.detail ?? "Asistan yanıt veremedi.");
       }
       setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Danışman ile iletişim kurulurken bir hata oluştu.");
+      setError(err instanceof Error ? err.message : "Asistan ile iletişim kurulurken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -239,7 +239,7 @@ export default function AdvisorPage() {
     <div className="flex min-h-dvh flex-col bg-zinc-50 px-6 py-10 dark:bg-black">
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Akıllı Danışman</h1>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Yatırım Asistanı</h1>
           <div className="flex items-center gap-4">
             {activeTab === "sohbet" && messages.length > 0 && (
               <button
@@ -278,7 +278,7 @@ export default function AdvisorPage() {
                 : "text-zinc-500"
             }`}
           >
-            Danışmanlık Oturumu
+            Asistan Sohbeti
           </button>
         </div>
 

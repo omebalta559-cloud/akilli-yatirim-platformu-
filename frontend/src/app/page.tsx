@@ -136,7 +136,7 @@ export default function Home() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
             <h1 className="shrink-0 whitespace-nowrap text-xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
-              Akıllı Yatırım Danışmanı
+              Akıllı Portföy
             </h1>
 
             <div className="hidden flex-wrap items-center justify-end gap-1 sm:flex">
@@ -153,7 +153,7 @@ export default function Home() {
                     Alarmlar
                   </Link>
                   <Link href="/advisor" className={NAV_LINK_CLASS}>
-                    Akıllı Danışman
+                    Yatırım Asistanı
                   </Link>
                   <span className="mx-1 h-5 w-px bg-zinc-200 dark:bg-zinc-800" />
                   <button
@@ -215,7 +215,7 @@ export default function Home() {
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Akıllı Danışman
+                    Yatırım Asistanı
                   </Link>
                   <div className="my-1 h-px bg-zinc-200 dark:bg-zinc-800" />
                   <button

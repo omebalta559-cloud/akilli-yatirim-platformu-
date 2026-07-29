@@ -433,7 +433,7 @@ export default function RiskProfileAdvisor() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(20);
       doc.setTextColor(42, 120, 214);
-      doc.text(toPdfSafe("Akıllı Yatırım Danışmanı"), marginX, y);
+      doc.text(toPdfSafe("Akıllı Portföy"), marginX, y);
 
       y += 7;
       doc.setFont("helvetica", "normal");
@@ -677,7 +677,7 @@ export default function RiskProfileAdvisor() {
 
         <div className="rounded-xl border-l-4 border-[#2a78d6] bg-[#f7fafd] p-5 dark:bg-zinc-900">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#2a78d6]">
-            Akıllı Danışman Notu
+            Yatırım Asistanı Notu
           </p>
           <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{note}</p>
         </div>
