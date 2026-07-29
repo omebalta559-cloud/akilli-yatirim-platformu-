@@ -295,8 +295,19 @@ export default function AdvisorPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-zinc-50 px-6 py-10 dark:bg-black">
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4">
+    <div
+      className={`flex flex-col bg-zinc-50 px-6 py-10 dark:bg-black ${
+        // Sohbette: sabit viewport yuksekligi -> mesajlar ic kismda kayar,
+        // giris kutusu her zaman altta sabit kalir (uzun sohbette asagi
+        // inmeye gerek yok). Profil sekmesinde form uzun oldugu icin normal akis.
+        activeTab === "sohbet" ? "h-dvh overflow-hidden" : "min-h-dvh"
+      }`}
+    >
+      <main
+        className={`mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 ${
+          activeTab === "sohbet" ? "overflow-hidden" : ""
+        }`}
+      >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Yatırım Asistanı</h1>
           <div className="flex items-center gap-4">
