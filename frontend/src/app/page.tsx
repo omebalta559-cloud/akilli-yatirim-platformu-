@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles, Target, TrendingUp, Bell } from "lucide-react";
 import { clearToken, getToken } from "@/lib/auth";
 import { getApiUrl } from "@/lib/api";
 
@@ -374,6 +374,62 @@ export default function Home() {
             ⚠️ &quot;%40 kâr ettim&quot; sandığın yatırım, enflasyon sonrası aslında
             değer kaybetmiş. İşte bunu net gösteren tek uygulama.
           </p>
+        </section>
+
+        {/* OZELLIKLER - uygulamanin can alici kisimlari */}
+        <section>
+          <h3 className="text-center text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
+            Sadece takip değil — akıllı bir portföy asistanı
+          </h3>
+          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-zinc-500">
+            Yapay zekâ ve kişisel risk analizi ile yatırımlarını daha bilinçli yönet.
+          </p>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {[
+              {
+                icon: <Sparkles className="h-5 w-5" />,
+                title: "AI Yatırım Asistanı",
+                desc: "Güncel finans haberlerini ve senin portföyünü bilen yapay zekâya sor; piyasayı, riskleri ve seçenekleri sade bir dille açıklasın.",
+                highlight: true,
+              },
+              {
+                icon: <Target className="h-5 w-5" />,
+                title: "Risk Profili Analizi",
+                desc: "Risk toleransın, vaden ve hedefine göre sana uygun örnek varlık dağılımını (borsa / kripto / altın / döviz) gör.",
+                highlight: true,
+              },
+              {
+                icon: <TrendingUp className="h-5 w-5" />,
+                title: "Reel Getiri Takibi",
+                desc: "Enflasyona göre gerçekte kazandın mı kaybettin mi — nominal değil, alım gücü bazında.",
+                highlight: false,
+              },
+              {
+                icon: <Bell className="h-5 w-5" />,
+                title: "Fiyat Alarmları",
+                desc: "Bir varlık hedef fiyatına ulaştığında anında e-posta ile haberdar ol, fırsatı kaçırma.",
+                highlight: false,
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className={`flex gap-4 rounded-xl border p-5 ${
+                  f.highlight
+                    ? "border-indigo-200 bg-indigo-50/50 dark:border-indigo-900 dark:bg-indigo-950/30"
+                    : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+                }`}
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                  {f.icon}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-50">{f.title}</h4>
+                  <p className="mt-1 text-sm text-zinc-500">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {error && (
