@@ -19,6 +19,10 @@ _collection = None
 
 NEWS_RSS_FEEDS = [
     "https://www.bloomberght.com/rss",
+    "https://www.aa.com.tr/tr/rss/default?cat=ekonomi",
+    "https://www.dunya.com/rss",
+    "https://www.ntv.com.tr/ekonomi.rss",
+    "https://www.hurriyet.com.tr/rss/ekonomi",
 ]
 
 GOLD_SILVER_TICKERS = {
@@ -95,17 +99,25 @@ def add_news_document(doc_id: str, text: str, metadata: dict | None = None) -> N
 def refresh_news_from_rss() -> int:
     added = 0
     for feed_url in NEWS_RSS_FEEDS:
-        parsed = feedparser.parse(feed_url)
-        for entry in parsed.entries[:20]:
-            title = entry.get("title", "")
-            summary = entry.get("summary", "")
-            link = entry.get("link", "")
-            if not title:
-                continue
-            text = f"{title}\n{summary}"
-            doc_id = hashlib.sha1(link.encode() if link else text.encode()).hexdigest()
-            add_news_document(doc_id, text, {"source": feed_url, "link": link, "title": title})
-            added += 1
+        # Her kaynak ayri try/except icinde: biri (siteye ulasilamama, bozuk
+        # RSS vb.) basarisiz olsa bile diger kaynaklar islenmeye devam eder.
+        try:
+            parsed = feedparser.parse(feed_url)
+            feed_added = 0
+            for entry in parsed.entries[:20]:
+                title = entry.get("title", "")
+                summary = entry.get("summary", "")
+                link = entry.get("link", "")
+                if not title:
+                    continue
+                text = f"{title}\n{summary}"
+                doc_id = hashlib.sha1(link.encode() if link else text.encode()).hexdigest()
+                add_news_document(doc_id, text, {"source": feed_url, "link": link, "title": title})
+                added += 1
+                feed_added += 1
+            logger.info("RSS kaynagi islendi: %s (%d haber)", feed_url, feed_added)
+        except Exception:
+            logger.warning("RSS kaynagi islenemedi, atlaniyor: %s", feed_url, exc_info=True)
     return added
 
 
