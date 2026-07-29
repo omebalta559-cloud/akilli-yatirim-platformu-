@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X, Sparkles, Target, TrendingUp, Bell } from "lucide-react";
+import { Menu, X, Sparkles, Target, TrendingUp, Bell, LineChart, Wallet } from "lucide-react";
 import { clearToken, getToken } from "@/lib/auth";
 
 const NAV_LINK_CLASS =
@@ -25,6 +25,18 @@ const FEATURES = [
     icon: <TrendingUp className="h-5 w-5" />,
     title: "Reel Getiri Takibi",
     desc: "Enflasyona göre gerçekte kazandın mı kaybettin mi — nominal değil, alım gücü bazında.",
+    highlight: false,
+  },
+  {
+    icon: <LineChart className="h-5 w-5" />,
+    title: "Canlı Fiyatlar & Grafikler",
+    desc: "Kripto, döviz, altın ve BIST hisselerinin anlık fiyatları ve geçmiş grafikleri — hepsi güncel.",
+    highlight: false,
+  },
+  {
+    icon: <Wallet className="h-5 w-5" />,
+    title: "Portföy Takibi",
+    desc: "Tüm varlıklarını ekle; toplam değerini ve kâr/zararını tek bakışta gör.",
     highlight: false,
   },
   {
