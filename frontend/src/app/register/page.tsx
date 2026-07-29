@@ -32,9 +32,7 @@ export default function RegisterPage() {
         throw new Error(data.detail ?? "Kayıt başarısız oldu.");
       }
       saveToken(data.access_token);
-      // Yeni kullaniciyi dogrudan portfoye yonlendir: uygulamanin asil degeri
-      // (enflasyona gore reel getiri) ancak portfoy girilince gorunur.
-      router.push("/portfolio");
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata oluştu.");
     } finally {

@@ -4,7 +4,6 @@ import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Wallet, ArrowDown } from "lucide-react";
 import { getToken } from "@/lib/auth";
 import PriceChart from "@/components/PriceChart";
 import {
@@ -491,56 +490,37 @@ function PortfolioSummary({
       : null;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950 sm:p-5">
-      <p className="mb-3 text-xs font-semibold text-zinc-500">Portföy Özeti</p>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+      <p className="mb-2 text-xs font-semibold text-zinc-500">Portföy Özeti</p>
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+        <div>
           <p className="text-xs text-zinc-400">Toplam Değer</p>
-          <p className="mt-0.5 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            {totalCurrent.toLocaleString(undefined, { maximumFractionDigits: 0 })} TL
+          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {totalCurrent.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL
           </p>
         </div>
-
-        <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900">
-          <p className="text-xs text-zinc-400">Nominal Kâr/Zarar</p>
-          <p className={`mt-0.5 text-lg font-semibold ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
+        <div>
+          <p className="text-xs text-zinc-400">Toplam Kâr/Zarar (Nominal)</p>
+          <p className={`text-xl font-semibold ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
             {isPositive ? "+" : ""}
-            {gainPercent.toFixed(1)}%
+            {gainAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} TL ({isPositive ? "+" : ""}
+            {gainPercent.toFixed(2)}%)
           </p>
-          <p className="text-[11px] text-zinc-400">hesapta böyle görünür</p>
         </div>
-
         {realGainPercent !== null && (
-          <div
-            className={`col-span-2 rounded-xl p-3 ring-1 ${
-              realGainPercent >= 0
-                ? "bg-emerald-50 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-900"
-                : "bg-red-50 ring-red-200 dark:bg-red-950/30 dark:ring-red-900"
-            }`}
-          >
-            <p className="text-xs font-medium text-zinc-500">★ Enflasyona Göre GERÇEK Getiri</p>
+          <div>
+            <p className="text-xs text-zinc-400">Enflasyona Göre Reel Getiri</p>
             <p
-              className={`mt-0.5 text-3xl font-bold ${
-                realGainPercent >= 0 ? "text-emerald-600" : "text-red-500"
-              }`}
+              className={`text-xl font-semibold ${realGainPercent >= 0 ? "text-emerald-600" : "text-red-500"}`}
             >
               {realGainPercent >= 0 ? "+" : ""}
-              {realGainPercent.toFixed(1)}%
-            </p>
-            <p className="mt-0.5 text-xs text-zinc-600 dark:text-zinc-400">
-              {realGainPercent >= 0
-                ? "Alım gücün gerçekten arttı — enflasyonu yendin. 🎉"
-                : isPositive
-                ? "Nominalde kârlı görünüyorsun ama enflasyon sonrası alım gücün azaldı."
-                : "Enflasyon sonrası alım gücün azaldı."}
+              {realGainPercent.toFixed(2)}%
             </p>
           </div>
         )}
       </div>
-
       {!allPriced && (
-        <p className="mt-3 text-xs text-zinc-400">
+        <p className="mt-2 text-xs text-zinc-400">
           Bazı varlıklar için canlı fiyat bulunamadı, bu özet tam kesin olmayabilir.
         </p>
       )}
@@ -701,22 +681,7 @@ function HoldingsTable({
   }
 
   if (holdings.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-indigo-300 bg-indigo-50/50 px-6 py-10 text-center dark:border-indigo-900 dark:bg-indigo-950/20">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
-          <Wallet className="h-6 w-6" />
-        </div>
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">İlk yatırımını ekle</h3>
-        <p className="max-w-md text-sm text-zinc-500">
-          Borsa, kripto, altın, döviz veya mevduatını ekle; enflasyona göre{" "}
-          <span className="font-semibold text-indigo-600 dark:text-indigo-400">gerçek getirini</span> anında gör.
-        </p>
-        <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
-          <ArrowDown className="h-4 w-4" />
-          Aşağıdaki formdan başla
-        </p>
-      </div>
-    );
+    return <p className="text-sm text-zinc-400">Henüz portföyüne varlık eklemedin.</p>;
   }
 
   return (
