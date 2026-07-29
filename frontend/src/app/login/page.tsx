@@ -172,6 +172,10 @@ export default function LoginPage() {
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 p-1 transition-all hover:bg-gray-100">
               <GoogleSignInButton onError={setError} />
             </div>
+
+            <p className="text-center text-xs leading-relaxed text-slate-400">
+              Bu platform yatırım tavsiyesi değildir, yalnızca genel bilgilendirme amaçlıdır.
+            </p>
           </form>
         </div>
       </div>
