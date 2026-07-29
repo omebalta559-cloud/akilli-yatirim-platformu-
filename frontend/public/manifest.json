@@ -1,0 +1,20 @@
+{
+  "name": "Akıllı Portföy",
+  "short_name": "Akıllı Portföy",
+  "description": "Yapay zekâ destekli akıllı portföy platformu — enflasyona göre gerçek getirini gör.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
