@@ -76,6 +76,9 @@ export default function Home() {
             <div className="hidden flex-wrap items-center justify-end gap-1 sm:flex">
               {isLoggedIn ? (
                 <>
+                  <Link href="/charts" className={NAV_LINK_CLASS}>
+                    Grafikler
+                  </Link>
                   <Link href="/portfolio" className={NAV_LINK_CLASS}>
                     Portföyüm
                   </Link>
@@ -122,6 +125,13 @@ export default function Home() {
             <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950 sm:hidden">
               {isLoggedIn ? (
                 <>
+                  <Link
+                    href="/charts"
+                    className={`${NAV_LINK_CLASS} text-center`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Grafikler
+                  </Link>
                   <Link
                     href="/portfolio"
                     className={`${NAV_LINK_CLASS} text-center`}
