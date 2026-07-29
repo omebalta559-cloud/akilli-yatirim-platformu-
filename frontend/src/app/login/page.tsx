@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { TrendingUp, Mail, Lock } from "lucide-react";
+import { TrendingUp, Mail, Lock, Check } from "lucide-react";
 import { saveToken } from "@/lib/auth";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { getApiUrl } from "@/lib/api";
@@ -44,6 +44,10 @@ export default function LoginPage() {
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       {/* SOL PANEL */}
       <div className="relative hidden overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-950 lg:flex lg:flex-col lg:justify-between lg:p-12">
+        {/* yumusak isik efektleri */}
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
+
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full opacity-20"
           viewBox="0 0 600 800"
@@ -73,13 +77,28 @@ export default function LoginPage() {
           <span className="text-lg font-semibold">Akıllı Portföy</span>
         </div>
 
-        <div className="relative flex flex-col gap-4">
+        <div className="relative flex flex-col gap-8">
           <h1 className="text-4xl font-bold leading-tight text-white xl:text-5xl">
-            Yatırımlarınızı Yapay Zekâ ile Akıllıca Yönetin.
+            Tekrar hoş geldin.<br />
+            Portföyün seni{" "}
+            <span className="text-emerald-400">bekliyor</span>.
           </h1>
-          <p className="max-w-md text-base text-indigo-200/70">
-            Risk profilinizi belirleyin, portföyünüzü canlı verilerle takip edin.
-          </p>
+
+          <ul className="flex flex-col gap-4">
+            {[
+              "Borsa, kripto, altın, döviz — hepsi tek panelde",
+              "Yapay zekâ yatırım asistanı",
+              "Enflasyona göre gerçek (reel) getiri",
+              "Fiyat alarmları ve kişisel risk analizi",
+            ].map((item) => (
+              <li key={item} className="flex items-center gap-3 text-indigo-100">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/30">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                </span>
+                <span className="text-sm">{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <p className="relative text-xs text-indigo-300/50">
