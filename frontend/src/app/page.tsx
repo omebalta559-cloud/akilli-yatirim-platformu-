@@ -320,6 +320,62 @@ export default function Home() {
           </div>
         </section>
 
+        {/* NASIL CALISIR - 3 adim */}
+        <section>
+          <h3 className="text-center text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
+            3 adımda gerçek getirini gör
+          </h3>
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              { n: "1", title: "Kaydol", desc: "30 saniyede ücretsiz hesabını aç. Kredi kartı gerekmez." },
+              { n: "2", title: "Yatırımlarını gir", desc: "Borsa, kripto, altın, döviz, mevduat… hepsini tek yere ekle." },
+              { n: "3", title: "Reel getirini gör", desc: "Enflasyona göre gerçekte kazandın mı, kaybettin mi anında öğren." },
+            ].map((step) => (
+              <div
+                key={step.n}
+                className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                  {step.n}
+                </div>
+                <h4 className="mt-3 font-semibold text-zinc-900 dark:text-zinc-50">{step.title}</h4>
+                <p className="mt-1 text-sm text-zinc-500">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ORNEK GETIRI KARTI - urunun farkini gosterir */}
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950 sm:p-8">
+          <span className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Örnek</span>
+          <h3 className="mt-1 text-lg font-bold text-zinc-900 dark:text-zinc-50 sm:text-xl">
+            100.000 ₺ yatırdın, 1 yıl sonra…
+          </h3>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/30">
+              <p className="text-xs text-zinc-500">Nominal getiri</p>
+              <p className="mt-1 text-2xl font-bold text-emerald-600">+%40</p>
+              <p className="mt-1 text-xs text-zinc-500">Hesabında böyle görünüyor</p>
+            </div>
+            <div className="rounded-xl bg-zinc-100 p-4 dark:bg-zinc-900">
+              <p className="text-xs text-zinc-500">Yıllık enflasyon</p>
+              <p className="mt-1 text-2xl font-bold text-zinc-700 dark:text-zinc-300">%52</p>
+              <p className="mt-1 text-xs text-zinc-500">Aynı dönemde fiyat artışı</p>
+            </div>
+            <div className="rounded-xl bg-red-50 p-4 ring-1 ring-red-200 dark:bg-red-950/30 dark:ring-red-900">
+              <p className="text-xs text-zinc-500">Gerçek (reel) getiri</p>
+              <p className="mt-1 text-2xl font-bold text-red-600">−%8</p>
+              <p className="mt-1 text-xs text-zinc-500">Alım gücün aslında azaldı</p>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+            ⚠️ &quot;%40 kâr ettim&quot; sandığın yatırım, enflasyon sonrası aslında
+            değer kaybetmiş. İşte bunu net gösteren tek uygulama.
+          </p>
+        </section>
+
         {error && (
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-red-500">{error}</p>
