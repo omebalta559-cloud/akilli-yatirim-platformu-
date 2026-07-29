@@ -1,14 +1,73 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { getToken } from "@/lib/auth";
 import RiskProfileAdvisor from "@/components/RiskProfileAdvisor";
 import { CRYPTO_IDS, GOLD_NAMES } from "@/lib/marketSymbols";
 import { getApiUrl } from "@/lib/api";
 
 const API_URL = getApiUrl();
+
+// Asistan cevaplarindaki basit markdown'i (kalin **...** ve * / - listeleri)
+// ekstra bir kutuphaneye ihtiyac duymadan React'e cevirir. AI'nin dondurdugu
+// ham "**" ve "*" isaretlerinin metinde gorunmesini engeller.
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={`${keyPrefix}-${i}`} className="font-semibold text-zinc-900 dark:text-zinc-50">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return <span key={`${keyPrefix}-${i}`}>{part}</span>;
+  });
+}
+
+function renderMessage(content: string): ReactNode[] {
+  const blocks: ReactNode[] = [];
+  let listItems: ReactNode[] = [];
+
+  const flushList = () => {
+    if (listItems.length) {
+      blocks.push(
+        <ul key={`ul-${blocks.length}`} className="ml-1 flex list-inside list-disc flex-col gap-1">
+          {listItems}
+        </ul>
+      );
+      listItems = [];
+    }
+  };
+
+  content.split("\n").forEach((line, i) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+      listItems.push(<li key={`li-${i}`}>{renderInline(trimmed.slice(2), `li-${i}`)}</li>);
+    } else {
+      flushList();
+      if (trimmed) blocks.push(<p key={`p-${i}`}>{renderInline(line, `p-${i}`)}</p>);
+    }
+  });
+  flushList();
+  return blocks;
+}
+
+function AssistantBubble({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex max-w-[90%] items-start gap-2.5 self-start">
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
+        <Sparkles className="h-4 w-4" />
+      </div>
+      <div className="rounded-2xl rounded-tl-md border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-700 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 type Holding = {
   id: number;
@@ -288,28 +347,34 @@ export default function AdvisorPage() {
 
         {activeTab === "sohbet" && (
           <>
-            <div className="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto rounded-2xl border border-zinc-200 bg-gradient-to-b from-indigo-50/40 to-white p-4 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
               {historyLoaded && messages.length === 0 && (
-                <div className="max-w-[85%] self-start rounded-xl bg-zinc-100 px-4 py-2 text-sm whitespace-pre-wrap text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50">
-                  {welcomeMessage}
-                </div>
+                <AssistantBubble>
+                  <p className="whitespace-pre-wrap">{welcomeMessage}</p>
+                </AssistantBubble>
               )}
-              {messages.map((m, i) => (
-                <div
-                  key={i}
-                  className={`max-w-[85%] rounded-xl px-4 py-2 text-sm whitespace-pre-wrap ${
-                    m.role === "user"
-                      ? "self-end bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                      : "self-start bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                  }`}
-                >
-                  {m.content}
-                </div>
-              ))}
+              {messages.map((m, i) =>
+                m.role === "user" ? (
+                  <div
+                    key={i}
+                    className="max-w-[85%] self-end whitespace-pre-wrap rounded-2xl rounded-br-md bg-indigo-600 px-4 py-2.5 text-sm text-white shadow-sm"
+                  >
+                    {m.content}
+                  </div>
+                ) : (
+                  <AssistantBubble key={i}>
+                    <div className="flex flex-col gap-2 leading-relaxed">{renderMessage(m.content)}</div>
+                  </AssistantBubble>
+                )
+              )}
               {loading && (
-                <div className="self-start rounded-xl bg-zinc-100 px-4 py-2 text-sm text-zinc-400 dark:bg-zinc-800">
-                  Yazıyor...
-                </div>
+                <AssistantBubble>
+                  <span className="flex items-center gap-1 text-zinc-400">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-400" />
+                  </span>
+                </AssistantBubble>
               )}
               <div ref={bottomRef} />
             </div>
@@ -320,12 +385,12 @@ export default function AdvisorPage() {
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Sorunu yaz..."
                 required
-                className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="flex-1 rounded-xl border border-zinc-300 px-4 py-2.5 text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-900"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:opacity-50"
               >
                 Gönder
               </button>
