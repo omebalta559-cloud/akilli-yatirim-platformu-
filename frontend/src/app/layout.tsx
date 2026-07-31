@@ -14,12 +14,52 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://akilli-yatirim-platformu.vercel.app";
+const SITE_DESCRIPTION =
+  "Kripto, döviz, altın ve borsa yatırımlarını tek yerde takip et; enflasyona göre gerçek (reel) getirini gör. Yapay zekâ destekli portföy takip platformu.";
+
 export const metadata: Metadata = {
-  title: "Akıllı Portföy",
-  description:
-    "Kripto, döviz, altın ve borsa yatırımlarını tek yerde takip et; enflasyona göre gerçek (reel) getirini gör. Yapay zekâ destekli portföy takip platformu.",
-  manifest: "/manifest.json",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Akıllı Portföy — Enflasyona Göre Reel Getiri & Portföy Takip",
+    template: "%s · Akıllı Portföy",
+  },
+  description: SITE_DESCRIPTION,
   applicationName: "Akıllı Portföy",
+  manifest: "/manifest.json",
+  keywords: [
+    "portföy takip",
+    "reel getiri",
+    "enflasyona göre getiri",
+    "yatırım takip",
+    "BIST",
+    "kripto",
+    "altın",
+    "döviz",
+    "yapay zeka yatırım asistanı",
+    "TÜFE reel getiri",
+  ],
+  authors: [{ name: "Akıllı Portföy" }],
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    url: SITE_URL,
+    siteName: "Akıllı Portföy",
+    title: "Akıllı Portföy — Enflasyona karşı gerçek getirini gör",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Akıllı Portföy — Enflasyona karşı gerçek getirini gör",
+    description: SITE_DESCRIPTION,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
