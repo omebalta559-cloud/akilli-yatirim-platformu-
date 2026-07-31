@@ -24,3 +24,66 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ---- Blog yazi (prose) stilleri: dangerouslySetInnerHTML ile basilan
+   yazi govdesini bicimler. Yalnizca .blog-prose kapsayicisinin altini
+   etkiler, uygulamanin geri kalanina sizmaz. ---- */
+.blog-prose {
+  --bp-ink: #27272a;
+  --bp-muted: #52525b;
+  --bp-faint: #71717a;
+  --bp-line: #e4e4e7;
+  --bp-card: #ffffff;
+  --bp-wash: #f4f4f5;
+  --bp-accent: #4f46e5;
+  --bp-accent-soft: #eef0fb;
+  --bp-good: #059669;
+  --bp-bad: #dc2626;
+  --bp-bad-soft: #fdecec;
+  color: var(--bp-ink);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+@media (prefers-color-scheme: dark) {
+  .blog-prose {
+    --bp-ink: #e4e4e7; --bp-muted: #a1a1aa; --bp-faint: #71717a;
+    --bp-line: #27272a; --bp-card: #18181b; --bp-wash: #111114;
+    --bp-accent-soft: #1e1b3a; --bp-bad-soft: #2a1414;
+  }
+}
+.blog-prose p { margin: 0 0 1.15rem; }
+.blog-prose .lead { font-size: 1.2rem; color: var(--bp-muted); }
+.blog-prose .hl { color: var(--bp-accent); font-weight: 600; }
+.blog-prose strong { font-weight: 650; color: var(--bp-ink); }
+.blog-prose h2 {
+  font-size: 1.55rem; line-height: 1.25; letter-spacing: -0.02em;
+  margin: 2.4rem 0 0.75rem; font-weight: 700;
+}
+.blog-prose blockquote {
+  margin: 1.5rem 0; padding: 0.9rem 1.25rem; border-left: 3px solid var(--bp-accent);
+  background: var(--bp-accent-soft); border-radius: 0 0.75rem 0.75rem 0; font-size: 1rem;
+}
+.blog-prose blockquote strong { color: var(--bp-accent); }
+
+/* Ornek reel getiri karti */
+.blog-prose .calc {
+  margin: 1.6rem 0; border: 1px solid var(--bp-line); border-radius: 1rem; overflow: hidden;
+  background: var(--bp-card);
+}
+.blog-prose .calc-head {
+  padding: 0.85rem 1.1rem; font-weight: 700; font-size: 0.95rem; border-bottom: 1px solid var(--bp-line);
+}
+.blog-prose .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--bp-line); }
+.blog-prose .calc-cell { background: var(--bp-card); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.blog-prose .calc-cell.hero { background: var(--bp-bad-soft); }
+.blog-prose .calc-cell .k { font-size: 0.75rem; color: var(--bp-faint); }
+.blog-prose .calc-cell .v { font-size: 1.7rem; font-weight: 800; }
+.blog-prose .calc-cell .n { font-size: 0.75rem; color: var(--bp-faint); }
+.blog-prose .v.green { color: var(--bp-good); }
+.blog-prose .v.red { color: var(--bp-bad); }
+.blog-prose .v.zinc { color: var(--bp-ink); }
+.blog-prose .calc-note { padding: 0.8rem 1.1rem; font-size: 0.9rem; color: var(--bp-muted); background: var(--bp-wash); }
+@media (max-width: 640px) {
+  .blog-prose .calc-grid { grid-template-columns: 1fr; }
+  .blog-prose h2 { font-size: 1.35rem; }
+}
