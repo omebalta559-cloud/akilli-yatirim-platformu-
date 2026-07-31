@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import "./globals.css";
 import KeepAlivePing from "@/components/KeepAlivePing";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
@@ -90,12 +89,7 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <KeepAlivePing />
         <div className="flex-1">{children}</div>
-        <footer className="border-t border-zinc-200 bg-zinc-50 px-6 py-4 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-black">
-          <div className="mb-2">
-            <Link href="/blog" className="font-medium text-zinc-500 hover:text-indigo-600 dark:text-zinc-400">
-              Blog
-            </Link>
-          </div>
+        <footer className="border-t border-zinc-200 bg-zinc-50 px-6 py-3 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-black">
           Bu platform ve içerdiği yapay zekâ asistanı yatırım tavsiyesi değildir, yalnızca
           genel bilgilendirme amaçlıdır. Yatırım kararlarınızdan önce yetkili bir uzmana danışın.
         </footer>

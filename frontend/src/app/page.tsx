@@ -183,6 +183,9 @@ export default function Home() {
             </Link>
 
             <div className="hidden flex-wrap items-center justify-end gap-1 sm:flex">
+              <Link href="/blog" className={NAV_LINK_CLASS}>
+                Blog
+              </Link>
               {isLoggedIn ? (
                 <>
                   <Link href="/" className={NAV_LINK_CLASS}>
@@ -235,6 +238,9 @@ export default function Home() {
 
           {menuOpen && (
             <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950 sm:hidden">
+              <Link href="/blog" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
+                Blog
+              </Link>
               {isLoggedIn ? (
                 <>
                   <Link href="/" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
