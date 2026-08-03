@@ -21,6 +21,12 @@ export function BlogHeader() {
             Blog
           </Link>
           <Link
+            href="/sss"
+            className="rounded-lg px-3 py-1.5 font-medium text-zinc-600 hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            SSS
+          </Link>
+          <Link
             href="/register"
             className="rounded-lg bg-indigo-600 px-3 py-1.5 font-semibold text-white transition-colors hover:bg-indigo-500"
           >

@@ -186,6 +186,9 @@ export default function Home() {
               <Link href="/blog" className={NAV_LINK_CLASS}>
                 Blog
               </Link>
+              <Link href="/sss" className={NAV_LINK_CLASS}>
+                SSS
+              </Link>
               {isLoggedIn ? (
                 <>
                   <Link href="/" className={NAV_LINK_CLASS}>
@@ -240,6 +243,9 @@ export default function Home() {
             <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950 sm:hidden">
               <Link href="/blog" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
                 Blog
+              </Link>
+              <Link href="/sss" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
+                SSS
               </Link>
               {isLoggedIn ? (
                 <>
