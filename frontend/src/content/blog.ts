@@ -289,6 +289,76 @@ export const articles: Article[] = [
 </p>
 `.trim(),
   },
+
+  {
+    slug: "en-cok-sorulan-finans-sorulari",
+    title: "En Çok Sorulan 30 Finans Sorusu ve Cevapları",
+    description:
+      "Enflasyon, reel getiri, borsa, altın, kripto, portföy ve vergi hakkında en çok sorulan finans sorularının kısa, tarafsız cevapları. Sorunu seç, cevabını gör.",
+    date: "2026-07-31",
+    readingTime: "30 soru",
+    html: `
+<p class="lead">
+  Yatırıma yeni başlayanların en çok sorduğu 30 finans sorusunu ve sade cevaplarını bir araya
+  getirdik. Aşağıdaki başlıklardan sorunun kategorisine atla, sadece <span class="hl">merak ettiğin
+  soruya tıkla</span>, cevabı açılsın.
+</p>
+
+<div class="toc">
+  <a href="#temel">Temel Kavramlar</a>
+  <a href="#baslama">Yatırıma Başlama</a>
+  <a href="#borsa">Borsa &amp; Hisse</a>
+  <a href="#altin">Altın &amp; Döviz</a>
+  <a href="#kripto">Kripto</a>
+  <a href="#portfoy">Portföy &amp; Strateji</a>
+  <a href="#vergi">Vergi &amp; Yasal</a>
+</div>
+
+<h2 id="temel">Temel Kavramlar</h2>
+<details><summary>Enflasyon nedir?</summary><p>Enflasyon, mal ve hizmet fiyatlarının genel seviyesinin zaman içinde artmasıdır. Enflasyon yükseldikçe aynı parayla daha az şey alırsın; yani paranın alım gücü düşer. Türkiye gibi yüksek enflasyonlu ekonomilerde, yatırımda &ldquo;gerçek&rdquo; getiriye bakmak zorunlu hale gelir.</p></details>
+<details><summary>TÜFE nedir?</summary><p>TÜFE (Tüketici Fiyat Endeksi), hane halkının tükettiği mal ve hizmet sepetinin fiyat değişimini ölçen endekstir. Enflasyon oranı genellikle TÜFE&rsquo;nin yıllık değişimiyle ifade edilir ve TÜİK tarafından her ay açıklanır.</p></details>
+<details><summary>Reel getiri nedir?</summary><p>Reel getiri, enflasyondan arındırılmış gerçek getiridir; yatırımının alım gücünü ne kadar artırdığını gösterir. Nominal getirin %40 ama enflasyon %52 ise reel getirin negatiftir, yani aslında değer kaybetmişsindir.</p></details>
+<details><summary>Nominal getiri ne demek?</summary><p>Nominal getiri, paranın sayısal olarak ne kadar arttığıdır ve enflasyonu hesaba katmaz. 100.000 TL&rsquo;n 140.000 TL olduysa nominal getirin %40&rsquo;tır; ama gerçek kazancın için reel getiriye bakman gerekir.</p></details>
+<details><summary>Faiz nedir?</summary><p>Faiz, parayı ödünç vermenin ya da mevduatta tutmanın karşılığında alınan getiridir. Mevduat faizi enflasyonun üstündeyse alım gücün artar; altındaysa reel olarak kaybedersin.</p></details>
+<details><summary>Volatilite (oynaklık) nedir?</summary><p>Volatilite, bir varlığın fiyatının ne kadar dalgalandığını ölçer. Yüksek volatilite, fiyatın kısa sürede sert inip çıkması demektir; hem getiri potansiyelini hem de riski artırır.</p></details>
+<details><summary>Bileşik getiri nedir?</summary><p>Bileşik getiri, kazancın da kazanç getirmesidir: getirilerini yeniden yatırdığında para zamanla üstel olarak büyür. Uzun vadeli yatırımın en güçlü avantajlarından biridir.</p></details>
+<details><summary>Likidite nedir?</summary><p>Likidite, bir varlığı hızlıca ve değer kaybetmeden nakde çevirebilme kolaylığıdır. Mevduat çok likittir; gayrimenkul gibi varlıklar daha az likittir.</p></details>
+
+<h2 id="baslama">Yatırıma Başlama</h2>
+<details><summary>Yatırıma nasıl başlanır?</summary><p>Önce acil durum fonunu ayır, sonra risk profilini ve hedefini belirle, ardından küçük ve çeşitlendirilmiş şekilde başla. Anlamadığın ürüne yatırım yapma; öğrenerek ilerle. Bu bir yatırım tavsiyesi değildir.</p></details>
+<details><summary>Az parayla yatırım yapılır mı?</summary><p>Evet. Günümüzde düşük tutarlarla borsa, fon ve altın gibi araçlara erişilebilir. Önemli olan tutarın büyüklüğü değil, düzenlilik ve doğru alışkanlıktır.</p></details>
+<details><summary>Acil durum fonu nedir?</summary><p>Beklenmedik durumlar (iş kaybı, sağlık gideri) için kolayca erişebileceğin nakit tampondur; genelde 3-6 aylık giderini karşılaması önerilir. Yatırıma başlamadan önce oluşturulması mantıklıdır.</p></details>
+<details><summary>Risk profili nedir?</summary><p>Risk profili, ne kadar dalgalanmaya ve olası kayba tahammül edebildiğini, vadeni ve hedefini tanımlar (düşük / orta / yüksek). Sana uygun varlık dağılımı buna göre şekillenir.</p></details>
+
+<h2 id="borsa">Borsa &amp; Hisse</h2>
+<details><summary>Borsa nedir, nasıl çalışır?</summary><p>Borsa, şirket hisselerinin ve diğer menkul kıymetlerin alınıp satıldığı organize piyasadır. Bir hisse aldığında o şirkete küçük bir ortak olursun; değeri arz-talep ve şirketin performansıyla değişir.</p></details>
+<details><summary>Hisse senedi nedir?</summary><p>Hisse senedi, bir şirketteki ortaklık payını temsil eden menkul kıymettir. Şirket büyür ve kâr ederse hissenin değeri ve temettüsü seni de etkiler.</p></details>
+<details><summary>Endeks fonu nedir?</summary><p>Endeks fonu, BIST 100 gibi bir endeksi taklit eden ve içinde onlarca şirketi barındıran fondur. Tek tek hisse seçmek yerine otomatik çeşitlendirme sağlar; bireysel yatırımcı için sık önerilen bir başlangıçtır.</p></details>
+<details><summary>Temettü nedir?</summary><p>Temettü, bir şirketin kârından hissedarlarına dağıttığı paydır. Düzenli temettü, hissedeki fiyat artışı dışında ek bir gelir kaynağı olabilir.</p></details>
+<details><summary>BIST 100 nedir?</summary><p>BIST 100, Borsa İstanbul&rsquo;da işlem gören en büyük ve en likit 100 şirketten oluşan ana endekstir. Türkiye borsasının genel gidişatını temsil eder.</p></details>
+
+<h2 id="altin">Altın &amp; Döviz</h2>
+<details><summary>Altın iyi bir yatırım mı?</summary><p>Altın, uzun vadede enflasyona karşı klasik bir korunak olarak görülür; ancak kısa vadede oynaktır ve her dönem reel kazandırmaz. Genelde portföyün bir kısmı için değerlendirilir.</p></details>
+<details><summary>Gram altın mı çeyrek altın mı almalıyım?</summary><p>Gram altında işçilik payı genelde daha düşük olduğu için değer biriktirmede daha verimlidir; çeyrek altın ise bölünebilir ve pratik olmasıyla öne çıkar. Sadece yatırım amacıysa gram altın çoğu zaman daha mantıklıdır.</p></details>
+<details><summary>Dolar veya euro yatırımı mantıklı mı?</summary><p>Döviz, TL değer kaybettiğinde koruma sağlar ama faiz getirmez ve kurun durağan olduğu dönemlerde reel olarak eriyebilir. Tek başına değil, çeşitlendirilmiş bir dağılımın parçası olarak düşünülür.</p></details>
+
+<h2 id="kripto">Kripto Para</h2>
+<details><summary>Kripto para nedir?</summary><p>Kripto para, merkezi bir otoriteye bağlı olmadan blok zinciri teknolojisiyle çalışan dijital varlıktır (Bitcoin, Ethereum gibi). Yüksek getiri potansiyeli kadar yüksek risk taşır.</p></details>
+<details><summary>Kripto para riskli mi?</summary><p>Evet, kripto çok yüksek volatiliteye sahiptir; kısa sürede büyük değer kayıpları yaşanabilir. Genelde portföyün yalnızca kaybını göze alabileceğin küçük bir kısmıyla değerlendirilmesi önerilir.</p></details>
+<details><summary>Bitcoin nedir?</summary><p>Bitcoin, 2009&rsquo;da ortaya çıkan ilk ve en bilinen kripto paradır. Arzı sınırlıdır ve merkezi olmayan bir ağda çalışır; çok oynak bir varlık olarak kabul edilir.</p></details>
+
+<h2 id="portfoy">Portföy &amp; Strateji</h2>
+<details><summary>Portföy çeşitlendirme nedir?</summary><p>Parayı farklı davranan birden fazla varlığa dağıtarak riski azaltmaktır. Biri düşerken diğeri dengeler; tek bir kötü haberde her şeyini kaybetmezsin.</p></details>
+<details><summary>Uzun vade mi kısa vade mi daha iyi?</summary><p>Uzun vade, dalgalanmaların etkisini azaltır ve bileşik getiriden faydalanmayı sağlar. Kısa vadede piyasa tahmini zordur ve risk artar; vaden hedefine göre belirlenir.</p></details>
+<details><summary>Enflasyona karşı ne yapmalıyım?</summary><p>Nakiti eritmemek için enflasyonu yenme potansiyeli olan araçlara çeşitlendirilmiş şekilde yönelmek ve her varlığın reel getirisini izlemek genel bir yaklaşımdır. Amaç, sadece nominal değil reel olarak kazanmaktır.</p></details>
+<details><summary>Fon nedir?</summary><p>Fon, birçok yatırımcının parasının bir havuzda toplanıp profesyonelce farklı varlıklara yatırıldığı bir üründür. Küçük tutarla çeşitlendirme imkânı sağlar.</p></details>
+
+<h2 id="vergi">Vergi &amp; Yasal</h2>
+<details><summary>Borsa kazancında vergi var mı?</summary><p>Hisse ve yatırım araçlarının vergilendirilmesi araca, elde tutma süresine ve güncel mevzuata göre değişir. Kesin ve güncel durum için resmi kaynaklara veya bir mali müşavire başvurmak gerekir.</p></details>
+<details><summary>Kripto kazancı vergilendirilir mi?</summary><p>Kripto varlıkların vergilendirilmesi Türkiye&rsquo;de gelişen ve değişebilen bir konudur. Güncel yükümlülükler için resmi düzenlemeleri ve bir uzmanı takip etmek en doğrusudur.</p></details>
+<details><summary>Yatırım tavsiyesi almak yasal mı?</summary><p>Kişiye özel yatırım danışmanlığı Türkiye&rsquo;de SPK lisansı gerektiren bir faaliyettir. Lisanssız kişi veya kaynaklardan gelen &ldquo;şunu al, şunu sat&rdquo; tarzı öneriler risklidir; bilgi ile tavsiyeyi ayırmak önemlidir.</p></details>
+`.trim(),
+  },
 ];
 
 export function getArticle(slug: string): Article | undefined {
