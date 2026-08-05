@@ -112,7 +112,7 @@ Proje ücretsiz planlar üzerinde çalışıyor; bu bazı ek çözümler gerekti
 - **ChromaDB embedding modeli (~79 MB)** her build'de yeniden inmesin diye kalıcı Docker volume'ünde saklanıyor
 - **TCMB EVDS API'si** (evds2 → evds3 geçişi nedeniyle) istekleri engellediği için TÜFE oranı konfigürasyondan elle güncelleniyor
 
-Bu kararların ayrıntılı anlatımı Medium yazısında *(yayınlandıktan sonra link buraya eklenecek)*.
+Bu kararların ayrıntılı anlatımı: [Sıfırdan Bir Yatırım Platformu — Medium yazısı](https://medium.com/@omebalta559/s%C4%B1f%C4%B1rdan-bir-yat%C4%B1r%C4%B1m-platformu-next-js-fastapi-ve-gemini-ile-ak%C4%B1ll%C4%B1-portf%C3%B6y-bb657f5f5bdf)
 
 ---
 
