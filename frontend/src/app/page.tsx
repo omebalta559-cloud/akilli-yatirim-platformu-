@@ -555,7 +555,7 @@ function MarketCard({
 }) {
   return (
     <div
-      className="min-h-[280px] rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+      className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950 sm:min-h-[280px]"
       style={{ borderTopWidth: "3px", borderTopColor: accent }}
     >
       <div className="mb-3 flex items-center gap-2">
