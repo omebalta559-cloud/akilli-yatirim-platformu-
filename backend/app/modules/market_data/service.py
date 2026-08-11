@@ -9,6 +9,10 @@ from app.core.decorators import log_calls
 
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+# TEFAS (Turkiye Elektronik Fon Alim Satim Platformu) 2026'da yenilenen JSON
+# API'si; yatirim fonlarinin gunluk fiyatini doner. Login/anahtar gerektirmez,
+# dakikada ~6 istek siniri var (get_or_set cache bunu koruyor).
+TEFAS_FUND_URL = "https://www.tefas.gov.tr/api/funds/fonFiyatBilgiGetir"
 
 CACHE_TTL_SECONDS = 30
 HISTORY_CACHE_TTL_SECONDS = 3600
@@ -181,6 +185,10 @@ async def get_current_price(asset_type: str, asset_symbol: str) -> float | None:
             return None
         return quote["price"]
 
+    if asset_type == "fon":
+        data = await get_fund_price(asset_symbol)
+        return data.get("price")
+
     return None
 
 
@@ -209,3 +217,39 @@ async def get_price_history(symbol: str, range_: str = "1y", interval: str = "1w
 
     cache_key = f"market:history:{symbol}:{range_}:{interval}"
     return await get_or_set(cache_key, HISTORY_CACHE_TTL_SECONDS, fetch)
+
+
+@log_calls
+async def get_fund_price(fund_code: str) -> dict:
+    """TEFAS'tan bir yatirim fonunun (orn. KUT) en guncel gunluk fiyatini ceker."""
+    code = fund_code.upper()
+
+    async def fetch():
+        payload = {"fonKodu": code, "dil": "TR", "periyod": 1}
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://www.tefas.gov.tr/",
+        }
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.post(TEFAS_FUND_URL, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+
+        results = data.get("resultList") or []
+        if not results:
+            return {"code": code, "name": code, "price": None, "date": None}
+
+        # resultList tarihe gore artan sirada gelir; son eleman en guncel fiyattir.
+        latest = results[-1]
+        return {
+            "code": code,
+            "name": latest.get("fonUnvan", code),
+            "price": latest.get("fiyat"),
+            "date": latest.get("tarih"),
+        }
+
+    # Fon fiyatlari gunde bir kez aciklanir; uzun sureli onbellek yeterli ve
+    # TEFAS'in dakikalik istek sinirina takilmayi onler.
+    return await get_or_set(f"market:fund:{code}", HISTORY_CACHE_TTL_SECONDS, fetch)

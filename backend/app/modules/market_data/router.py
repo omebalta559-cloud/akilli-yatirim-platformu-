@@ -33,6 +33,11 @@ async def price_history(symbol: str, range: str = "1y", interval: str = "1wk"):
     return await service.get_price_history(symbol, range, interval)
 
 
+@router.get("/fund")
+async def fund_price(code: str):
+    return await service.get_fund_price(code)
+
+
 @router.get("/inflation")
 async def inflation_rate():
     return {
