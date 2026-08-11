@@ -17,9 +17,9 @@ export default function FloatingAdvisorButton() {
     setIsLoggedIn(Boolean(getToken()));
   }, [pathname]);
 
-  // Ana sayfa (landing / dashboard) ve asistan sayfasinin kendisinde gizli;
-  // yalnizca ic sayfalarda (portfoy, alarmlar, grafikler vb.) gorunur.
-  if (!isLoggedIn || pathname === "/" || pathname === "/advisor") return null;
+  // Giris yapmamis landing sayfasinda (isLoggedIn false) ve asistan
+  // sayfasinin kendisinde gizli; diger tum sayfalarda gorunur.
+  if (!isLoggedIn || pathname === "/advisor") return null;
 
   return (
     <div className="fixed bottom-5 right-5 z-50">
