@@ -144,8 +144,12 @@ export default function Home() {
       if (forexResult.status === "fulfilled") setForex(forexResult.value);
       if (goldResult.status === "fulfilled") {
         const goldData: GoldResponse = goldResult.value;
-        const oncelikliKalemler = ["Gram Altın", "Çeyrek Altın", "Yarım Altın", "Gümüş"];
-        setGold(goldData.result.filter((item) => oncelikliKalemler.includes(item.name)));
+        const siraliKalemler = ["Gram Altın", "Çeyrek Altın", "Yarım Altın", "Tam Altın", "Gümüş"];
+        setGold(
+          siraliKalemler
+            .map((name) => goldData.result.find((item) => item.name === name))
+            .filter((item): item is GoldItem => item !== undefined)
+        );
       }
       if (stocksResult.status === "fulfilled") {
         const stocksData: StockResponse = stocksResult.value;
@@ -425,6 +429,35 @@ export default function Home() {
             </div>
 
             <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <MarketCard title="Altın & Gümüş (TL)" accent="#eda100" icon={<GemIcon />}>
+                {gold ? (
+                  <ul className="flex flex-col gap-2">
+                    {gold.map((item) => (
+                      <li key={item.name} className="flex w-full items-center justify-between text-sm">
+                        <span className="text-zinc-500">{item.name}</span>
+                        <span className="flex items-baseline gap-2">
+                          <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                            {formatNumber(item.selling)}
+                          </span>
+                          {item.rate !== undefined && (
+                            <span
+                              className={`text-xs font-medium ${
+                                item.rate >= 0 ? "text-emerald-600" : "text-red-500"
+                              }`}
+                            >
+                              {item.rate >= 0 ? "+" : ""}
+                              {item.rate}%
+                            </span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Loading />
+                )}
+              </MarketCard>
+
               <MarketCard title="Kripto (USD)" accent="#2a78d6" icon={<CoinIcon />}>
                 {crypto ? (
                   <ul className="flex flex-col gap-2">
@@ -473,35 +506,6 @@ export default function Home() {
                         </span>
                       </li>
                     ) : null}
-                  </ul>
-                ) : (
-                  <Loading />
-                )}
-              </MarketCard>
-
-              <MarketCard title="Altın & Gümüş (TL)" accent="#eda100" icon={<GemIcon />}>
-                {gold ? (
-                  <ul className="flex flex-col gap-2">
-                    {gold.map((item) => (
-                      <li key={item.name} className="flex w-full items-center justify-between text-sm">
-                        <span className="text-zinc-500">{item.name}</span>
-                        <span className="flex items-baseline gap-2">
-                          <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                            {formatNumber(item.selling)}
-                          </span>
-                          {item.rate !== undefined && (
-                            <span
-                              className={`text-xs font-medium ${
-                                item.rate >= 0 ? "text-emerald-600" : "text-red-500"
-                              }`}
-                            >
-                              {item.rate >= 0 ? "+" : ""}
-                              {item.rate}%
-                            </span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
                   </ul>
                 ) : (
                   <Loading />
