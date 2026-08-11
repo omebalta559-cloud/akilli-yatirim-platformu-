@@ -191,6 +191,18 @@ export default function AdvisorPage() {
         })
       );
 
+      const fonSymbols = [
+        ...new Set(holdings.filter((h) => h.asset_type === "fon").map((h) => h.asset_symbol)),
+      ];
+      const fonPrices: Record<string, number> = {};
+      await Promise.all(
+        fonSymbols.map(async (code) => {
+          const res = await fetch(`${API_URL}/market/fund?code=${code}`);
+          const data = await res.json();
+          if (data.price) fonPrices[code] = data.price;
+        })
+      );
+
       const needsGold = holdings.some((h) => h.asset_type === "altin");
       const goldData = needsGold ? await (await fetch(`${API_URL}/market/gold`)).json() : null;
 
@@ -210,6 +222,8 @@ export default function AdvisorPage() {
         } else if (h.asset_type === "hisse" && stockData) {
           const item = stockData.result.find((s: { name: string }) => s.name === h.asset_symbol);
           if (item) prices[h.id] = item.price;
+        } else if (h.asset_type === "fon") {
+          if (fonPrices[h.asset_symbol]) prices[h.id] = fonPrices[h.asset_symbol];
         }
       }
 

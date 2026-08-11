@@ -112,6 +112,19 @@ export default function PortfolioPage() {
         })
       );
 
+      // Yatirim fonlari: TEFAS'tan gelen fiyat zaten TL cinsinden, donusum yok.
+      const fonSymbols = [
+        ...new Set(holdings!.filter((h) => h.asset_type === "fon").map((h) => h.asset_symbol)),
+      ];
+      const fonPrices: Record<string, number> = {};
+      await Promise.all(
+        fonSymbols.map(async (code) => {
+          const res = await fetch(`${API_URL}/market/fund?code=${code}`);
+          const data = await res.json();
+          if (data.price) fonPrices[code] = data.price;
+        })
+      );
+
       const needsGold = holdings!.some((h) => h.asset_type === "altin");
       const goldData = needsGold
         ? await (await fetch(`${API_URL}/market/gold`)).json()
@@ -141,6 +154,8 @@ export default function PortfolioPage() {
             (s: { name: string }) => s.name === h.asset_symbol
           );
           if (item) prices[h.id] = item.price;
+        } else if (h.asset_type === "fon") {
+          if (fonPrices[h.asset_symbol]) prices[h.id] = fonPrices[h.asset_symbol];
         }
       }
 
@@ -352,6 +367,7 @@ export default function PortfolioPage() {
                 <option value="altin">Altın / Gümüş</option>
                 <option value="hisse">Hisse Senedi</option>
                 <option value="gayrimenkul">Gayrimenkul</option>
+                <option value="fon">Yatırım Fonu</option>
                 <option value="diger">Diğer</option>
               </select>
             </label>
@@ -609,6 +625,7 @@ const ASSET_TYPE_LABELS: Record<string, string> = {
   altin: "Altın / Gümüş",
   hisse: "Hisse Senedi (BIST)",
   gayrimenkul: "Gayrimenkul (GYO)",
+  fon: "Yatırım Fonu",
   diger: "Diğer",
 };
 

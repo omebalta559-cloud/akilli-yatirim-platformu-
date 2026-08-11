@@ -25,6 +25,7 @@ export const SYMBOLS_BY_TYPE: Record<string, string[]> = {
     "YKBNK",
   ],
   gayrimenkul: ["EKGYO", "ISGYO", "TRGYO", "SNGYO", "YGGYO"],
+  fon: ["KUT", "KTJ", "KLU"],
   diger: [],
 };
 
@@ -59,9 +60,18 @@ export const REAL_ESTATE_LABELS: Record<string, string> = {
   YGGYO: "Yeşil GYO",
 };
 
+// TEFAS fon kodlari -> okunabilir isim. Liste kisadir; kullanici listede
+// olmayan baska bir fon kodunu "Diger (elle yaz)" ile de ekleyebilir.
+export const FUND_NAMES: Record<string, string> = {
+  KUT: "Kuveyt Türk Kıymetli Madenler",
+  KTJ: "Kuveyt Türk Teknoloji",
+  KLU: "Kuveyt Türk Para Piyasası (TL)",
+};
+
 export function getSymbolLabel(assetType: string, symbol: string): string {
   if (assetType === "altin") return GOLD_NAMES[symbol] ?? symbol;
   if (assetType === "gayrimenkul") return REAL_ESTATE_LABELS[symbol] ?? symbol;
+  if (assetType === "fon") return FUND_NAMES[symbol] ?? symbol;
   return symbol;
 }
 
@@ -88,4 +98,5 @@ export const CHART_CATEGORY_LABELS: Record<string, string> = {
   altin: "Altın / Gümüş",
   hisse: "Hisse Senedi (BIST)",
   gayrimenkul: "Gayrimenkul (GYO)",
+  fon: "Yatırım Fonu",
 };
