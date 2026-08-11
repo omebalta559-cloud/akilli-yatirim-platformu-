@@ -6,9 +6,9 @@ import Link from "next/link";
 import { getToken } from "@/lib/auth";
 
 // Sayfanin sag altinda sabit duran, tiklayinca Yatirim Asistani'na goturen
-// buton. Ne oldugu net anlasilsin diye ikonun yaninda "Yatirim Asistani"
-// yazisi da var. Yalnizca giris yapmis kullaniciya ve asistan sayfasi
-// disindaki sayfalarda gosterilir.
+// gradientli, hafif parlayan (glow) hap buton. Yaninda "Yatirim Asistani"
+// yazisi ile ne oldugu net anlasilir. Yalnizca giris yapmis kullaniciya ve
+// asistan sayfasi disindaki sayfalarda gosterilir.
 export default function FloatingAdvisorButton() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,29 +17,34 @@ export default function FloatingAdvisorButton() {
     setIsLoggedIn(Boolean(getToken()));
   }, [pathname]);
 
-  if (!isLoggedIn || pathname === "/advisor") return null;
+  // Ana sayfa (landing / dashboard) ve asistan sayfasinin kendisinde gizli;
+  // yalnizca ic sayfalarda (portfoy, alarmlar, grafikler vb.) gorunur.
+  if (!isLoggedIn || pathname === "/" || pathname === "/advisor") return null;
 
   return (
-    <Link
-      href="/advisor"
-      aria-label="Yatırım Asistanı'na git"
-      className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-indigo-600 py-3 pl-4 pr-5 text-white shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:bg-indigo-500"
-    >
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="shrink-0"
+    <div className="fixed bottom-5 right-5 z-50">
+      {/* arkada hafif nabizli parlama (glow) */}
+      <span
+        aria-hidden
+        className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-600 to-sky-500 opacity-60 blur-lg animate-pulse"
+      />
+      <Link
+        href="/advisor"
+        aria-label="Yatırım Asistanı'na git"
+        className="relative flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-sky-500 py-3 pl-4 pr-5 text-white shadow-lg shadow-indigo-500/40 ring-1 ring-white/20 transition-transform duration-200 hover:scale-105"
       >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        <path d="M9 10h6M9 13h4" />
-      </svg>
-      <span className="whitespace-nowrap text-sm font-semibold">Yatırım Asistanı</span>
-    </Link>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="shrink-0"
+        >
+          <path d="M12 2.5l1.7 4.1a5 5 0 0 0 2.7 2.7L20.5 11l-4.1 1.7a5 5 0 0 0-2.7 2.7L12 19.5l-1.7-4.1a5 5 0 0 0-2.7-2.7L3.5 11l4.1-1.7a5 5 0 0 0 2.7-2.7z" />
+          <path d="M19 15.5l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6z" />
+        </svg>
+        <span className="whitespace-nowrap text-sm font-semibold">Yatırım Asistanı</span>
+      </Link>
+    </div>
   );
 }
