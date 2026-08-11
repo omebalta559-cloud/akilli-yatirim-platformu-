@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import KeepAlivePing from "@/components/KeepAlivePing";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import FloatingAdvisorButton from "@/components/FloatingAdvisorButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -88,6 +89,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ServiceWorkerRegister />
         <KeepAlivePing />
+        <FloatingAdvisorButton />
         <div className="flex-1">{children}</div>
         <footer className="border-t border-zinc-200 bg-zinc-50 px-6 py-3 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-black">
           Bu platform ve içerdiği yapay zekâ asistanı yatırım tavsiyesi değildir, yalnızca

@@ -353,20 +353,12 @@ export default function Home() {
                   Portföyüme Git
                 </Link>
               ) : (
-                <>
-                  <Link
-                    href="/register"
-                    className="rounded-xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-400"
-                  >
-                    Ücretsiz Başla
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                  >
-                    Giriş Yap
-                  </Link>
-                </>
+                <Link
+                  href="/login"
+                  className="rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Giriş Yap
+                </Link>
               )}
             </div>
 
@@ -407,18 +399,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Giris yapmamis ziyaretci icin kapanis CTA */}
-        <section className="flex flex-col items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-6 py-10 text-center dark:border-zinc-800 dark:bg-zinc-950">
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
-            Yatırımlarının gerçek durumunu bugün gör.
-          </h3>
-          <Link
-            href="/register"
-            className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-          >
-            Ücretsiz Başla
-          </Link>
-        </section>
           </>
         )}
 
@@ -479,14 +459,20 @@ export default function Home() {
               <MarketCard title="Döviz Kurları" accent="#1baf7a" icon={<ExchangeIcon />}>
                 {forex ? (
                   <ul className="flex flex-col gap-2">
-                    {Object.entries(forex.rates).map(([symbol, rate]) => (
-                      <li key={symbol} className="flex w-full items-center justify-between text-sm">
-                        <span className="text-zinc-500">USD/{symbol}</span>
+                    <li className="flex w-full items-center justify-between text-sm">
+                      <span className="text-zinc-500">USD/TRY</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                        {formatNumber(forex.rates.TRY)}
+                      </span>
+                    </li>
+                    {forex.rates.EUR ? (
+                      <li className="flex w-full items-center justify-between text-sm">
+                        <span className="text-zinc-500">EUR/TRY</span>
                         <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                          {formatNumber(rate)}
+                          {formatNumber(forex.rates.TRY / forex.rates.EUR)}
                         </span>
                       </li>
-                    ))}
+                    ) : null}
                   </ul>
                 ) : (
                   <Loading />
