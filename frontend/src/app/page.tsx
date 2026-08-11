@@ -425,7 +425,7 @@ export default function Home() {
               <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
                 Canlı piyasa fiyatları
               </h3>
-              <span className="text-xs text-zinc-400">Kripto · Döviz · Altın · BIST</span>
+              <span className="text-xs text-zinc-400">Altın · Döviz · Kripto · BIST</span>
             </div>
 
             <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -458,6 +458,29 @@ export default function Home() {
                 )}
               </MarketCard>
 
+              <MarketCard title="Döviz Kurları" accent="#1baf7a" icon={<ExchangeIcon />}>
+                {forex ? (
+                  <ul className="flex flex-col gap-2">
+                    <li className="flex w-full items-center justify-between text-sm">
+                      <span className="text-zinc-500">USD/TRY</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                        {formatNumber(forex.rates.TRY)}
+                      </span>
+                    </li>
+                    {forex.rates.EUR ? (
+                      <li className="flex w-full items-center justify-between text-sm">
+                        <span className="text-zinc-500">EUR/TRY</span>
+                        <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                          {formatNumber(forex.rates.TRY / forex.rates.EUR)}
+                        </span>
+                      </li>
+                    ) : null}
+                  </ul>
+                ) : (
+                  <Loading />
+                )}
+              </MarketCard>
+
               <MarketCard title="Kripto (USD)" accent="#2a78d6" icon={<CoinIcon />}>
                 {crypto ? (
                   <ul className="flex flex-col gap-2">
@@ -483,29 +506,6 @@ export default function Home() {
                           </span>
                         </li>
                       ))}
-                  </ul>
-                ) : (
-                  <Loading />
-                )}
-              </MarketCard>
-
-              <MarketCard title="Döviz Kurları" accent="#1baf7a" icon={<ExchangeIcon />}>
-                {forex ? (
-                  <ul className="flex flex-col gap-2">
-                    <li className="flex w-full items-center justify-between text-sm">
-                      <span className="text-zinc-500">USD/TRY</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                        {formatNumber(forex.rates.TRY)}
-                      </span>
-                    </li>
-                    {forex.rates.EUR ? (
-                      <li className="flex w-full items-center justify-between text-sm">
-                        <span className="text-zinc-500">EUR/TRY</span>
-                        <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                          {formatNumber(forex.rates.TRY / forex.rates.EUR)}
-                        </span>
-                      </li>
-                    ) : null}
                   </ul>
                 ) : (
                   <Loading />
