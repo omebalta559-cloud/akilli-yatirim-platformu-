@@ -89,6 +89,16 @@ type StockResponse = {
   result: StockItem[];
 };
 
+type FundItem = {
+  code: string;
+  name: string;
+  price: number | null;
+  date: string | null;
+};
+
+// Ana sayfada gosterilen ornek yatirim fonlari (Kuveyt Turk katilim fonlari).
+const FUND_CODES = ["KUT", "KTJ", "KLU"];
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -97,6 +107,7 @@ export default function Home() {
   const [forex, setForex] = useState<ForexRates | null>(null);
   const [gold, setGold] = useState<GoldItem[] | null>(null);
   const [stocks, setStocks] = useState<StockItem[] | null>(null);
+  const [funds, setFunds] = useState<FundItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -154,6 +165,25 @@ export default function Home() {
       if (stocksResult.status === "fulfilled") {
         const stocksData: StockResponse = stocksResult.value;
         setStocks(stocksData.result.slice(0, 5));
+      }
+
+      // Yatirim fonlari: her biri ayri bir TEFAS cagrisi (backend'de onbellekli).
+      const fundResults = await Promise.allSettled(
+        FUND_CODES.map((code) =>
+          fetchWithTimeout(`${API_URL}/market/fund?code=${code}`).then((r) => {
+            if (!r.ok) throw new Error("fund");
+            return r.json() as Promise<FundItem>;
+          })
+        )
+      );
+      if (!cancelled) {
+        const loadedFunds = fundResults
+          .filter(
+            (r): r is PromiseFulfilledResult<FundItem> =>
+              r.status === "fulfilled" && r.value?.price != null
+          )
+          .map((r) => r.value);
+        if (loadedFunds.length > 0) setFunds(loadedFunds);
       }
 
       const failedCount = [cryptoResult, forexResult, goldResult, stocksResult].filter(
@@ -428,7 +458,7 @@ export default function Home() {
               <span className="text-xs text-zinc-400">Altın · Döviz · Kripto · BIST</span>
             </div>
 
-            <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <MarketCard title="Altın & Gümüş (TL)" accent="#eda100" icon={<GemIcon />}>
                 {gold ? (
                   <ul className="flex flex-col gap-2">
@@ -538,6 +568,25 @@ export default function Home() {
                   <Loading />
                 )}
               </MarketCard>
+
+              <MarketCard title="Yatırım Fonları (TL)" accent="#7c3aed" icon={<FundIcon />}>
+                {funds ? (
+                  <ul className="flex flex-col gap-2">
+                    {funds.map((f) => (
+                      <li key={f.code} className="flex w-full items-center justify-between text-sm">
+                        <span className="text-zinc-500" title={f.name}>
+                          {f.code}
+                        </span>
+                        <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                          {f.price != null ? formatNumber(f.price) : "-"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Loading />
+                )}
+              </MarketCard>
             </section>
           </>
         )}
@@ -611,6 +660,16 @@ function ChartIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M4 20V10M11 20V4M18 20v-7" />
+    </svg>
+  );
+}
+
+function FundIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" />
+      <path d="M7 15l3-3 3 2 4-5" />
+      <circle cx="20" cy="9" r="1" fill="currentColor" />
     </svg>
   );
 }
