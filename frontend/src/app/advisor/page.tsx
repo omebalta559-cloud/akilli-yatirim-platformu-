@@ -9,6 +9,7 @@ import { getToken } from "@/lib/auth";
 import RiskProfileAdvisor from "@/components/RiskProfileAdvisor";
 import { CRYPTO_IDS, GOLD_NAMES } from "@/lib/marketSymbols";
 import { getApiUrl } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 
 const API_URL = getApiUrl();
 
@@ -104,6 +105,7 @@ function buildWelcomeMessage(totals: CategoryTotals, riskProfile: string): strin
 }
 
 export default function AdvisorPage() {
+  const { lang } = useI18n();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"profil" | "sohbet">("profil");
   const [portfolioSummary, setPortfolioSummary] = useState("");
@@ -303,6 +305,7 @@ export default function AdvisorPage() {
         body: JSON.stringify({
           question: userMessage.content,
           portfolio_summary: portfolioSummary,
+          lang,
         }),
       });
       const data = await res.json();

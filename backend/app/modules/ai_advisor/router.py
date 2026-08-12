@@ -67,6 +67,7 @@ async def ask(
             payload.portfolio_summary,
             chart_context,
             conversation_history,
+            payload.lang,
         )
     except ResourceExhausted:
         logger.warning("Gemini gunluk kota asildi (user_id=%s)", user_id)
