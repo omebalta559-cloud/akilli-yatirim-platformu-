@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Menu, X, Sparkles, Target, TrendingUp, Bell, LineChart, Wallet } from "lucide-react";
 import { clearToken, getToken } from "@/lib/auth";
 import { getApiUrl } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const NAV_LINK_CLASS =
   "rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900";
@@ -14,38 +16,38 @@ const API_URL = getApiUrl();
 const FEATURES = [
   {
     icon: <Sparkles className="h-5 w-5" />,
-    title: "AI Yatırım Asistanı",
-    desc: "Güncel finans haberlerini ve senin portföyünü bilen yapay zekâya sor; piyasayı, riskleri ve seçenekleri sade bir dille açıklasın.",
+    titleKey: "feat.advisor.title",
+    descKey: "feat.advisor.desc",
     highlight: true,
   },
   {
     icon: <Target className="h-5 w-5" />,
-    title: "Risk Profili Analizi",
-    desc: "Risk toleransın, vaden ve hedefine göre sana uygun örnek varlık dağılımını (borsa / kripto / altın / döviz) gör.",
+    titleKey: "feat.risk.title",
+    descKey: "feat.risk.desc",
     highlight: true,
   },
   {
     icon: <Wallet className="h-5 w-5" />,
-    title: "Portföy Takibi",
-    desc: "Tüm varlıklarını ekle; toplam değerini ve kâr/zararını tek bakışta gör.",
+    titleKey: "feat.portfolio.title",
+    descKey: "feat.portfolio.desc",
     highlight: false,
   },
   {
     icon: <Bell className="h-5 w-5" />,
-    title: "Fiyat Alarmları",
-    desc: "Bir varlık hedef fiyatına ulaştığında anında e-posta ile haberdar ol, fırsatı kaçırma.",
+    titleKey: "feat.alerts.title",
+    descKey: "feat.alerts.desc",
     highlight: false,
   },
   {
     icon: <LineChart className="h-5 w-5" />,
-    title: "Canlı Fiyatlar & Grafikler",
-    desc: "Kripto, döviz, altın ve BIST hisselerinin anlık fiyatları ve geçmiş grafikleri — hepsi güncel.",
+    titleKey: "feat.livePrices.title",
+    descKey: "feat.livePrices.desc",
     highlight: false,
   },
   {
     icon: <TrendingUp className="h-5 w-5" />,
-    title: "Reel Getiri Takibi",
-    desc: "Enflasyona göre gerçekte kazandın mı kaybettin mi — nominal değil, alım gücü bazında.",
+    titleKey: "feat.real.title",
+    descKey: "feat.real.desc",
     highlight: false,
   },
 ];
@@ -100,6 +102,7 @@ type FundItem = {
 const FUND_CODES = ["KUT", "KTJ", "KLU"];
 
 export default function Home() {
+  const { t } = useI18n();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -192,8 +195,8 @@ export default function Home() {
       if (failedCount > 0) {
         setError(
           failedCount === 4
-            ? "Piyasa verileri yüklenirken bir hata oluştu. Sunucu uyanıyor olabilir, birkaç saniye sonra tekrar deneyin."
-            : "Bazı piyasa verileri şu an alınamadı, diğerleri gösteriliyor. Eksik olanlar için tekrar deneyin."
+            ? t("error.marketAll")
+            : t("error.marketSome")
         );
       }
     }
@@ -217,25 +220,26 @@ export default function Home() {
             </Link>
 
             <div className="hidden flex-wrap items-center justify-end gap-1 sm:flex">
+              <LanguageSwitcher className="mr-1" />
               <Link href="/blog" className={NAV_LINK_CLASS}>
-                Blog
+                {t("nav.blog")}
               </Link>
               {isLoggedIn ? (
                 <>
                   <Link href="/" className={NAV_LINK_CLASS}>
-                    Güncel Fiyatlar
+                    {t("nav.prices")}
                   </Link>
                   <Link href="/charts" className={NAV_LINK_CLASS}>
-                    Grafikler
+                    {t("nav.charts")}
                   </Link>
                   <Link href="/portfolio" className={NAV_LINK_CLASS}>
-                    Portföyüm
+                    {t("nav.portfolio")}
                   </Link>
                   <Link href="/alerts" className={NAV_LINK_CLASS}>
-                    Alarmlar
+                    {t("nav.alerts")}
                   </Link>
                   <Link href="/advisor" className={NAV_LINK_CLASS}>
-                    Yatırım Asistanı
+                    {t("nav.advisor")}
                   </Link>
                   <span className="mx-1 h-5 w-px bg-zinc-200 dark:bg-zinc-800" />
                   <button
@@ -243,19 +247,19 @@ export default function Home() {
                     className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                   >
                     <LogoutIcon />
-                    Çıkış Yap
+                    {t("nav.logout")}
                   </button>
                 </>
               ) : (
                 <>
                   <Link href="/login" className={NAV_LINK_CLASS}>
-                    Giriş Yap
+                    {t("nav.login")}
                   </Link>
                   <Link
                     href="/register"
                     className="ml-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
                   >
-                    Kayıt Ol
+                    {t("nav.register")}
                   </Link>
                 </>
               )}
@@ -263,7 +267,7 @@ export default function Home() {
 
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              aria-label={menuOpen ? "Menüyü kapat" : "Menüyü aç"}
+              aria-label={menuOpen ? t("nav.menuClose") : t("nav.menuOpen")}
               className="rounded-lg p-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900 sm:hidden"
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -272,37 +276,40 @@ export default function Home() {
 
           {menuOpen && (
             <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950 sm:hidden">
+              <div className="flex justify-center pb-1">
+                <LanguageSwitcher />
+              </div>
               <Link href="/blog" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
-                Blog
+                {t("nav.blog")}
               </Link>
               {isLoggedIn ? (
                 <>
                   <Link href="/" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
-                    Güncel Fiyatlar
+                    {t("nav.prices")}
                   </Link>
                   <Link href="/charts" className={`${NAV_LINK_CLASS} text-center`} onClick={() => setMenuOpen(false)}>
-                    Grafikler
+                    {t("nav.charts")}
                   </Link>
                   <Link
                     href="/portfolio"
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Portföyüm
+                    {t("nav.portfolio")}
                   </Link>
                   <Link
                     href="/alerts"
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Alarmlar
+                    {t("nav.alerts")}
                   </Link>
                   <Link
                     href="/advisor"
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Yatırım Asistanı
+                    {t("nav.advisor")}
                   </Link>
                   <div className="my-1 h-px bg-zinc-200 dark:bg-zinc-800" />
                   <button
@@ -310,7 +317,7 @@ export default function Home() {
                     className="flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                   >
                     <LogoutIcon />
-                    Çıkış Yap
+                    {t("nav.logout")}
                   </button>
                 </>
               ) : (
@@ -320,14 +327,14 @@ export default function Home() {
                     className={`${NAV_LINK_CLASS} text-center`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    Giriş Yap
+                    {t("nav.login")}
                   </Link>
                   <Link
                     href="/register"
                     className="rounded-lg bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Kayıt Ol
+                    {t("nav.register")}
                   </Link>
                 </>
               )}
@@ -366,16 +373,15 @@ export default function Home() {
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-100 ring-1 ring-white/15">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Yapay zekâ destekli akıllı portföy platformu
+              {t("hero.badge")}
             </span>
             <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-tight sm:text-5xl">
-              Yatırımlarını tek yerde topla,{" "}
-              <span className="text-emerald-400">akıllıca</span> yönet.
+              {t("hero.titleLead")}{" "}
+              <span className="text-emerald-400">{t("hero.titleEmphasis")}</span>{" "}
+              {t("hero.titleTail")}
             </h2>
             <p className="mt-4 max-w-xl text-sm text-indigo-200/80 sm:text-base">
-              Borsa, kripto, altın, döviz, mevduat… hepsi tek panelde. Yapay zekâ
-              asistanına sor, risk profilini çıkar ve enflasyona göre{" "}
-              <span className="font-medium text-white">gerçek getirini</span> gör.
+              {t("hero.subtitle")}
             </p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -384,20 +390,20 @@ export default function Home() {
                   href="/portfolio"
                   className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-950 shadow-sm transition hover:bg-indigo-50"
                 >
-                  Portföyüme Git
+                  {t("hero.ctaPortfolio")}
                 </Link>
               ) : (
                 <Link
                   href="/login"
                   className="rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
-                  Giriş Yap
+                  {t("hero.ctaLogin")}
                 </Link>
               )}
             </div>
 
             <p className="mt-4 text-xs text-indigo-300/60">
-              Kredi kartı gerekmez · Ücretsiz kayıt · Türkiye piyasalarına özel
+              {t("hero.disclaimer")}
             </p>
           </div>
         </section>
@@ -405,10 +411,10 @@ export default function Home() {
         {/* OZELLIKLER - uygulamanin can alici kisimlari */}
         <section>
           <h3 className="text-center text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
-            Sadece takip değil — akıllı bir portföy asistanı
+            {t("features.title")}
           </h3>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-zinc-500">
-            Yapay zekâ ve kişisel risk analizi ile yatırımlarını daha bilinçli yönet.
+            {t("features.subtitle")}
           </p>
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -425,8 +431,8 @@ export default function Home() {
                   {f.icon}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-50">{f.title}</h4>
-                  <p className="mt-1 text-sm text-zinc-500">{f.desc}</p>
+                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-50">{t(f.titleKey)}</h4>
+                  <p className="mt-1 text-sm text-zinc-500">{t(f.descKey)}</p>
                 </div>
               </div>
             ))}
@@ -446,20 +452,20 @@ export default function Home() {
                   onClick={() => setRetryCount((c) => c + 1)}
                   className="rounded-lg border border-red-200 px-3 py-1 text-sm font-medium text-red-500 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950"
                 >
-                  Tekrar Dene
+                  {t("common.retry")}
                 </button>
               </div>
             )}
 
             <div className="-mb-2 flex items-baseline justify-between">
               <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                Canlı piyasa fiyatları
+                {t("prices.heading")}
               </h3>
-              <span className="text-xs text-zinc-400">Altın · Döviz · Kripto · BIST</span>
+              <span className="text-xs text-zinc-400">{t("prices.tag")}</span>
             </div>
 
             <section className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <MarketCard title="Altın & Gümüş (TL)" accent="#eda100" icon={<GemIcon />}>
+              <MarketCard title={t("card.gold")} accent="#eda100" icon={<GemIcon />}>
                 {gold ? (
                   <ul className="flex flex-col gap-2">
                     {gold.map((item) => (
@@ -488,7 +494,7 @@ export default function Home() {
                 )}
               </MarketCard>
 
-              <MarketCard title="Döviz Kurları" accent="#1baf7a" icon={<ExchangeIcon />}>
+              <MarketCard title={t("card.forex")} accent="#1baf7a" icon={<ExchangeIcon />}>
                 {forex ? (
                   <ul className="flex flex-col gap-2">
                     <li className="flex w-full items-center justify-between text-sm">
@@ -511,7 +517,7 @@ export default function Home() {
                 )}
               </MarketCard>
 
-              <MarketCard title="Kripto (USD)" accent="#2a78d6" icon={<CoinIcon />}>
+              <MarketCard title={t("card.crypto")} accent="#2a78d6" icon={<CoinIcon />}>
                 {crypto ? (
                   <ul className="flex flex-col gap-2">
                     {Object.entries(crypto)
@@ -542,7 +548,7 @@ export default function Home() {
                 )}
               </MarketCard>
 
-              <MarketCard title="Borsa (BIST)" accent="#008300" icon={<ChartIcon />}>
+              <MarketCard title={t("card.stocks")} accent="#008300" icon={<ChartIcon />}>
                 {stocks ? (
                   <ul className="flex flex-col gap-2">
                     {stocks.map((item) => (
@@ -569,7 +575,7 @@ export default function Home() {
                 )}
               </MarketCard>
 
-              <MarketCard title="Yatırım Fonları (TL)" accent="#7c3aed" icon={<FundIcon />}>
+              <MarketCard title={t("card.funds")} accent="#7c3aed" icon={<FundIcon />}>
                 {funds ? (
                   <ul className="flex flex-col gap-2">
                     {funds.map((f) => (
@@ -675,5 +681,6 @@ function FundIcon() {
 }
 
 function Loading() {
-  return <p className="text-sm text-zinc-400">Yükleniyor...</p>;
+  const { t } = useI18n();
+  return <p className="text-sm text-zinc-400">{t("common.loading")}</p>;
 }
