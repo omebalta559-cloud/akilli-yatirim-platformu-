@@ -420,7 +420,7 @@ export default function Home() {
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {FEATURES.map((f) => (
               <div
-                key={f.title}
+                key={f.titleKey}
                 className={`flex gap-4 rounded-xl border p-5 ${
                   f.highlight
                     ? "border-indigo-200 bg-indigo-50/50 dark:border-indigo-900 dark:bg-indigo-950/30"
