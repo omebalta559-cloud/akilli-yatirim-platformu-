@@ -105,7 +105,7 @@ function buildWelcomeMessage(totals: CategoryTotals, riskProfile: string): strin
 }
 
 export default function AdvisorPage() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"profil" | "sohbet">("profil");
   const [portfolioSummary, setPortfolioSummary] = useState("");
@@ -335,24 +335,24 @@ export default function AdvisorPage() {
         }`}
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Yatırım Asistanı</h1>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{t("advisor.title")}</h1>
           <div className="flex items-center gap-4">
             {activeTab === "sohbet" && messages.length > 0 && (
               <button
                 onClick={handleClearHistory}
                 className="text-sm font-medium text-zinc-500"
               >
-                Sohbeti Temizle
+                {t("advisor.clearChat")}
               </button>
             )}
             <Link href="/" className="text-sm font-medium text-zinc-500">
-              Dashboard&apos;a dön
+              {t("advisor.backToDashboard")}
             </Link>
           </div>
         </div>
 
         <p className="text-xs text-zinc-400">
-          Bu bir yatırım tavsiyesi değildir, genel bilgi amaçlıdır.
+          {t("advisor.disclaimer")}
         </p>
 
         <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
@@ -364,7 +364,7 @@ export default function AdvisorPage() {
                 : "text-zinc-500"
             }`}
           >
-            Risk Profili
+            {t("advisor.tabRisk")}
           </button>
           <button
             onClick={() => setActiveTab("sohbet")}
@@ -374,7 +374,7 @@ export default function AdvisorPage() {
                 : "text-zinc-500"
             }`}
           >
-            Asistan Sohbeti
+            {t("advisor.tabChat")}
           </button>
         </div>
 
@@ -391,7 +391,9 @@ export default function AdvisorPage() {
                   onClick={() => setShowHistory((v) => !v)}
                   className="mx-auto rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500 shadow-sm transition-colors hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:text-indigo-400"
                 >
-                  {showHistory ? "Geçmişi gizle" : `Geçmiş sohbeti göster (${historyCount} mesaj)`}
+                  {showHistory
+                    ? t("advisor.hideHistory")
+                    : `${t("advisor.showHistory")} (${historyCount} ${t("advisor.messagesWord")})`}
                 </button>
               )}
               {historyLoaded && messages.length === historyCount && !showHistory && (
@@ -431,7 +433,7 @@ export default function AdvisorPage() {
               <input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Sorunu yaz..."
+                placeholder={t("advisor.placeholder")}
                 required
                 className="flex-1 rounded-xl border border-zinc-300 px-4 py-2.5 text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-900"
               />
@@ -440,7 +442,7 @@ export default function AdvisorPage() {
                 disabled={loading}
                 className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:opacity-50"
               >
-                Gönder
+                {t("advisor.send")}
               </button>
             </form>
           </>

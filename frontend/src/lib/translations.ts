@@ -69,6 +69,20 @@ export const translations: Record<Lang, Record<string, string>> = {
       "Piyasa verileri yüklenirken bir hata oluştu. Sunucu uyanıyor olabilir, birkaç saniye sonra tekrar deneyin.",
     "error.marketSome":
       "Bazı piyasa verileri şu an alınamadı, diğerleri gösteriliyor. Eksik olanlar için tekrar deneyin.",
+
+    // AI danisman
+    "advisor.title": "Yatırım Asistanı",
+    "advisor.clearChat": "Sohbeti Temizle",
+    "advisor.backToDashboard": "Dashboard'a dön",
+    "advisor.disclaimer": "Bu bir yatırım tavsiyesi değildir, genel bilgi amaçlıdır.",
+    "advisor.tabRisk": "Risk Profili",
+    "advisor.tabChat": "Asistan Sohbeti",
+    "advisor.hideHistory": "Geçmişi gizle",
+    "advisor.showHistory": "Geçmiş sohbeti göster",
+    "advisor.messagesWord": "mesaj",
+    "advisor.placeholder": "Sorunu yaz...",
+    "advisor.send": "Gönder",
+    "advisor.errorGeneric": "Asistan ile iletişim kurulurken bir hata oluştu.",
   },
 
   en: {
@@ -132,5 +146,18 @@ export const translations: Record<Lang, Record<string, string>> = {
       "An error occurred while loading market data. The server may be waking up; please try again in a few seconds.",
     "error.marketSome":
       "Some market data could not be loaded; the rest is shown. Try again for the missing ones.",
+
+    "advisor.title": "Investment Assistant",
+    "advisor.clearChat": "Clear Chat",
+    "advisor.backToDashboard": "Back to Dashboard",
+    "advisor.disclaimer": "This is not investment advice — for general information only.",
+    "advisor.tabRisk": "Risk Profile",
+    "advisor.tabChat": "Assistant Chat",
+    "advisor.hideHistory": "Hide history",
+    "advisor.showHistory": "Show past chat",
+    "advisor.messagesWord": "messages",
+    "advisor.placeholder": "Type your question...",
+    "advisor.send": "Send",
+    "advisor.errorGeneric": "An error occurred while communicating with the assistant.",
   },
 };
