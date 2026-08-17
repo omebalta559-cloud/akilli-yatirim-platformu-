@@ -29,10 +29,6 @@ class Settings(BaseSettings):
     # Kaynak: TUIK, Haziran 2026 TUFE yillik degisim orani.
     annual_tufe_rate: float = 32.11
     annual_tufe_period: str = "2026-06"
-    # Ayri bir kucuk Render servisi (keepalive/ klasoru) ile karsilikli ping
-    # atarak ikisinin de ucretsiz planda uykuya gecmesini engellemek icin.
-    # Bos birakilirsa bu dongu hic baslamaz.
-    keepalive_partner_url: str = ""
     # Sifre sifirlama e-postasindaki linkin isaret edecegi frontend adresi.
     frontend_url: str = "https://akilli-yatirim-platformu.vercel.app"
     # --- E-posta gonderimi (Brevo HTTP API) ---

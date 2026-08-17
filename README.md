@@ -37,7 +37,6 @@ Kripto, döviz, altın/gümüş ve BIST hisselerini tek portföyde toplayan; can
 ```
 frontend/    → Next.js arayüz (Vercel)
 backend/     → FastAPI servisi (Render, Docker)
-keepalive/   → Ana backend'i uyanık tutan yardımcı servis (Render)
 ```
 
 Backend modüler bir yapıda; her iş alanı kendi `router / service / models / schemas` dörtlüsüne sahip:
@@ -107,7 +106,7 @@ docker compose exec backend pytest
 
 Proje ücretsiz planlar üzerinde çalışıyor; bu bazı ek çözümler gerektirdi:
 
-- **Render ücretsiz planı 15 dk sonra uyuyor** → `keepalive/` klasöründeki ikinci servis ile ana backend 6–10 dakikada bir karşılıklı ping atarak birbirini uyanık tutuyor
+- **Render ücretsiz planı 15 dk sonra uyuyor** → önceden `keepalive/` klasöründeki ikinci servis ile karşılıklı ping atılıyordu; ancak Render'ın 750 saat/ay ücretsiz kotası **tüm servisler için ortak** olduğundan iki servisi 7/24 uyanık tutmak kotayı ayın ortasında tüketip her ikisinin de askıya alınmasına yol açtı. Çözüm: tek servise dönüldü, uyanık tutma işi harici bir cron servisine (gündüz saatleriyle sınırlı ping) devredildi
 - **Render giden SMTP portlarını (25/465/587) engelliyor** → e-postalar `smtplib` yerine Brevo'nun HTTPS API'si üzerinden gönderiliyor
 - **ChromaDB embedding modeli (~79 MB)** her build'de yeniden inmesin diye kalıcı Docker volume'ünde saklanıyor
 - **TCMB EVDS API'si** (evds2 → evds3 geçişi nedeniyle) istekleri engellediği için TÜFE oranı konfigürasyondan elle güncelleniyor
