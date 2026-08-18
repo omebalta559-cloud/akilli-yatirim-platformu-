@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Wallet, FileText, Check } from "lucide-react";
 import { getToken } from "@/lib/auth";
@@ -297,6 +297,18 @@ export default function RiskProfileAdvisor() {
       cancelled = true;
     };
   }, []);
+
+  // "Portföyümü Oluştur" butonu anketin en altinda; asama degisince tarayicinin
+  // kaydirma konumu oldugu yerde kaldigi icin kullanici sonucun ortasina dusuyordu.
+  // Asama degistiginde sayfayi basa aliyoruz (ilk acilista degil).
+  const ilkRender = useRef(true);
+  useEffect(() => {
+    if (ilkRender.current) {
+      ilkRender.current = false;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [stage]);
 
   const budgetNumber = Number(budget);
   const canSubmit = risk !== null && vade !== null && amac !== null && budgetNumber > 0;
