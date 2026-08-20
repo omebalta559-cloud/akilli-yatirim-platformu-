@@ -44,6 +44,12 @@ export default function PortfolioPage() {
   const [showHistory, setShowHistory] = useState(false);
 
   const [assetType, setAssetType] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    eklenen: number;
+    atlanan: number;
+    hatalar: { satir: number; hata: string }[];
+  } | null>(null);
   const [assetSymbol, setAssetSymbol] = useState("");
   const [customSymbol, setCustomSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -212,6 +218,59 @@ export default function PortfolioPage() {
       setError("Varlık eklenirken bir hata oluştu.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function downloadTemplate() {
+    // Ondalik ayirici belirsizligini ornekle cozuyoruz: nokta ondalik, binlik ayirici yok.
+    const ornek = [
+      "tur,sembol,adet,alis_fiyati",
+      "kripto,bitcoin,0.5,1800000",
+      "altin,Gram Altın,10,6800",
+      "hisse,THYAO,100,305.25",
+      "doviz,USD,1500,32.15",
+      "fon,KUT,50,12.40",
+    ].join("\n");
+
+    const blob = new Blob(["﻿" + ornek], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "portfoy-sablonu.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const token = getToken();
+    if (!token) return;
+
+    setImporting(true);
+    setImportResult(null);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(`${API_URL}/portfolio/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail ?? "Dosya işlenemedi.");
+      }
+      setImportResult(data);
+      if (data.eklenen > 0) {
+        await loadHoldings(token);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Dosya yüklenirken bir hata oluştu.");
+    } finally {
+      setImporting(false);
+      e.target.value = "";      // ayni dosya tekrar secilebilsin
     }
   }
 
@@ -433,6 +492,51 @@ export default function PortfolioPage() {
             {submitting ? "Ekleniyor..." : "Ekle"}
           </button>
         </form>
+
+        {/* Varliklari tek tek eklemek ilk kullanimdaki en buyuk surtunme noktasiydi;
+            araci kurumdan indirilen CSV ekstresi toplu aktarim icin kullanilabiliyor. */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-500">CSV ile Toplu Ekle</h2>
+              <p className="mt-1 text-xs text-zinc-400">
+                Aracı kurumundan indirdiğin ekstreyi yükle, varlıklar tek seferde eklensin.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs text-zinc-600 transition-colors hover:border-indigo-500 hover:text-indigo-600 dark:border-zinc-700 dark:text-zinc-300"
+            >
+              Örnek şablonu indir
+            </button>
+          </div>
+
+          <label className="flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-zinc-300 px-4 py-5 text-sm text-zinc-500 transition-colors hover:border-indigo-500 hover:text-indigo-600 dark:border-zinc-700 dark:text-zinc-400">
+            {importing ? "Yükleniyor..." : "CSV dosyası seç"}
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              disabled={importing}
+              onChange={handleImport}
+            />
+          </label>
+
+          {importResult && (
+            <div className="flex flex-col gap-1 rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-900">
+              <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {importResult.eklenen} varlık eklendi
+                {importResult.atlanan > 0 && `, ${importResult.atlanan} satır atlandı`}
+              </p>
+              {importResult.hatalar.map((h) => (
+                <p key={h.satir} className="text-zinc-500">
+                  Satır {h.satir}: {h.hata}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
 
         {showHistory && (
           <div className="flex flex-col gap-2">

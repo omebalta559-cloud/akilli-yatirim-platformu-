@@ -20,6 +20,17 @@ class HoldingOut(HoldingCreate):
         from_attributes = True
 
 
+class ImportSatirHatasi(BaseModel):
+    satir: int
+    hata: str
+
+
+class ImportSonucu(BaseModel):
+    eklenen: int
+    atlanan: int
+    hatalar: list[ImportSatirHatasi]
+
+
 class PortfolioSnapshotOut(BaseModel):
     snapshot_date: date
     total_value: float

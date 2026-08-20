@@ -1,16 +1,27 @@
+import io
+import logging
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.modules.auth.service import get_current_user_id
+from app.modules.portfolio import importer
 from app.modules.portfolio import performance as performance_service
 from app.modules.portfolio import report as report_service
 from app.modules.portfolio.models import Holding, PortfolioSnapshot
-from app.modules.portfolio.schemas import HoldingCreate, HoldingOut, PortfolioSnapshotOut
+from app.modules.portfolio.schemas import (
+    HoldingCreate,
+    HoldingOut,
+    ImportSatirHatasi,
+    ImportSonucu,
+    PortfolioSnapshotOut,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
@@ -46,6 +57,51 @@ def add_holding(
     db.commit()
     db.refresh(holding)
     return holding
+
+
+@router.post("/import", response_model=ImportSonucu)
+async def import_holdings(
+    file: UploadFile,
+    user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """Araci kurum/banka CSV ekstresinden varliklari toplu ekler.
+
+    Elle giris ilk kullanimdaki en buyuk surtunme noktasiydi: kullanici her
+    varligi tek tek eklemek zorunda kaliyordu.
+    """
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Lütfen bir .csv dosyası yükleyin.")
+
+    ham = await file.read()
+    if len(ham) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Dosya çok büyük (en fazla 2 MB).")
+
+    # Excel'den cikan dosyalar sik sik BOM'lu UTF-8 ya da Windows-1254 oluyor.
+    for kodlama in ("utf-8-sig", "cp1254", "latin-1"):
+        try:
+            metin = ham.decode(kodlama)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        raise HTTPException(status_code=400, detail="Dosya okunamadı, kodlaması desteklenmiyor.")
+
+    eklenen = 0
+    hatalar: list[ImportSatirHatasi] = []
+    for satir_no, kayit, hata in importer.satirlari_oku(io.StringIO(metin)):
+        if hata:
+            if len(hatalar) < 20:          # cok uzun hata listesi kullaniciya yardimci olmuyor
+                hatalar.append(ImportSatirHatasi(satir=satir_no, hata=hata))
+            continue
+        db.add(Holding(user_id=user_id, **kayit))
+        eklenen += 1
+
+    if eklenen:
+        db.commit()
+
+    logger.info("Portfoy CSV aktarimi: kullanici=%s eklenen=%d hatali=%d", user_id, eklenen, len(hatalar))
+    return ImportSonucu(eklenen=eklenen, atlanan=len(hatalar), hatalar=hatalar)
 
 
 @router.get("/performance", response_model=list[PortfolioSnapshotOut])
