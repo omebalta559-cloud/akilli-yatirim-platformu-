@@ -77,6 +77,47 @@ const ALLOCATION_MATRIX: Record<RiskLevel, Record<Vade, Allocation>> = {
   },
 };
 
+// Amac, temel matrisi (risk x vade) yeniden yazmak yerine uzerine sabit bir
+// kaydirma uygular: 27 satirlik bir matris yerine 9 satir + 3 kaydirma.
+// Her kaydirmanin toplami sifir; kalemler kirpildiktan sonra tekrar %100'e
+// normalize ediliyor, boylece cikti her zaman deterministik ve toplami 100.
+const AMAC_KAYDIRMA: Record<Amac, Allocation> = {
+  koruma: { kripto: -10, borsa: -5, altin: 8, doviz: 7 },
+  gelir: { kripto: -8, borsa: 6, altin: -3, doviz: 5 },
+  buyume: { kripto: 10, borsa: 5, altin: -8, doviz: -7 },
+};
+
+function getAllocation(risk: RiskLevel, vade: Vade, amac: Amac | null): Allocation {
+  const temel = ALLOCATION_MATRIX[risk][vade];
+  if (!amac) return temel;
+
+  const kaydirma = AMAC_KAYDIRMA[amac];
+  const anahtarlar = Object.keys(temel) as (keyof Allocation)[];
+
+  // Negatife dusen kalem sifirlanir; bu yuzden toplam 100'den sapabilir.
+  const ham = anahtarlar.map((k) => Math.max(0, temel[k] + kaydirma[k]));
+  const toplam = ham.reduce((a, b) => a + b, 0);
+  if (toplam === 0) return temel;
+
+  const yuzdeler = ham.map((v) => Math.round((v / toplam) * 100));
+
+  // Yuvarlama sonrasi 100'e tamamlama: farki en buyuk kaleme ekle/cikar.
+  const fark = 100 - yuzdeler.reduce((a, b) => a + b, 0);
+  if (fark !== 0) {
+    let enBuyuk = 0;
+    for (let i = 1; i < yuzdeler.length; i++) {
+      if (yuzdeler[i] > yuzdeler[enBuyuk]) enBuyuk = i;
+    }
+    yuzdeler[enBuyuk] += fark;
+  }
+
+  const sonuc = {} as Allocation;
+  anahtarlar.forEach((k, i) => {
+    sonuc[k] = yuzdeler[i];
+  });
+  return sonuc;
+}
+
 const ASSET_COLORS: Record<keyof Allocation, string> = {
   kripto: "#2a78d6",
   doviz: "#1baf7a",
@@ -332,7 +373,7 @@ export default function RiskProfileAdvisor() {
   }
 
   async function handleTransferToPortfolio() {
-    if (!risk || !vade || !prices || budgetNumber <= 0) return;
+    if (!risk || !vade || !amac || !prices || budgetNumber <= 0) return;
 
     const token = getToken();
     if (!token) {
@@ -341,7 +382,7 @@ export default function RiskProfileAdvisor() {
       return;
     }
 
-    const allocation = ALLOCATION_MATRIX[risk][vade];
+    const allocation = getAllocation(risk, vade, amac);
     const items: { asset_type: string; asset_symbol: string; quantity: number; purchase_price: number }[] = [];
 
     if (allocation.altin > 0) {
@@ -427,7 +468,7 @@ export default function RiskProfileAdvisor() {
     try {
       const { jsPDF } = await import("jspdf");
 
-      const allocation = ALLOCATION_MATRIX[risk][vade];
+      const allocation = getAllocation(risk, vade, amac);
       const note = buildAdvisorNote(risk, vade, amac);
       const rows = (Object.keys(allocation) as (keyof Allocation)[]).sort(
         (a, b) => allocation[b] - allocation[a]
@@ -584,7 +625,7 @@ export default function RiskProfileAdvisor() {
   }
 
   if (stage === "result" && risk && vade && amac) {
-    const allocation = ALLOCATION_MATRIX[risk][vade];
+    const allocation = getAllocation(risk, vade, amac);
     const note = buildAdvisorNote(risk, vade, amac);
     const rows = (Object.keys(allocation) as (keyof Allocation)[]).sort(
       (a, b) => allocation[b] - allocation[a]
