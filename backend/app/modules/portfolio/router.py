@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.modules.auth.service import get_current_user_id
+from app.modules.market_data import service as market_data_service
 from app.modules.portfolio import gorsel_okuyucu, importer
 from app.modules.portfolio import performance as performance_service
 from app.modules.portfolio import report as report_service
@@ -141,14 +142,38 @@ async def import_holdings_from_image(
             detail="Görsel şu an okunamadı, lütfen birkaç saniye sonra tekrar deneyin.",
         )
 
+    eklenen = 0
+    notlar: list[str] = []
     for kayit in kayitlar:
+        if kayit["purchase_price"] is None:
+            # Elle yazilmis listede alis maliyeti yok; guncel fiyattan ekleyip
+            # kullaniciyi uyariyoruz. Sessizce sifir yazmak reel getiriyi bozar.
+            guncel = await market_data_service.get_current_price(
+                kayit["asset_type"], kayit["asset_symbol"]
+            )
+            if guncel is None:
+                hatalar.append(f"{kayit['asset_symbol']}: alış fiyatı görselde yok ve güncel fiyat alınamadı")
+                continue
+            kayit["purchase_price"] = guncel
+            notlar.append(
+                f"{kayit['asset_symbol']}: alış fiyatı görselde yoktu, güncel fiyat "
+                f"({guncel:,.2f}) kullanıldı — portföyden düzeltebilirsin."
+            )
         db.add(Holding(user_id=user_id, **kayit))
-    if kayitlar:
+        eklenen += 1
+
+    if eklenen:
         db.commit()
 
     logger.info(
-        "Gorselden portfoy aktarimi: kullanici=%s eklenen=%d elenen=%d",
-        user_id, len(kayitlar), len(hatalar),
+        "Gorselden portfoy aktarimi: kullanici=%s eklenen=%d elenen=%d fiyatsiz=%d",
+        user_id, eklenen, len(hatalar), len(notlar),
+    )
+    return ImportSonucu(
+        eklenen=eklenen,
+        atlanan=len(hatalar),
+        hatalar=[ImportSatirHatasi(satir=i, hata=h) for i, h in enumerate(hatalar[:20], start=1)],
+        notlar=notlar[:20],
     )
     return ImportSonucu(
         eklenen=len(kayitlar),

@@ -50,6 +50,7 @@ export default function PortfolioPage() {
     eklenen: number;
     atlanan: number;
     hatalar: { satir: number; hata: string }[];
+    notlar?: string[];
   } | null>(null);
   const [assetSymbol, setAssetSymbol] = useState("");
   const [customSymbol, setCustomSymbol] = useState("");
@@ -583,6 +584,13 @@ export default function PortfolioPage() {
               {importResult.hatalar.map((h) => (
                 <p key={h.satir} className="text-zinc-500">
                   Satır {h.satir}: {h.hata}
+                </p>
+              ))}
+              {/* Hata degil, bilgilendirme: gorselde alis fiyati olmayan
+                  varliklar guncel fiyattan eklendi. */}
+              {importResult.notlar?.map((n, i) => (
+                <p key={`not-${i}`} className="text-amber-600 dark:text-amber-400">
+                  {n}
                 </p>
               ))}
             </div>

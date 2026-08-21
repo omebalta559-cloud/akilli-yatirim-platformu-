@@ -29,6 +29,9 @@ class ImportSonucu(BaseModel):
     eklenen: int
     atlanan: int
     hatalar: list[ImportSatirHatasi]
+    # Gorselde alis fiyati bulunmadigi icin guncel fiyattan eklenen varliklar
+    # gibi, hata olmayan ama kullanicinin bilmesi gereken durumlar.
+    notlar: list[str] = []
 
 
 class PortfolioSnapshotOut(BaseModel):
