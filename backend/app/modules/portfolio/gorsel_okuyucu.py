@@ -19,8 +19,18 @@ from app.modules.portfolio.importer import GECERLI_TURLER, _TUR_ESLEME, _sadeles
 
 logger = logging.getLogger(__name__)
 
-MAKS_BOYUT = 4 * 1024 * 1024
-GECERLI_TIPLER = {"image/png", "image/jpeg", "image/webp"}
+# Telefon fotograflari 12 MP'de 3-5 MB olabiliyor; 4 MB sinir gercek
+# kullanicinin en dogal girdisini reddediyordu.
+MAKS_BOYUT = 12 * 1024 * 1024
+# iPhone varsayilan olarak HEIC uretiyor; model bu formati da okuyabiliyor.
+GECERLI_TIPLER = {
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+}
 
 # Olculdu: gorseli tanimak icin dusunme tokeni acik kalsa da maliyet gorsel
 # basina ~0,003 dolar. Butceyi sifira cekmek modelin okuma dogrulugunu

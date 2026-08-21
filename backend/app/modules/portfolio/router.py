@@ -126,7 +126,7 @@ async def import_holdings_from_image(
 
     ham = await file.read()
     if len(ham) > gorsel_okuyucu.MAKS_BOYUT:
-        raise HTTPException(status_code=400, detail="Görsel çok büyük (en fazla 4 MB).")
+        raise HTTPException(status_code=400, detail="Görsel çok büyük (en fazla 12 MB).")
     if not ham:
         raise HTTPException(status_code=400, detail="Dosya boş.")
 

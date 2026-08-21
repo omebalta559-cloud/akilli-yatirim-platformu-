@@ -46,6 +46,9 @@ export default function PortfolioPage() {
   const [assetType, setAssetType] = useState("");
   const [importing, setImporting] = useState(false);
   const [importingImage, setImportingImage] = useState(false);
+  // Sayfa basindaki genel hata cok yukarida kaliyordu; toplu ekleme sonucunu
+  // kullanicinin baktigi yerde, kutunun icinde gostermek gerekiyor.
+  const [importError, setImportError] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<{
     eklenen: number;
     atlanan: number;
@@ -252,6 +255,7 @@ export default function PortfolioPage() {
     setImporting(true);
     setImportResult(null);
     setError(null);
+    setImportError(null);
     try {
       const form = new FormData();
       form.append("file", file);
@@ -269,7 +273,7 @@ export default function PortfolioPage() {
         await loadHoldings(token);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Dosya yüklenirken bir hata oluştu.");
+      setImportError(err instanceof Error ? err.message : "Dosya yüklenirken bir hata oluştu.");
     } finally {
       setImporting(false);
       e.target.value = "";      // ayni dosya tekrar secilebilsin
@@ -286,6 +290,7 @@ export default function PortfolioPage() {
     setImportingImage(true);
     setImportResult(null);
     setError(null);
+    setImportError(null);
     try {
       const form = new FormData();
       form.append("file", file);
@@ -303,7 +308,7 @@ export default function PortfolioPage() {
         await loadHoldings(token);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Görsel yüklenirken bir hata oluştu.");
+      setImportError(err instanceof Error ? err.message : "Görsel yüklenirken bir hata oluştu.");
     } finally {
       setImportingImage(false);
       e.target.value = "";
@@ -564,26 +569,42 @@ export default function PortfolioPage() {
           <label className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-zinc-300 px-4 py-5 text-sm text-zinc-500 transition-colors hover:border-indigo-500 hover:text-indigo-600 dark:border-zinc-700 dark:text-zinc-400">
             <span>{importingImage ? "Görsel okunuyor..." : "veya portföy ekran görüntüsü yükle"}</span>
             <span className="text-xs text-zinc-400">
-              PNG, JPEG veya WEBP · en fazla 4 MB · hesap numaranı kapatmanı öneririz
+              Telefon fotoğrafı da olur · en fazla 12 MB · hesap numaranı kapatmanı öneririz
             </span>
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/*"
               className="hidden"
               disabled={importingImage}
               onChange={handleImageImport}
             />
           </label>
 
+          {importError && (
+            <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {importError}
+            </div>
+          )}
+
           {importResult && (
-            <div className="flex flex-col gap-1 rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-900">
-              <p className="font-semibold text-emerald-600 dark:text-emerald-400">
-                {importResult.eklenen} varlık eklendi
-                {importResult.atlanan > 0 && `, ${importResult.atlanan} satır atlandı`}
-              </p>
+            <div className="flex flex-col gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-xs dark:border-zinc-800 dark:bg-zinc-900">
+              {importResult.eklenen > 0 ? (
+                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  ✓ Portföyünüze {importResult.eklenen} varlık eklendi
+                  {importResult.atlanan > 0 && ` · ${importResult.atlanan} satır atlandı`}
+                </p>
+              ) : (
+                // eklenen=0 iken "0 varlık eklendi" yazmak kullaniciyi
+                // ne oldugu konusunda bilgisiz birakiyordu.
+                <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                  Hiçbir varlık eklenemedi
+                  {importResult.atlanan === 0 &&
+                    " — görselde tanınabilir bir varlık listesi bulunamadı, daha net bir görüntü deneyin."}
+                </p>
+              )}
               {importResult.hatalar.map((h) => (
                 <p key={h.satir} className="text-zinc-500">
-                  Satır {h.satir}: {h.hata}
+                  {h.hata}
                 </p>
               ))}
               {/* Hata degil, bilgilendirme: gorselde alis fiyati olmayan
