@@ -135,11 +135,16 @@ async def import_holdings_from_image(
         kayitlar, hatalar = await asyncio.to_thread(
             gorsel_okuyucu.gorselden_oku, ham, file.content_type
         )
-    except Exception:
-        logger.exception("Gorselden portfoy okuma basarisiz (user_id=%s)", user_id)
+    except Exception as e:
+        logger.exception(
+            "Gorselden portfoy okuma basarisiz (user_id=%s tip=%s boyut=%d)",
+            user_id, file.content_type, len(ham),
+        )
+        # Sebebi gizlemek teshisi imkansiz kiliyordu; kisa bir ozet donuyoruz.
+        ozet = str(e).replace("\n", " ")[:180] or type(e).__name__
         raise HTTPException(
             status_code=503,
-            detail="Görsel şu an okunamadı, lütfen birkaç saniye sonra tekrar deneyin.",
+            detail=f"Görsel okunamadı ({ozet}). Birkaç saniye sonra tekrar deneyin.",
         )
 
     eklenen = 0
