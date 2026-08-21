@@ -1,3 +1,4 @@
+import asyncio
 import io
 import logging
 from datetime import datetime, timezone
@@ -9,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.modules.auth.service import get_current_user_id
-from app.modules.portfolio import importer
+from app.modules.portfolio import gorsel_okuyucu, importer
 from app.modules.portfolio import performance as performance_service
 from app.modules.portfolio import report as report_service
 from app.modules.portfolio.models import Holding, PortfolioSnapshot
@@ -103,6 +104,57 @@ async def import_holdings(
     logger.info("Portfoy CSV aktarimi: kullanici=%s eklenen=%d hatali=%d", user_id, eklenen, len(hatalar))
     return ImportSonucu(eklenen=eklenen, atlanan=len(hatalar), hatalar=hatalar)
 
+
+
+@router.post("/import-image", response_model=ImportSonucu)
+async def import_holdings_from_image(
+    file: UploadFile,
+    user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """Portfoy ekran goruntusunden varliklari toplu ekler.
+
+    CSV yolu araci kurumdan dosya indirmeyi gerektiriyor; cogu kullanici icin
+    en kisa yol telefondaki uygulamanin ekran goruntusu.
+    """
+    if file.content_type not in gorsel_okuyucu.GECERLI_TIPLER:
+        raise HTTPException(
+            status_code=400,
+            detail="Lütfen PNG, JPEG veya WEBP bir görsel yükleyin.",
+        )
+
+    ham = await file.read()
+    if len(ham) > gorsel_okuyucu.MAKS_BOYUT:
+        raise HTTPException(status_code=400, detail="Görsel çok büyük (en fazla 4 MB).")
+    if not ham:
+        raise HTTPException(status_code=400, detail="Dosya boş.")
+
+    try:
+        # Model cagrisi senkron; olay dongusunu bloklamamasi icin thread'e aliniyor.
+        kayitlar, hatalar = await asyncio.to_thread(
+            gorsel_okuyucu.gorselden_oku, ham, file.content_type
+        )
+    except Exception:
+        logger.exception("Gorselden portfoy okuma basarisiz (user_id=%s)", user_id)
+        raise HTTPException(
+            status_code=503,
+            detail="Görsel şu an okunamadı, lütfen birkaç saniye sonra tekrar deneyin.",
+        )
+
+    for kayit in kayitlar:
+        db.add(Holding(user_id=user_id, **kayit))
+    if kayitlar:
+        db.commit()
+
+    logger.info(
+        "Gorselden portfoy aktarimi: kullanici=%s eklenen=%d elenen=%d",
+        user_id, len(kayitlar), len(hatalar),
+    )
+    return ImportSonucu(
+        eklenen=len(kayitlar),
+        atlanan=len(hatalar),
+        hatalar=[ImportSatirHatasi(satir=i, hata=h) for i, h in enumerate(hatalar[:20], start=1)],
+    )
 
 @router.get("/performance", response_model=list[PortfolioSnapshotOut])
 async def get_performance(

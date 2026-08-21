@@ -45,6 +45,7 @@ export default function PortfolioPage() {
 
   const [assetType, setAssetType] = useState("");
   const [importing, setImporting] = useState(false);
+  const [importingImage, setImportingImage] = useState(false);
   const [importResult, setImportResult] = useState<{
     eklenen: number;
     atlanan: number;
@@ -274,6 +275,40 @@ export default function PortfolioPage() {
     }
   }
 
+  // Ayni akis, farkli uc: dosya yerine ekran goruntusu gonderiliyor.
+  async function handleImageImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const token = getToken();
+    if (!token) return;
+
+    setImportingImage(true);
+    setImportResult(null);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(`${API_URL}/portfolio/import-image`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail ?? "Görsel işlenemedi.");
+      }
+      setImportResult(data);
+      if (data.eklenen > 0) {
+        await loadHoldings(token);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Görsel yüklenirken bir hata oluştu.");
+    } finally {
+      setImportingImage(false);
+      e.target.value = "";
+    }
+  }
+
   async function toggleHistory() {
     if (showHistory) {
       setShowHistory(false);
@@ -498,9 +533,9 @@ export default function PortfolioPage() {
         <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 className="text-sm font-semibold text-zinc-500">CSV ile Toplu Ekle</h2>
+              <h2 className="text-sm font-semibold text-zinc-500">Portföyü Toplu Ekle</h2>
               <p className="mt-1 text-xs text-zinc-400">
-                Aracı kurumundan indirdiğin ekstreyi yükle, varlıklar tek seferde eklensin.
+                Aracı kurumundan indirdiğin CSV ekstresini ya da portföy ekranının görüntüsünü yükle.
               </p>
             </div>
             <button
@@ -520,6 +555,22 @@ export default function PortfolioPage() {
               className="hidden"
               disabled={importing}
               onChange={handleImport}
+            />
+          </label>
+
+          {/* CSV indirmek icin araci kuruma girmek gerekiyor; ekran goruntusu
+              cogu kullanici icin daha kisa yol. */}
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-zinc-300 px-4 py-5 text-sm text-zinc-500 transition-colors hover:border-indigo-500 hover:text-indigo-600 dark:border-zinc-700 dark:text-zinc-400">
+            <span>{importingImage ? "Görsel okunuyor..." : "veya portföy ekran görüntüsü yükle"}</span>
+            <span className="text-xs text-zinc-400">
+              PNG, JPEG veya WEBP · en fazla 4 MB · hesap numaranı kapatmanı öneririz
+            </span>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              disabled={importingImage}
+              onChange={handleImageImport}
             />
           </label>
 
