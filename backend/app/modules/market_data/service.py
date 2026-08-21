@@ -14,7 +14,12 @@ YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 # dakikada ~6 istek siniri var (get_or_set cache bunu koruyor).
 TEFAS_FUND_URL = "https://www.tefas.gov.tr/api/funds/fonFiyatBilgiGetir"
 
-CACHE_TTL_SECONDS = 30
+# 30 saniyeydi: onbellek her yarim dakikada bosaliyordu, dolayisiyla siteyi acan
+# hemen her kullanici soguk onbellege dusup dis API'leri bekliyordu (olculdu:
+# BIST 16 sn, altin 5.9 sn). Bu urun uzun vadeli dagilim uzerine kurulu, fiyatin
+# 30 saniyelik tazeligine ihtiyaci yok. 5 dakika hem beklemeyi bitiriyor hem de
+# ucretsiz API kotalarini koruyor.
+CACHE_TTL_SECONDS = 300
 HISTORY_CACHE_TTL_SECONDS = 3600
 
 GRAMS_PER_TROY_OUNCE = 31.1034768

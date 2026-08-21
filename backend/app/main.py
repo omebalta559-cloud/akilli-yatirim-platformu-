@@ -14,6 +14,7 @@ from app.modules.ai_advisor.router import router as ai_advisor_router
 from app.modules.alerts import service as alerts_service
 from app.modules.alerts.router import router as alerts_router
 from app.modules.auth.router import router as auth_router
+from app.modules.market_data import service as market_data_service
 from app.modules.market_data.router import router as market_data_router
 from app.modules.outreach.router import router as outreach_router
 from app.modules.portfolio.router import router as portfolio_router
@@ -72,6 +73,36 @@ async def check_alerts_periodically():
             except Exception:
                 logger.exception("Alarm kontrol döngüsünde hata oluştu, bir sonraki döngüde tekrar denenecek.")
             await asyncio.sleep(60)
+
+    asyncio.create_task(loop())
+
+
+@app.on_event("startup")
+async def keep_market_cache_warm():
+    """Ana sayfadaki fiyat kartlarinin onbellegini suresi dolmadan tazeler.
+
+    Onbellek suresi 5 dakika; her 4 dakikada bir yenileyince kullanici hicbir
+    zaman soguk onbellege dusmuyor. Onceden ilk yukleme dis API'lere gidiyordu
+    ve BIST tarafinda 16 saniyeyi buluyordu.
+    """
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        return
+
+    async def loop():
+        while True:
+            # Dordu paralel: toplam sure en yavas kaynak kadar, toplamlari kadar degil.
+            sonuclar = await asyncio.gather(
+                market_data_service.get_crypto_prices(["bitcoin", "ethereum"]),
+                market_data_service.get_exchange_rates("USD", ["TRY", "EUR"]),
+                market_data_service.get_gold_prices(),
+                market_data_service.get_stock_prices(),
+                return_exceptions=True,
+            )
+            basarisiz = [s for s in sonuclar if isinstance(s, Exception)]
+            if basarisiz:
+                # Tek kaynagin dusmesi digerlerini etkilemesin; bir sonraki turda tekrar denenir.
+                logger.warning("Piyasa onbellegi tazelenirken %d kaynak basarisiz oldu.", len(basarisiz))
+            await asyncio.sleep(240)
 
     asyncio.create_task(loop())
 
