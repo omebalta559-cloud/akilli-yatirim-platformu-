@@ -36,7 +36,11 @@ GECERLI_TIPLER = {
 # basina ~0,003 dolar. Butceyi sifira cekmek modelin okuma dogrulugunu
 # dusurdugu icin varsayilanda birakildi.
 MODEL_ADI = "gemini-flash-latest"
-DENEME_SAYISI = 4
+# Gemini bugun sik sik 503 "high demand" donuyor ve bazen altinci denemede
+# geciyor. Dort deneme / 3,6 saniyelik bekleme butcesi yetmiyordu; kullanici
+# calisan bir ozelligi bozuk saniyor. Toplam bekleme ~15 sn ile sinirli.
+DENEME_SAYISI = 7
+MAKS_BEKLEME = 3.5
 
 # Kullanici fotografta "Ceyrek Altin" yaziyor, sistem "CEYREK_ALTIN" bekliyor.
 # Modelden dogru sembolu istiyoruz ama guvenmiyoruz; sunucuda da esliyoruz.
@@ -170,7 +174,7 @@ def _modeli_cagir(icerik: bytes, mime: str):
                 raise
             logger.warning("Gorsel okuma denemesi %d gecici hatayla dustu: %s", deneme, hata)
             if deneme < DENEME_SAYISI:
-                time.sleep(0.6 * deneme)
+                time.sleep(min(1.0 * deneme, MAKS_BEKLEME))
     raise son_hata
 
 
