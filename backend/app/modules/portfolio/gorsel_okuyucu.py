@@ -82,9 +82,20 @@ def _kaydi_dogrula(ham: dict) -> tuple[dict | None, str | None]:
     }, None
 
 
+def _gecici_hata_mi(hata: Exception) -> bool:
+    """Sadece gecici sunucu hatalarinda tekrar denemek icin.
+
+    503 "high demand" ve 429 kota hatalari birkac saniye sonra genelde geciyor;
+    gecersiz istek gibi kalici hatalarda beklemek bosuna gecikme demek.
+    """
+    metin = str(hata).lower()
+    return any(im in metin for im in ("503", "unavailable", "high demand", "429", "overloaded", "timeout"))
+
+
 def _modeli_cagir(icerik: bytes, mime: str):
-    """503 'high demand' gecici bir durum; canli demoda ozelliği bozuk
-    gostermemesi icin birkac kez yeniden deneniyor."""
+    """503 'high demand' gecici bir durum; canli kullanimda ozelligi bozuk
+    gostermemesi icin kisa araliklarla yeniden deneniyor. Beklemeler bilerek
+    kisa: toplam gecikme kullanicinin bekledigi sureye ekleniyor."""
     model = genai.GenerativeModel(MODEL_ADI, system_instruction=YONERGE)
     parcalar = [
         {"mime_type": mime, "data": icerik},
@@ -97,9 +108,12 @@ def _modeli_cagir(icerik: bytes, mime: str):
             return model.generate_content(parcalar)
         except Exception as hata:
             son_hata = hata
-            logger.warning("Gorsel okuma denemesi %d basarisiz: %s", deneme, hata)
+            if not _gecici_hata_mi(hata):
+                logger.warning("Gorsel okuma kalici hata verdi, tekrar denenmiyor: %s", hata)
+                raise
+            logger.warning("Gorsel okuma denemesi %d gecici hatayla dustu: %s", deneme, hata)
             if deneme < DENEME_SAYISI:
-                time.sleep(1.5 * deneme)
+                time.sleep(0.6 * deneme)
     raise son_hata
 
 
