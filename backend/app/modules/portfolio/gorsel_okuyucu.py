@@ -11,10 +11,8 @@ Modelin ciktisina guvenmiyoruz: donen her satir CSV yolundaki ayni dogrulamadan
 import json
 import logging
 import re
-import time
 
-import google.generativeai as genai
-
+from app.core import gemini
 from app.modules.portfolio.importer import GECERLI_TURLER, _TUR_ESLEME, _sadelestir
 
 logger = logging.getLogger(__name__)
@@ -35,12 +33,9 @@ GECERLI_TIPLER = {
 # Olculdu: gorseli tanimak icin dusunme tokeni acik kalsa da maliyet gorsel
 # basina ~0,003 dolar. Butceyi sifira cekmek modelin okuma dogrulugunu
 # dusurdugu icin varsayilanda birakildi.
-MODEL_ADI = "gemini-flash-latest"
 # Gemini bugun sik sik 503 "high demand" donuyor ve bazen altinci denemede
 # geciyor. Dort deneme / 3,6 saniyelik bekleme butcesi yetmiyordu; kullanici
 # calisan bir ozelligi bozuk saniyor. Toplam bekleme ~15 sn ile sinirli.
-DENEME_SAYISI = 7
-MAKS_BEKLEME = 3.5
 
 # Kullanici fotografta "Ceyrek Altin" yaziyor, sistem "CEYREK_ALTIN" bekliyor.
 # Modelden dogru sembolu istiyoruz ama guvenmiyoruz; sunucuda da esliyoruz.
@@ -143,55 +138,20 @@ def _kaydi_dogrula(ham: dict) -> tuple[dict | None, str | None]:
     }, None
 
 
-def _gecici_hata_mi(hata: Exception) -> bool:
-    """Sadece gecici sunucu hatalarinda tekrar denemek icin.
-
-    503 "high demand" ve 429 kota hatalari birkac saniye sonra genelde geciyor;
-    gecersiz istek gibi kalici hatalarda beklemek bosuna gecikme demek.
-    """
-    metin = str(hata).lower()
-    return any(im in metin for im in ("503", "unavailable", "high demand", "429", "overloaded", "timeout"))
-
-
 def _modeli_cagir(icerik: bytes, mime: str):
-    """503 'high demand' gecici bir durum; canli kullanimda ozelligi bozuk
-    gostermemesi icin kisa araliklarla yeniden deneniyor. Beklemeler bilerek
-    kisa: toplam gecikme kullanicinin bekledigi sureye ekleniyor."""
-    model = genai.GenerativeModel(MODEL_ADI, system_instruction=YONERGE)
-    parcalar = [
-        {"mime_type": mime, "data": icerik},
-        "Bu ekstredeki varliklari cikar.",
-    ]
-
-    son_hata = None
-    for deneme in range(1, DENEME_SAYISI + 1):
-        try:
-            return model.generate_content(parcalar)
-        except Exception as hata:
-            son_hata = hata
-            if not _gecici_hata_mi(hata):
-                logger.warning("Gorsel okuma kalici hata verdi, tekrar denenmiyor: %s", hata)
-                raise
-            logger.warning("Gorsel okuma denemesi %d gecici hatayla dustu: %s", deneme, hata)
-            if deneme < DENEME_SAYISI:
-                time.sleep(min(1.0 * deneme, MAKS_BEKLEME))
-    raise son_hata
+    """Model zinciri ortak katmanda: biri kotayi doldurunca digerine geciliyor."""
+    return gemini.uret(
+        YONERGE,
+        [
+            {"mime_type": mime, "data": icerik},
+            "Bu ekstredeki varliklari cikar.",
+        ],
+    )
 
 
 def gorselden_oku(icerik: bytes, mime: str) -> tuple[list[dict], list[str]]:
-    """(gecerli_kayitlar, hatalar) dondurur."""
-    t0 = time.perf_counter()
+    """(gecerli_kayitlar, hatalar) dondurur. Token kullanimi ortak katmanda loglaniyor."""
     yanit = _modeli_cagir(icerik, mime)
-    sure = time.perf_counter() - t0
-
-    kullanim = getattr(yanit, "usage_metadata", None)
-    if kullanim is not None:
-        logger.info(
-            "Gorsel okuma TOKEN girdi=%s cikti=%s sure=%.2fsn",
-            getattr(kullanim, "prompt_token_count", "?"),
-            getattr(kullanim, "candidates_token_count", "?"),
-            sure,
-        )
 
     try:
         ham_liste = _json_ayikla(yanit.text)

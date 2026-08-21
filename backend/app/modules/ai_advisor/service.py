@@ -5,13 +5,12 @@ import time
 
 import chromadb
 import feedparser
-import google.generativeai as genai
 
 from app.core.config import settings
+from app.core import gemini
 from app.core.decorators import log_calls
 from app.modules.market_data import service as market_data_service
 
-genai.configure(api_key=settings.gemini_api_key)
 
 logger = logging.getLogger(__name__)
 
@@ -190,8 +189,7 @@ def ask_advisor(
         f"Soru:\n{question}"
     )
 
-    model = genai.GenerativeModel("gemini-flash-latest", system_instruction=system_prompt)
-    t0 = time.perf_counter()
-    response = model.generate_content(user_message)
-    logger.info("Gemini cevap uretme: %.2f sn", time.perf_counter() - t0)
-    return response.text
+    yanit = gemini.uret(system_prompt, user_message)
+    return yanit.text
+
+
