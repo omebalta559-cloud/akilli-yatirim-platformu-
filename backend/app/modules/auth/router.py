@@ -63,6 +63,13 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
         logger.warning("Başarısız giriş denemesi: %s", payload.email)
         raise HTTPException(status_code=401, detail="Geçersiz e-posta veya şifre")
 
+    # Tur sayisi dusuruldugu icin eski hash'i olan kullanicilar ilk basarili
+    # girislerinde yeni tura tasiniyor; sonraki girisleri hizli oluyor.
+    if service.parola_yenilenmeli_mi(user.hashed_password):
+        user.hashed_password = service.hash_password(payload.password)
+        db.commit()
+        logger.info("Parola hash'i yeni tura tasindi: id=%s", user.id)
+
     logger.info("Giriş yapıldı: id=%s email=%s", user.id, user.email)
     token = service.create_access_token(subject=str(user.id))
     return Token(access_token=token)
